@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Header, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,13 +9,22 @@ import json
 from typing import Optional, Dict, Any, List
 
 from .config import config
-from .database import get_connection
+from .database import get_connection, init_db, get_db
 from .security import verify_scoped_token
+from .schemas import ScopedTokenPayload, TransferRequest
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Ensure bank tables and custodial student account exist
+    init_db()
+    yield
+    # Shutdown: Clean teardown if needed
 
 app = FastAPI(
     title="AegisPath Bank Service (Simulated)",
     description="Independent simulated banking and ledger daemon enforcing inner-ring limits.",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -49,20 +59,6 @@ def problem_response(status_code: int, title: str, detail: str, code: str, reque
             "timestamp": time.time()
         }
     )
-
-# ── Models ─────────────────────────────────────────────────────
-class ScopedTokenPayload(BaseModel):
-    account_id: str = "acc_student_ayu"
-    amount: float
-    payee_id: str
-    payee_name: str
-    fee_usd: float = 0.42
-    nonce: str
-    expires_at: float
-
-class TransferRequest(BaseModel):
-    token: ScopedTokenPayload
-    signature: str
 
 # ── Endpoints ──────────────────────────────────────────────────
 @app.get("/v1/health")

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Header, HTTPException, status, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,20 +11,40 @@ import asyncio
 from typing import Optional, Dict, Any, List
 
 from .config import config
-from .database import get_connection
+from .database import get_connection, init_db, get_db
 from .auth import generate_tokens_for_user, verify_jwt
 from .policy import evaluate_transfer_policy, compute_intent_hash
 from .tokens import create_scoped_bank_token
 from .audit import record_audit_event, verify_audit_chain
 from .parser import parse_user_instruction
 from .planner import calculate_tuition_quote, plan_and_process_intent
+from .schemas import (
+    DemoLoginRequest,
+    TokenRefreshRequest,
+    PolicyProposalRequest,
+    ApprovePlanRequest,
+    ResumeAgentRequest,
+    AgentMessageRequest,
+    TuitionQuoteRequest,
+    AttackReplayRequest,
+    EvidenceShareRequest,
+    HealthResponse,
+)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Ensure database tables and initial testnet records exist
+    init_db()
+    yield
+    # Shutdown: Clean teardown if needed
 
 app = FastAPI(
     title="AegisPath Core API Service",
     description="Main agent policy plane, spending limit checks, audit chain, and scoped token issuer.",
     version="0.1.0",
     openapi_url="/v1/openapi.json",
-    docs_url="/v1/docs"
+    docs_url="/v1/docs",
+    lifespan=lifespan
 )
 
 app.add_middleware(
@@ -69,40 +90,6 @@ def get_current_user(authorization: Optional[str] = Header(None)) -> str:
     if not valid:
         raise HTTPException(status_code=401, detail=f"Invalid or expired token: {err}")
     return payload.get("sub", "usr_ayu")
-
-# ── Request / Response Models ──────────────────────────────────
-class DemoLoginRequest(BaseModel):
-    username: str = "Ayu"
-
-class TokenRefreshRequest(BaseModel):
-    refresh_token: str
-
-class PolicyProposalRequest(BaseModel):
-    new_daily_cap_usd: float
-    new_single_send_cap_usd: float
-
-class ApprovePlanRequest(BaseModel):
-    intent_hash: str
-    passkey_signature: str
-
-class ResumeAgentRequest(BaseModel):
-    passkey_signature: str
-
-class AgentMessageRequest(BaseModel):
-    text: str
-    locale: str = "en"
-
-class TuitionQuoteRequest(BaseModel):
-    amount_cny: float = 18000.0
-    mode: str = "cheapest"
-
-class AttackReplayRequest(BaseModel):
-    case_id: str = "invoice_hidden_instruction_01"
-    disabled_layers: List[str] = Field(default_factory=list)
-
-class EvidenceShareRequest(BaseModel):
-    recipient: str = "Landlord A"
-    days: int = 14
 
 # ── Endpoints ──────────────────────────────────────────────────
 @app.get("/v1/health")

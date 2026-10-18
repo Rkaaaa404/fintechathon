@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import "./legacy-styles.css";
+@import "./shell.css";
+
+@theme {
+  --color-brand-blue: #3D6BEA;
+  --color-brand-blue-deep: #1F3FA8;
+  --color-brand-sky: #E6EEFF;
+  --color-brand-mist: #F4F7FE;
+  --color-brand-night: #0A1440;
+  --color-brand-ink: #14213D;
+  --color-brand-slate: #5B6B8C;
+  --color-brand-line: #E6ECF8;
+  --color-brand-blue-soft: #9DB8FF;
+  --color-brand-cyan: #6FD3FF;
+  --color-brand-blue-dot: #5B8CFF;
+  
+  --color-status-green: #1E9E6A;
+  --color-status-green-tint: #E3F6EE;
+  --color-status-amber: #F5A524;
+  --color-status-amber-tint: #FFF4DC;
+  --color-status-amber-text: #B7791F;
+  --color-status-red: #E5484D;
+  --color-status-red-tint: #FDE8E9;
+  --color-status-red-text: #C9343A;
+
+  --radius-card: 18px;
+  --radius-tile: 15px;
+  --radius-pill: 999px;
+  --radius-sheet: 26px;
+  --radius-btn: 27px;
+}

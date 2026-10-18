@@ -29,8 +29,34 @@ venv/
 **/.mypy_cache/
 .ruff_cache/
 **/.ruff_cache/
+# Next.js & Turbopack
+.next/
+**/.next/
+.turbo/
+**/.turbo/
+out/
+**/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Data & Databases
+data/
 *.db
+*.db-journal
+*.sqlite
 *.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test Coverage
+coverage/
+**/coverage/
 
 # Environment & Secrets
 .env
@@ -39,6 +65,8 @@ venv/
 **/.env.local
 .env.*.local
 **/.env.*.local
+!.env.example
+!**/.env.example
 
 # Operating System Files
 .DS_Store
