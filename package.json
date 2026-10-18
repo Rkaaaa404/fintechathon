@@ -10,9 +10,10 @@
     "dev:frontend": "node frontend/server.js",
     "dev:backend": "py backend/server.py",
     "test:connector": "node connector.js",
-    "verify": "py aegispath/scripts/verify.py",
-    "smoke": "py aegispath/scripts/smoke.py",
-    "eval:attacks": "py -m aegispath.eval.attacks"
+    "verify": "py scripts/verify.py",
+    "smoke": "py scripts/smoke.py",
+    "eval:attacks": "py -m backend.eval.attacks",
+    "test": "npm run test:connector && npm run verify && npm run smoke"
   },
   "keywords": [
     "fintech",

@@ -27,12 +27,12 @@ def run_services():
     print("=" * 60)
 
     env = os.environ.copy()
-    env["PYTHONPATH"] = f"{ROOT / 'aegispath'}{os.pathsep}{ROOT}"
+    env["PYTHONPATH"] = f"{ROOT}{os.pathsep}{ROOT / 'backend'}"
 
-    api_cmd = [sys.executable, "-m", "uvicorn", "services.api.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"]
-    bank_cmd = [sys.executable, "-m", "uvicorn", "services.bank.main:app", "--host", "127.0.0.1", "--port", "8100", "--reload"]
+    api_cmd = [sys.executable, "-m", "uvicorn", "backend.api.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"]
+    bank_cmd = [sys.executable, "-m", "uvicorn", "backend.bank.main:app", "--host", "127.0.0.1", "--port", "8100", "--reload"]
 
-    cwd = str(ROOT / "aegispath")
+    cwd = str(ROOT)
     print(f"Starting Bank Service on http://127.0.0.1:8100...")
     bank_proc = subprocess.Popen(bank_cmd, cwd=cwd, env=env)
     time.sleep(1)

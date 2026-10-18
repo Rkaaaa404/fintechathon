@@ -3,13 +3,22 @@ import uuid
 import json
 import httpx
 from fastapi.testclient import TestClient
-from services.api.main import app
-from services.bank.main import app as bank_app
-from services.api.config import config as api_config
-from services.api.database import get_connection as get_api_conn
-from services.bank.database import get_connection as get_bank_conn
-from services.api.parser import parse_user_instruction
-from services.api.planner import calculate_tuition_quote
+try:
+    from backend.api.main import app
+    from backend.bank.main import app as bank_app
+    from backend.api.config import config as api_config
+    from backend.api.database import get_connection as get_api_conn
+    from backend.bank.database import get_connection as get_bank_conn
+    from backend.api.parser import parse_user_instruction
+    from backend.api.planner import calculate_tuition_quote
+except ImportError:
+    from services.api.main import app
+    from services.bank.main import app as bank_app
+    from services.api.config import config as api_config
+    from services.api.database import get_connection as get_api_conn
+    from services.bank.database import get_connection as get_bank_conn
+    from services.api.parser import parse_user_instruction
+    from services.api.planner import calculate_tuition_quote
 
 # Route bank requests in-process via ASGI transport during tests
 api_config.BANK_TRANSPORT = httpx.ASGITransport(app=bank_app)

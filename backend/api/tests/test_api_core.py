@@ -3,10 +3,16 @@ import time
 import json
 import uuid
 from fastapi.testclient import TestClient
-from services.api.main import app
-from services.api.database import get_connection
-from services.api.policy import evaluate_transfer_policy, compute_intent_hash
-from services.api.audit import record_audit_event, verify_audit_chain
+try:
+    from backend.api.main import app
+    from backend.api.database import get_connection
+    from backend.api.policy import evaluate_transfer_policy, compute_intent_hash
+    from backend.api.audit import record_audit_event, verify_audit_chain
+except ImportError:
+    from services.api.main import app
+    from services.api.database import get_connection
+    from services.api.policy import evaluate_transfer_policy, compute_intent_hash
+    from services.api.audit import record_audit_event, verify_audit_chain
 
 client = TestClient(app)
 
