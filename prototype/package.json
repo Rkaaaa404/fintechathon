@@ -1,0 +1,23 @@
+{
+  "name": "aegispath-prototype",
+  "version": "1.0.0",
+  "description": "AegisPath - AI Agent Wallet with Three-Layer Defense (FinTechathon 2026)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "fintechathon",
+    "agent-wallet",
+    "ai-safety",
+    "remittance"
+  ],
+  "author": "AegisPath Team",
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/ibm-plex-sans-condensed": "^5.3.0"
+  }
+}

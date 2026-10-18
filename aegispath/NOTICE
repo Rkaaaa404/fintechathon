@@ -1,0 +1,13 @@
+AegisPath Prototype
+Copyright (c) 2026 AegisPath Team (FinTechathon 2026)
+
+This project bundles and uses third-party open-source components:
+
+1. FastAPI (MIT License) - https://fastapi.tiangolo.com
+2. Pydantic (MIT License) - https://pydantic.dev
+3. Uvicorn (BSD 3-Clause) - https://www.uvicorn.org
+4. HTTPX (BSD 3-Clause) - https://www.encode.io/httpx/
+5. Pytest (MIT License) - https://pytest.org
+6. IBM Plex Fonts (SIL Open Font License 1.1) - https://github.com/IBM/plex
+7. Noto Sans SC (SIL Open Font License 1.1) - https://fonts.google.com/noto/specimen/Noto+Sans+SC
+8. React & Vite (MIT License) - https://react.dev, https://vitejs.dev

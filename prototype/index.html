@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AegisPath — AI Agent Digital Wallet (Testnet)</title>
+  <meta name="description" content="AegisPath is an AI agent that sends money and pays tuition across borders for international students with safety enforced outside the language model.">
+  <meta name="theme-color" content="#3D6BEA">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%233D6BEA'/><text x='50' y='65' font-size='50' font-weight='bold' fill='white' text-anchor='middle'>A</text></svg>">
+</head>
+<body>
+
+  <!-- ═══════════ DEV & PRESENTATION STATE SWITCHER ═══════════ -->
+  <header class="dev-state-bar" id="dev-state-bar" role="toolbar" aria-label="Dev State Switcher">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-weight: 700; color: #6FD3FF;">AegisPath:</span>
+      <select id="dev-state-select" class="dev-state-select" title="State Switcher">
+        <option value="default">State 1: Default (Normal)</option>
+        <option value="waiting-approval">State 2: Waiting for Approval</option>
+        <option value="payment-sent">State 3: Payment Sent Slip</option>
+        <option value="attack-blocked">State 4: Attack Blocked</option>
+        <option value="agent-paused">State 5: Agent Paused (Kill switch)</option>
+        <option value="model-offline">State 6: Model Offline</option>
+        <option value="empty-activity">State 7: Empty Activity</option>
+      </select>
+    </div>
+
+    <!-- Mode Switcher: Versi Web vs Versi App -->
+    <div class="view-mode-bar-cluster">
+      <button class="mode-toggle-pill active" id="btn-mode-web" title="Versi Web (Aplikasi Web Desktop)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>Versi Web</span>
+      </button>
+      <button class="mode-toggle-pill" id="btn-mode-app" title="Versi App (Aplikasi Mobile / PWA)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        <span>Versi App</span>
+      </button>
+    </div>
+
+    <div class="dev-nav-pills">
+      <button class="ring-toggle-pill" data-route="/">Home 首页</button>
+      <button class="ring-toggle-pill" data-route="/tuition">Tuition 学费</button>
+      <button class="ring-toggle-pill" data-route="/chat">Ask Chop 智能体</button>
+      <button class="ring-toggle-pill" data-route="/approve">Approval 授权</button>
+      <button class="ring-toggle-pill" data-route="/evidence">Evidence 证明</button>
+      <button class="ring-toggle-pill" data-route="/planner">Planner 规划</button>
+      <button class="ring-toggle-pill" data-route="/safety">Safety 安全</button>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN WEB APPLICATION VIEWPORT ═══════════ -->
+  <main class="webapp-container mode-web" id="main-container">
+    <!-- Desktop Web Application Header (Visible in Versi Web) -->
+    <header class="web-desktop-header" id="web-desktop-header">
+      <div class="web-header-inner">
+        <div class="web-header-left">
+          <div class="web-brand-cluster" data-route="/" role="button" tabindex="0">
+            <div class="web-logo-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <div class="web-brand-text">
+              <span class="web-brand-name">AegisPath</span>
+              <span class="web-brand-tag">AI Agent Digital Wallet</span>
+            </div>
+          </div>
+          <span class="pill-testnet">Testnet 测试网</span>
+        </div>
+
+        <nav class="web-header-nav" aria-label="Desktop Navigation">
+          <button class="web-nav-btn active" data-route="/">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+            <span>Home 首页</span>
+          </button>
+          <button class="web-nav-btn" data-route="/tuition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            <span>Pay Tuition 缴纳学费</span>
+          </button>
+          <button class="web-nav-btn" data-route="/chat">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>Ask Chop 询问智能体</span>
+          </button>
+          <button class="web-nav-btn" data-route="/evidence">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+            <span>Evidence Pack 财力证明</span>
+          </button>
+          <button class="web-nav-btn" data-route="/safety">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Safety Guard 安全防护</span>
+          </button>
+          <button class="web-nav-btn" data-route="/planner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <span>Planner 规划</span>
+          </button>
+        </nav>
+
+        <div class="web-header-right">
+          <!-- Quick switch to App view -->
+          <button class="web-view-toggle-btn" id="web-btn-toggle-app" title="Buka dalam tampilan Mobile App">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            <span>Mode App</span>
+          </button>
+
+          <!-- Language toggle -->
+          <button class="lang-toggle-btn" id="web-header-lang-toggle" aria-label="Toggle language">
+            <span class="active-lang" id="lang-label-en">EN</span>
+            <span>|</span>
+            <span class="inactive-lang" id="lang-label-zh">中文</span>
+          </button>
+
+          <!-- Notifications bell -->
+          <button class="bell-btn" id="web-header-bell-btn" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="bell-badge">2</span>
+          </button>
+
+          <!-- User Profile Pill -->
+          <div class="web-user-profile-badge">
+            <div class="web-user-avatar">AY</div>
+            <div class="web-user-info">
+              <span class="web-user-name">Ayu</span>
+              <span class="web-user-role">Student</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- App Frame / Viewport -->
+    <div class="webapp-card-frame" id="app-frame" role="region" aria-label="AegisPath Web Application">
+      <!-- Scrollable Screen Viewport Area -->
+      <div class="screen-viewport" id="screen-viewport">
+        <div id="screen-mount">
+          <!-- Dynamic screen rendered here based on active route -->
+        </div>
+      </div>
+
+      <!-- Persistent Bottom Navigation Area (in Mobile App mode) -->
+      <div id="bottom-nav-mount">
+        <!-- Rendered based on active route -->
+      </div>
+
+      <!-- Toast Feedback Popup -->
+      <div class="toast-popup" id="app-toast"></div>
+    </div>
+  </main>
+
+  <!-- Main ES6 App Bundle -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
