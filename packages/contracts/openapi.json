@@ -5,10 +5,19 @@
         "properties": {
           "locale": {
             "default": "en",
+            "description": "Target locale: 'en' or 'zh'",
             "title": "Locale",
             "type": "string"
           },
+          "synthetic_demo": {
+            "default": false,
+            "title": "Synthetic Demo",
+            "type": "boolean"
+          },
           "text": {
+            "description": "Natural language prompt for financial agent",
+            "maxLength": 4000,
+            "minLength": 1,
             "title": "Text",
             "type": "string"
           }
@@ -22,10 +31,13 @@
       "ApprovePlanRequest": {
         "properties": {
           "intent_hash": {
+            "description": "Cryptographic intent hash bound to user approval",
+            "minLength": 10,
             "title": "Intent Hash",
             "type": "string"
           },
           "passkey_signature": {
+            "description": "Demo consent marker; not a verified WebAuthn or hardware passkey signature",
             "title": "Passkey Signature",
             "type": "string"
           }
@@ -41,10 +53,12 @@
         "properties": {
           "case_id": {
             "default": "invoice_hidden_instruction_01",
+            "description": "Simulated attack scenario identifier",
             "title": "Case Id",
             "type": "string"
           },
           "disabled_layers": {
+            "description": "List of defensive rings to simulate bypass on",
             "items": {
               "type": "string"
             },
@@ -59,6 +73,7 @@
         "properties": {
           "username": {
             "default": "Ayu",
+            "description": "Demo student username",
             "title": "Username",
             "type": "string"
           }
@@ -70,11 +85,15 @@
         "properties": {
           "days": {
             "default": 14,
+            "description": "Link validity period in days",
+            "maximum": 90.0,
+            "minimum": 1.0,
             "title": "Days",
             "type": "integer"
           },
           "recipient": {
             "default": "Landlord A",
+            "description": "Verified party requesting funds evidence",
             "title": "Recipient",
             "type": "string"
           }
@@ -98,10 +117,14 @@
       "PolicyProposalRequest": {
         "properties": {
           "new_daily_cap_usd": {
+            "description": "New proposed daily spending cap in USD",
+            "exclusiveMinimum": 0.0,
             "title": "New Daily Cap Usd",
             "type": "number"
           },
           "new_single_send_cap_usd": {
+            "description": "New proposed single-send cap in USD",
+            "exclusiveMinimum": 0.0,
             "title": "New Single Send Cap Usd",
             "type": "number"
           }
@@ -116,6 +139,7 @@
       "ResumeAgentRequest": {
         "properties": {
           "passkey_signature": {
+            "description": "Demo resume marker; not verified hardware passkey authentication",
             "title": "Passkey Signature",
             "type": "string"
           }
@@ -129,6 +153,7 @@
       "TokenRefreshRequest": {
         "properties": {
           "refresh_token": {
+            "description": "JWT Refresh Token",
             "title": "Refresh Token",
             "type": "string"
           }
@@ -143,11 +168,14 @@
         "properties": {
           "amount_cny": {
             "default": 18000.0,
+            "description": "Tuition fee amount in CNY",
+            "exclusiveMinimum": 0.0,
             "title": "Amount Cny",
             "type": "number"
           },
           "mode": {
             "default": "cheapest",
+            "description": "Routing mode: 'fastest', 'cheapest', or 'balanced'",
             "title": "Mode",
             "type": "string"
           }

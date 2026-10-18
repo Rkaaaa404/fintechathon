@@ -2,6 +2,8 @@ import uuid
 import time
 import json
 import httpx
+import math
+from decimal import Decimal
 from typing import Dict, Any, List, Optional
 from .config import config
 from .database import get_connection
@@ -51,6 +53,33 @@ def calculate_tuition_quote(amount_cny: float = 18000.0, mode: str = "cheapest")
         "estimate_note": "Estimate with a buffer, not a guarantee (含缓冲的估算,非保证)"
     }
 
+async def execute_bank_transfer(token_payload: dict, signature: str, idempotency_key: str) -> dict | None:
+    """Return only a confirmed sandbox receipt; failures have unknown execution outcome."""
+    client_kwargs = {"timeout": 10.0}
+    if config.BANK_TRANSPORT is not None:
+        client_kwargs["transport"] = config.BANK_TRANSPORT
+    try:
+        async with httpx.AsyncClient(**client_kwargs) as client:
+            response = await client.post(
+                f"{config.BANK_SERVICE_URL}/v1/bank/transfer",
+                json={"token": token_payload, "signature": signature},
+                headers={"Idempotency-Key": idempotency_key},
+            )
+        if response.status_code != 200:
+            return None
+        receipt = response.json()
+        if not isinstance(receipt, dict) or receipt.get("status") != "COMPLETED":
+            return None
+        tx_id = receipt.get("tx_id")
+        balance = receipt.get("remaining_balance_usd")
+        if not isinstance(tx_id, str) or not tx_id.strip():
+            return None
+        if isinstance(balance, bool) or not isinstance(balance, (int, float)) or not math.isfinite(balance):
+            return None
+        return receipt
+    except (httpx.HTTPError, ValueError, TypeError, OverflowError):
+        return None
+
 async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ayu") -> Dict[str, Any]:
     """
     Executes DAG Planning sequence.
@@ -72,19 +101,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
                     "ring": "outer",
                     "name": "Privacy filter",
                     "status": "flagged",
-                    "text": "Privacy filter flagged an instruction inside the invoice/memo"
-                },
-                {
-                    "ring": "middle",
-                    "name": "Spending rules",
-                    "status": "refused",
-                    "text": "Spending rules would refuse: recipient is not on your list"
-                },
-                {
-                    "ring": "inner",
-                    "name": "Bank limit",
-                    "status": "refused",
-                    "text": "Bank-side limit would refuse: unverified scoped token"
+                    "text": "Sentinel flagged an instruction in the supplied text"
                 }
             ],
             "conclusion": "Nothing was sent. $0 funds lost.",
@@ -92,17 +109,40 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         }
 
     action = parsed.get("action")
-    amount = parsed.get("amount", 200.0)
-    payee_name = parsed.get("payee", "Mom")
+    if action == "general_query":
+        return {"type": "info_note", "message": "I can help with USD transfers and CNY tuition payments."}
+    amount = parsed.get("amount")
+    payee_name = parsed.get("payee")
+    valid_amount = (
+        not isinstance(amount, bool)
+        and isinstance(amount, (int, float))
+        and math.isfinite(amount)
+        and amount > 0
+        and Decimal(str(amount)).as_tuple().exponent >= -2
+    )
+    if (
+        action not in ("transfer", "tuition")
+        or not valid_amount
+        or not isinstance(payee_name, str)
+        or not payee_name.strip()
+        or (action == "transfer" and parsed.get("currency") != "USD")
+        or (action == "tuition" and (parsed.get("currency") != "CNY" or payee_name != "Campus bursar"))
+    ):
+        return {
+            "type": "clarification",
+            "message": "Specify one payment with an explicit amount, currency, and recipient.",
+        }
 
     # Handle Tuition
     if action == "tuition":
         quote = calculate_tuition_quote(amount, parsed.get("route_preference", "cheapest"))
         amount_usd = quote["total_send_usd"]
         policy_eval = evaluate_transfer_policy(user_id, amount_usd, "Campus bursar")
+        if policy_eval.get("tier") == "REFUSED":
+            return {"type": "refused_note", "reason": policy_eval.get("reason"), "stamp": "BLOCKED"}
 
         plan_id = f"plan-tuition-{uuid.uuid4().hex[:8]}"
-        intent_hash = policy_eval.get("intent_hash") or compute_intent_hash("p2", "Campus bursar", amount_usd, "CNY", SIM_FX := 7.1022)
+        intent_hash = policy_eval.get("intent_hash") or compute_intent_hash("p2", "Campus bursar", amount_usd, "CNY", SIMULATED_FX_USD_CNY)
 
         # Store plan in WAITING_APPROVAL state
         conn = get_connection()
@@ -131,6 +171,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         return {
             "type": "approval_sheet",
             "plan_id": plan_id,
+            "payee_name": "Campus bursar",
             "you_asked": parsed.get("raw_text"),
             "understood": f"Pay tuition ¥{amount:,.0f} to Campus bursar (${amount_usd:,.2f} USD)",
             "send_amount_usd": amount_usd,
@@ -140,7 +181,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
             "fee_with_buffer_usd": quote["fee_usd"] + quote["buffer_usd"],
             "eta": quote["eta_desc"],
             "intent_hash": intent_hash,
-            "why_approval_needed": policy_eval.get("reason", "Tuition amount exceeds auto-send allowance"),
+            "why_approval_needed": "Tuition payments require demo approval. " + policy_eval.get("reason", ""),
             "status": "WAITING_APPROVAL"
         }
 
@@ -185,6 +226,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         return {
             "type": "approval_sheet",
             "plan_id": plan_id,
+            "payee_name": payee_name,
             "you_asked": parsed.get("raw_text"),
             "understood": f"Send ${amount_usd:,.2f} to {payee_name}",
             "send_amount_usd": amount_usd,
@@ -210,21 +252,13 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         fee_usd=0.42
     )
 
-    bank_res_data = None
-    try:
-        client_kwargs = {"timeout": 10.0}
-        if config.BANK_TRANSPORT is not None:
-            client_kwargs["transport"] = config.BANK_TRANSPORT
-        async with httpx.AsyncClient(**client_kwargs) as client:
-            r = await client.post(
-                f"{config.BANK_SERVICE_URL}/v1/bank/transfer",
-                json={"token": token_payload, "signature": signature},
-                headers={"Idempotency-Key": f"auto-{uuid.uuid4().hex[:10]}"}
-            )
-            if r.status_code == 200:
-                bank_res_data = r.json()
-    except Exception as e:
-        pass
+    bank_res_data = await execute_bank_transfer(token_payload, signature, f"auto-{uuid.uuid4().hex}")
+    if bank_res_data is None:
+        return {
+            "type": "execution_error",
+            "code": "BANK_EXECUTION_FAILED",
+            "message": "Bank execution was not confirmed. Check the ledger before sending again.",
+        }
 
     # Record used daily allowance & audit event
     conn = get_connection()
@@ -238,7 +272,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
             "amount_usd": amount_usd,
             "payee_name": payee_name,
             "tier": "T1",
-            "tx_id": bank_res_data.get("tx_id") if bank_res_data else "TX-AUTO-SIM"
+            "tx_id": bank_res_data["tx_id"]
         }
     )
 
@@ -250,13 +284,13 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         "amount_usd": amount_usd,
         "payee_name": payee_name,
         "received_text": f"Received 收款 Rp {idr_received:,} · fee 手续费 $0.42 (simulated)",
-        "tx_id": bank_res_data.get("tx_id") if bank_res_data else "TX-SIM-9F2A-48B1",
-        "remaining_balance_usd": bank_res_data.get("remaining_balance_usd") if bank_res_data else 2249.58,
+        "tx_id": bank_res_data["tx_id"],
+        "remaining_balance_usd": bank_res_data["remaining_balance_usd"],
         "stamp": "SENT",
         "checks": {
             "privacy_filter": "pass",
             "spending_rules": "pass",
-            "bank_limit": "pass"
+            "bank_token": "pass"
         },
         "note": "Done. Arrives in about 2 minutes. 已完成,约2分钟到账。"
     }

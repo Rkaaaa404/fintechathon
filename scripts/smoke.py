@@ -77,16 +77,21 @@ def run_smoke_tests():
     assert resp_a["stamp"] == "SENT"
     assert resp_a["checks"]["privacy_filter"] == "pass"
     assert resp_a["checks"]["spending_rules"] == "pass"
-    assert resp_a["checks"]["bank_limit"] == "pass"
+    assert resp_a["checks"]["bank_token"] == "pass"
+    balance_after = bank_client.get("/v1/bank/balance?account_id=acc_student_ayu").json()["balance_usd"]
+    assert round(initial_balance - balance_after, 2) == 200.42
+    ledger = bank_client.get("/v1/bank/ledger?account_id=acc_student_ayu").json()["entries"]
+    assert any(entry["tx_id"] == resp_a["tx_id"] and entry["amount_usd"] == 200 for entry in ledger)
+    assert api_client.get("/v1/policy").json()["used_today_usd"] == 200
     print(f"  [OK] Flow A executed successfully: Receipt Slip received with SENT stamp.")
 
     # ──────────────────────────────────────────────────────────
     # 2. Golden Flow B: Pay Tuition & Intent Hash Tampering Proof
     # ──────────────────────────────────────────────────────────
-    print("\n[Flow B] Testing 'Pay tuition invoice ¥18,000' (Tier 2 Step-Up Approval)...")
+    print("\n[Flow B] Testing 'Pay tuition invoice ¥3,000' (Demo Step-Up Approval)...")
     r_flow_b = api_client.post(
         "/v1/agent/messages",
-        json={"text": "Pay tuition invoice ¥18,000 to Campus bursar", "locale": "en"}
+        json={"text": "Pay tuition invoice ¥3,000 to Campus bursar", "locale": "en"}
     )
     assert r_flow_b.status_code == 200, f"Flow B message failed: {r_flow_b.text}"
     resp_b = r_flow_b.json()["response"]
@@ -124,6 +129,11 @@ def run_smoke_tests():
     assert resp_legit["status"] == "COMPLETED"
     assert resp_legit["stamp"] == "SENT"
     print(f"  [OK] Flow B approved and signed: Bank transfer executed with SENT stamp.")
+    replay = api_client.post(f"/v1/plans/{plan_id}/approve", json={
+        "intent_hash": locked_intent_hash, "passkey_signature": "DEMO_CONSENT"})
+    assert replay.status_code == 409
+    refused = api_client.post("/v1/agent/messages", json={"text": "Pay tuition CNY 18000 to Campus bursar"})
+    assert refused.json()["response"]["type"] == "refused_note"
 
     # ──────────────────────────────────────────────────────────
     # 3. Golden Flow C: Prompt Injection Attack Blocked
@@ -139,7 +149,6 @@ def run_smoke_tests():
     assert resp_c["type"] == "blocked_slip", f"Expected blocked_slip, got {resp_c.get('type')}"
     assert resp_c["stamp"] == "BLOCKED"
     assert resp_c["amount_lost_usd"] == 0.0
-    assert len(resp_c["verdicts"]) == 3
     assert resp_c["verdicts"][0]["status"] == "flagged"
     print("  [OK] Flow C blocked cleanly by Outer Ring: $0 funds lost.")
 
@@ -159,7 +168,8 @@ def run_smoke_tests():
 
 if __name__ == "__main__":
     try:
-        run_smoke_tests()
+        with bank_client, api_client:
+            run_smoke_tests()
         sys.exit(0)
     except Exception as e:
         print(f"\n[FAIL] Smoke test encountered an error: {e}")

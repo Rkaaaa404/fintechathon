@@ -3,8 +3,8 @@ Pydantic v2 Schemas for AegisPath API Core Service.
 Strict typed request & response models conforming to OpenAPI 3.1 & Pydantic 2.x standards.
 """
 
-from typing import Optional, List
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Optional, List, Literal
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class BaseSchema(BaseModel):
@@ -26,16 +26,45 @@ class PolicyProposalRequest(BaseSchema):
 
 class ApprovePlanRequest(BaseSchema):
     intent_hash: str = Field(..., min_length=10, description="Cryptographic intent hash bound to user approval")
-    passkey_signature: str = Field(..., description="WebAuthn / Passkey cryptographic signature")
+    passkey_signature: str = Field(..., description="Demo consent marker; not a verified WebAuthn or hardware passkey signature")
 
 
 class ResumeAgentRequest(BaseSchema):
-    passkey_signature: str = Field(..., description="WebAuthn / Passkey signature to resume paused agent")
+    passkey_signature: str = Field(..., description="Demo resume marker; not verified hardware passkey authentication")
 
 
 class AgentMessageRequest(BaseSchema):
-    text: str = Field(..., min_length=1, description="Natural language prompt for financial agent")
+    text: str = Field(..., min_length=1, max_length=4000, description="Natural language prompt for financial agent")
     locale: str = Field(default="en", description="Target locale: 'en' or 'zh'")
+    synthetic_demo: bool = False
+
+    @field_validator("text", mode="before")
+    @classmethod
+    def trim_text(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class ModelIntentOutput(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    action: Literal["transfer", "tuition", "general_query", "clarification"]
+    amount: float | None
+    currency: Literal["USD", "CNY", "IDR"] | None
+    payee: str | None
+    route_preference: Literal["fastest", "cheapest", "balanced"]
+    amount_evidence: str | None
+    currency_evidence: str | None
+    payee_evidence: str | None
+
+
+class AIExecutionInfo(BaseModel):
+    source: Literal["deterministic", "cloud", "blocked"]
+    provider: Literal["none", "gemini", "groq"]
+    model: str | None
+
+
+class IntentExtraction(BaseModel):
+    intent: dict
+    ai: AIExecutionInfo
 
 
 class TuitionQuoteRequest(BaseSchema):

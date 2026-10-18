@@ -13,8 +13,7 @@ import { EvidenceScreen } from '@/components/screens/EvidenceScreen';
 import { PlannerScreen } from '@/components/screens/PlannerScreen';
 import { ChatScreen } from '@/components/screens/ChatScreen';
 import { AppPresentationState, AppRoute, Locale } from '@/types';
-import { TuitionMode } from '@/lib/mockData';
-import { connector } from '@/lib/api/connector';
+import { connector, type ApprovalSheetResponse } from '@/lib/api/connector';
 
 export default function HomePage() {
   const [currentState, setCurrentState] = useState<AppPresentationState>('default');
@@ -22,8 +21,8 @@ export default function HomePage() {
   const [locale, setLocale] = useState<Locale>('en');
   const [isPaused, setIsPaused] = useState(false);
   const [emptyActivity, setEmptyActivity] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<TuitionMode | null>(null);
-  const [forceSuccessSlip, setForceSuccessSlip] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState<ApprovalSheetResponse | null>(null);
+  const [chatDraft, setChatDraft] = useState('');
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
 
   // Safety, Evidence, Planner Interactive States
@@ -78,18 +77,15 @@ export default function HomePage() {
       setIsPaused(true);
       setCurrentRoute('/safety');
       setEmptyActivity(false);
-      setForceSuccessSlip(false);
       showToast('State: Agent Paused (Kill switch active)');
     } else if (state === 'waiting-approval') {
       setIsPaused(false);
       setCurrentRoute('/approve');
-      setForceSuccessSlip(false);
-      showToast('State: Waiting for Approval');
+      showToast(locale === 'zh' ? '审批视图：仅显示后端返回的计划' : 'Approval view: backend-issued plans only');
     } else if (state === 'payment-sent') {
       setIsPaused(false);
       setCurrentRoute('/approve');
-      setForceSuccessSlip(true);
-      showToast('State: Payment Sent Slip');
+      showToast(locale === 'zh' ? '回执仅在银行确认执行后显示' : 'Receipts appear only after confirmed bank execution');
     } else if (state === 'attack-blocked') {
       setIsPaused(false);
       setCurrentRoute('/safety');
@@ -99,17 +95,15 @@ export default function HomePage() {
         setIsAttackReplaying(false);
       }, 2000);
     } else if (state === 'model-offline') {
-      showToast('Model offline mode: using deterministic rules.');
+      showToast(locale === 'zh' ? '仅切换演示视图；服务器模型配置未改变' : 'Presentation only — server model configuration is unchanged');
     } else if (state === 'empty-activity') {
       setIsPaused(false);
       setCurrentRoute('/');
       setEmptyActivity(true);
-      setForceSuccessSlip(false);
       showToast('State: Empty Activity');
     } else {
       setIsPaused(false);
       setEmptyActivity(false);
-      setForceSuccessSlip(false);
       setIsAttackReplaying(false);
       setCurrentRoute('/');
       showToast('State: Default View');
@@ -199,16 +193,19 @@ export default function HomePage() {
           <TuitionScreen
             locale={locale}
             onNavigate={(route: AppRoute) => setCurrentRoute(route)}
-            onSelectPlan={setSelectedPlan}
+            onRequestTuition={(mode) => {
+              setChatDraft(`Pay tuition CNY 18000 to Campus bursar, ${mode} route`);
+              setCurrentRoute('/chat');
+            }}
           />
         );
       case '/approve':
         return (
           <ApprovalScreen
+            key={pendingApproval?.plan_id ?? 'no-plan'}
             locale={locale}
             onNavigate={(route: AppRoute) => setCurrentRoute(route)}
-            selectedPlan={selectedPlan}
-            forceSuccessState={forceSuccessSlip}
+            plan={pendingApproval}
           />
         );
       case '/safety':
@@ -273,14 +270,10 @@ export default function HomePage() {
             onNavigate={(route: AppRoute) => setCurrentRoute(route)}
             agentPaused={isPaused}
             onTogglePause={handleTogglePause}
-            onSimulateApproval={() => {
+            initialDraft={chatDraft}
+            onReviewPlan={(plan) => {
+              setPendingApproval(plan);
               setCurrentRoute('/approve');
-              showToast('Approval sheet requested: $3,000 to Campus bursar');
-            }}
-            onAttackBlockedDemo={() => {
-              setCurrentRoute('/safety');
-              setIsAttackReplaying(true);
-              showToast('Attack simulation blocked! 攻击已被外环拦截');
             }}
           />
         );

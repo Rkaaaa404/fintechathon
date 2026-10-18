@@ -3,28 +3,27 @@
 import React, { useState } from 'react';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
-import { SEED_DATA, TuitionMode } from '@/lib/mockData';
+import { SEED_DATA } from '@/lib/mockData';
 import { t, b } from '@/lib/i18n';
 import { AppRoute, Locale } from '@/types';
 
 interface TuitionScreenProps {
   locale: Locale;
   onNavigate: (route: AppRoute) => void;
-  onSelectPlan: (mode: TuitionMode) => void;
+  onRequestTuition: (mode: 'fastest' | 'cheapest' | 'balanced') => void;
 }
 
 export const TuitionScreen: React.FC<TuitionScreenProps> = ({
   locale,
   onNavigate,
-  onSelectPlan,
+  onRequestTuition,
 }) => {
   const tuition = SEED_DATA.tuition;
   const [currentMode, setCurrentMode] = useState<'fastest' | 'cheapest' | 'balanced'>('cheapest');
   const modeData = tuition.modes[currentMode];
 
   const handleReview = () => {
-    onSelectPlan(modeData);
-    onNavigate('/approve');
+    onRequestTuition(currentMode);
   };
 
   return (
@@ -61,7 +60,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
           </div>
 
           <div className="tuition-header-due text-[#E6EEFF] text-[12px] opacity-80 mb-0.5">
-            {b('tuition_due_label', 'tuition_due_sub', locale)}
+            {locale === 'zh' ? '示例学费金额（非付款计划）' : 'Illustrative tuition amount — not a payment plan'}
           </div>
 
           <div className="tuition-header-big-amount text-white text-[32px] font-bold font-mono tracking-tight mb-1">
@@ -76,6 +75,14 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
       {/* ═══════════ SCREEN BODY ═══════════ */}
       <main className="screen-body px-4 pt-4">
+        <div className="mb-3 p-3 bg-[#FFF4DC] border border-[#F5A524] rounded-[14px] text-[12px] text-[#B7791F]" role="note">
+          <strong>{locale === 'zh' ? '仅供演示：非实时报价，不可审批。' : 'Illustration only — not a live quote or an approvable plan.'}</strong>
+          <p className="mt-1">
+            {locale === 'zh'
+              ? '下方数字为固定示例。按钮仅在聊天中填写草稿，不会发送或付款。提交后由后端报价并检查额度；默认每日限额可能拒绝此金额。'
+              : 'The figures below are fixed examples. The button only prepares a chat draft; it does not send or pay. The backend quotes and checks policy after submission; the default daily cap may refuse this amount.'}
+          </p>
+        </div>
         {/* Tuition Calculation Card */}
         <div className="tuition-card bg-white rounded-[18px] p-4 border border-[#E6ECF8] shadow-sm text-left">
           {/* Segmented Control: Fastest / Cheapest / Balanced */}
@@ -170,12 +177,12 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
             className="w-full mt-4 bg-[#3D6BEA] text-white py-3 rounded-[27px] font-bold text-[14px] shadow-sm hover:bg-[#1F3FA8] transition-all flex flex-col items-center justify-center cursor-pointer"
             onClick={handleReview}
           >
-            <span>{t('btn_review_transfer', locale)}</span>
-            <span className="text-[11px] font-normal opacity-85">{t('btn_review_transfer_sub', locale)}</span>
+            <span>{locale === 'zh' ? '在聊天中准备付款请求' : 'Prepare payment request in chat'}</span>
+            <span className="text-[11px] font-normal opacity-85">{locale === 'zh' ? '请检查草稿后自行发送' : 'Review the draft and send it yourself'}</span>
           </button>
         </div>
 
-        {/* Verified Payee Card (SSOT Blueprint requirement) */}
+        {/* Illustrative payee, not a backend-verified plan */}
         <div className="payee-summary-card mt-3 bg-white rounded-[16px] p-3.5 border border-[#E6ECF8] shadow-sm flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[#E6EEFF] text-[#1F3FA8] flex items-center justify-center text-[18px] border border-[#9DB8FF]/40">
@@ -185,11 +192,11 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
               <div className="font-bold text-[13.5px] text-[#14213D] flex items-center gap-2">
                 <span>Campus bursar 学校财务处</span>
                 <span className="text-[10px] font-bold bg-[#E3F6EE] text-[#1E9E6A] px-2 py-0.5 rounded-full border border-[#1E9E6A]/20">
-                  ✓ {locale === 'zh' ? '官方渠道' : 'Official channel'}
+                  {locale === 'zh' ? '示例收款人' : 'Example payee'}
                 </span>
               </div>
               <div className="text-[11px] text-[#5B6B8C] mt-0.5">
-                {locale === 'zh' ? '新收款人 · 需通过 Passkey 签署意图哈希确认' : 'New institutional payee · Protected by locked intent hash'}
+                {locale === 'zh' ? '演示收款人 · 实际审批以聊天返回的后端计划为准' : 'Demo payee · Review only a backend-issued plan returned in chat'}
               </div>
             </div>
           </div>

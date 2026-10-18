@@ -29,10 +29,10 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ locale }) => {
         <div className="site-footer-links flex items-center gap-6 text-[12px] text-[#5B6B8C]">
           <span className="flex items-center gap-1.5 text-[#1E9E6A] font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-[#1E9E6A]"></span>
-            {locale === 'zh' ? '三环安全已激活' : 'Three Rings Active'}
+            {locale === 'zh' ? '演示安全护栏' : 'Demo safeguards'}
           </span>
           <span className="text-[#E6ECF8]">|</span>
-          <span>{locale === 'zh' ? '隐私过滤网关 (Presidio)' : 'Privacy Gateway (Presidio)'}</span>
+          <span>{locale === 'zh' ? 'Sentinel + 有限正则隐私检测' : 'Sentinel + limited regex PII guard'}</span>
           <span className="text-[#E6ECF8]">|</span>
           <span>{locale === 'zh' ? '银行沙盒接口' : 'Bank Gateway (Port 8100)'}</span>
           <span className="text-[#E6ECF8]">|</span>

@@ -16,8 +16,8 @@ from .auth import generate_tokens_for_user, verify_jwt
 from .policy import evaluate_transfer_policy, compute_intent_hash
 from .tokens import create_scoped_bank_token
 from .audit import record_audit_event, verify_audit_chain
-from .parser import parse_user_instruction
-from .planner import calculate_tuition_quote, plan_and_process_intent
+from .ai_service import extract_intent, start_intent_service, close_intent_service, AIError
+from .planner import calculate_tuition_quote, plan_and_process_intent, execute_bank_transfer
 from .schemas import (
     DemoLoginRequest,
     TokenRefreshRequest,
@@ -35,8 +35,11 @@ from .schemas import (
 async def lifespan(app: FastAPI):
     # Startup: Ensure database tables and initial testnet records exist
     init_db()
-    yield
-    # Shutdown: Clean teardown if needed
+    await start_intent_service()
+    try:
+        yield
+    finally:
+        await close_intent_service()
 
 app = FastAPI(
     title="AegisPath Core API Service",
@@ -229,10 +232,12 @@ def verify_audit():
 async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, user_id: str = Depends(get_current_user)):
     req_id = getattr(request.state, "request_id", str(uuid.uuid4()))
     conn = get_connection()
-    cur = conn.execute("SELECT plan_id, intent_hash, plan_data_json, status FROM plans WHERE plan_id = ?", (plan_id,))
+    cur = conn.execute("SELECT plan_id, intent_hash, plan_data_json, status FROM plans WHERE plan_id = ? AND user_id = ?", (plan_id, user_id))
     row = cur.fetchone()
     if not row:
-        return problem_response(404, "Plan Not Found", f"Plan {plan_id} does not exist", "PLAN_NOT_FOUND", req_id)
+        return problem_response(404, "Plan Not Found", "Plan not found for this user.", "PLAN_NOT_FOUND", req_id)
+    if row["status"] != "WAITING_APPROVAL":
+        return problem_response(409, "Plan Not Pending", "This plan is no longer pending approval.", "PLAN_NOT_PENDING", req_id)
 
     # Cryptographic Intent Hash Verification
     stored_hash = row["intent_hash"]
@@ -249,6 +254,9 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
     amount_usd = plan_data["amount_usd"]
     payee_id = plan_data["payee_id"]
     payee_name = plan_data["payee_name"]
+    policy_eval = evaluate_transfer_policy(user_id, amount_usd, payee_name)
+    if policy_eval["tier"] == "REFUSED":
+        return problem_response(409, "Policy Refused", policy_eval["reason"], "POLICY_REFUSED", req_id)
 
     # Issue Scoped Token for Bank Daemon
     token_payload, signature = create_scoped_bank_token(
@@ -259,28 +267,18 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
         fee_usd=plan_data.get("fee_usd", 0.42)
     )
 
-    # Call Bank Service Daemon (Port 8100)
-    try:
-        client_kwargs = {"timeout": 10.0}
-        if config.BANK_TRANSPORT is not None:
-            client_kwargs["transport"] = config.BANK_TRANSPORT
-        async with httpx.AsyncClient(**client_kwargs) as client:
-            bank_res = await client.post(
-                f"{config.BANK_SERVICE_URL}/v1/bank/transfer",
-                json={"token": token_payload, "signature": signature},
-                headers={"Idempotency-Key": f"plan-{plan_id}"}
-            )
-            bank_data = bank_res.json()
-    except Exception as e:
-        return problem_response(502, "Bank Service Unreachable", f"Failed to contact bank daemon: {e}", "BANK_UNREACHABLE", req_id)
+    bank_data = await execute_bank_transfer(token_payload, signature, f"plan-{plan_id}")
+    if bank_data is None:
+        return problem_response(502, "Bank Execution Unconfirmed", "Bank execution was not confirmed. Check the ledger before sending again.", "BANK_EXECUTION_FAILED", req_id)
 
-    if bank_res.status_code != 200:
-        return JSONResponse(status_code=bank_res.status_code, content=bank_data)
-
-    # Mark plan completed in API database
+    # A replay/concurrent approval must not account for the same plan twice.
     with conn:
-        conn.execute("UPDATE plans SET status = 'COMPLETED' WHERE plan_id = ?", (plan_id,))
-        # Increment used daily allowance
+        updated = conn.execute(
+            "UPDATE plans SET status = 'COMPLETED' WHERE plan_id = ? AND user_id = ? AND status = 'WAITING_APPROVAL'",
+            (plan_id, user_id),
+        )
+        if updated.rowcount != 1:
+            return problem_response(409, "Plan Not Pending", "This plan is no longer pending approval.", "PLAN_NOT_PENDING", req_id)
         conn.execute("UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ?", (amount_usd, user_id))
 
     record_audit_event(
@@ -307,20 +305,24 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
         "checks": {
             "privacy_filter": "pass",
             "spending_rules": "pass",
-            "bank_limit": "pass"
+            "bank_token": "pass"
         }
     }
 
 # ── Agent Conversation & Parser ────────────────────────────────
 @app.post("/v1/agent/messages")
-async def agent_message(req: AgentMessageRequest, user_id: str = Depends(get_current_user)):
-    parsed = parse_user_instruction(req.text, req.locale)
-    plan_res = await plan_and_process_intent(parsed, user_id)
+async def agent_message(req: AgentMessageRequest, request: Request, user_id: str = Depends(get_current_user)):
+    try:
+        result = await extract_intent(req.text, req.locale, synthetic_demo=req.synthetic_demo)
+    except AIError as exc:
+        return problem_response(exc.status, "AI Request Failed", exc.message, exc.code, request.state.request_id)
+    plan_res = await plan_and_process_intent(result.intent, user_id)
     return {
         "user_id": user_id,
         "input": req.text,
-        "parsed": parsed,
-        "response": plan_res
+        "parsed": result.intent,
+        "response": plan_res,
+        "ai": result.ai.model_dump(),
     }
 
 # ── Tuition Quote Endpoint ─────────────────────────────────────

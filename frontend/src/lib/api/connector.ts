@@ -1,20 +1,9 @@
 /**
- * ==============================================================================
- * AegisPath Unified WebApp Connector (frontend/src/lib/api/connector.ts)
- * ==============================================================================
- * Production bridge connecting the Next.js 16 Web Application to AegisPath Backend Services:
- * - API Core (Port 8000): Policy Engine, AI Planner, Sentinel, Scoped Tokens
- * - Bank Gateway (Port 8100): Core Banking Daemon, Ledger, Scoped Token Validation
- *
- * Implements the 3 Independent Defense Rings:
- *  1. Outer Ring: Privacy & Prompt Injection Filter
- *  2. Middle Ring: Deterministic Spending Rules & Intent-Hash Binding
- *  3. Inner Ring: Bank-Side Limit & HMAC Scoped Token Verification
- *
- * Supports dual-mode execution:
- * - Live Backend Mode: Communicates directly via HTTP with FastAPI services
- * - Deterministic Fallback Mode: Seamless offline resilience during network outages in Shenzhen
- * ==============================================================================
+ * Shared HTTP connector for the API core and local bank sandbox.
+ * Chat and approval always use backend results and fail explicitly.
+ * Legacy informational screens may retain their existing offline fallback.
+ * Defense checks are the privacy filter, spending rules, and bank scoped token;
+ * demo approval is UI consent, not hardware passkey authentication.
  */
 
 export const DEFAULT_API_BASE = 'http://127.0.0.1:8000';
@@ -65,6 +54,116 @@ export interface AttackReplayResponse {
     status: 'flagged' | 'refused' | 'bypassed' | 'inactive';
     text: string;
   }>;
+}
+
+export interface AIExecutionInfo {
+  source: 'deterministic' | 'cloud' | 'blocked';
+  provider: 'none' | 'gemini' | 'groq';
+  model: string | null;
+}
+
+export interface ExecutionChecks {
+  privacy_filter: 'pass';
+  spending_rules: 'pass';
+  bank_token: 'pass';
+}
+
+export interface SlipResponse {
+  type: 'slip';
+  plan_chips: string[];
+  status: 'COMPLETED';
+  amount_usd: number;
+  payee_name: string;
+  received_text: string;
+  tx_id: string;
+  remaining_balance_usd: number;
+  stamp: 'SENT';
+  checks: ExecutionChecks;
+  note: string;
+}
+
+export interface ApprovalSheetResponse {
+  type: 'approval_sheet';
+  plan_id: string;
+  payee_name: string;
+  you_asked: string;
+  understood: string;
+  send_amount_usd: number;
+  receives_cny?: number;
+  receives_idr?: number;
+  rate: number;
+  rate_pair: string;
+  fee_with_buffer_usd: number;
+  eta: string;
+  intent_hash: string;
+  why_approval_needed: string;
+  changed_from_request?: string[];
+  status: 'WAITING_APPROVAL';
+}
+
+export interface BlockedSlipResponse {
+  type: 'blocked_slip';
+  quoted_instruction: string;
+  amount_lost_usd: number;
+  verdicts: Array<{
+    ring: 'outer' | 'middle' | 'inner';
+    name: string;
+    status: 'flagged' | 'refused' | 'bypassed' | 'inactive';
+    text: string;
+  }>;
+  conclusion: string;
+  stamp: 'BLOCKED';
+}
+
+export interface RefusedNoteResponse {
+  type: 'refused_note';
+  reason: string;
+  stamp: 'BLOCKED';
+}
+
+export interface ClarificationResponse {
+  type: 'clarification';
+  message: string;
+}
+
+export interface InfoNoteResponse {
+  type: 'info_note';
+  message: string;
+}
+
+export interface ExecutionErrorResponse {
+  type: 'execution_error';
+  code: 'BANK_EXECUTION_FAILED';
+  message: string;
+}
+
+export type AgentMessageResponse =
+  | SlipResponse
+  | ApprovalSheetResponse
+  | BlockedSlipResponse
+  | RefusedNoteResponse
+  | ClarificationResponse
+  | InfoNoteResponse
+  | ExecutionErrorResponse;
+
+export interface AgentMessageEnvelope {
+  user_id: string;
+  input: string;
+  parsed: Record<string, unknown>;
+  response: AgentMessageResponse;
+  ai: AIExecutionInfo;
+}
+
+export interface ApprovalReceipt {
+  status: 'COMPLETED';
+  plan_id: string;
+  tx_id: string;
+  amount_usd: number;
+  payee_name: string;
+  remaining_balance_usd: number;
+  intent_hash: string;
+  stamp: 'SENT';
+  checks: ExecutionChecks;
 }
 
 export class AegisPathConnector {
@@ -127,11 +226,16 @@ export class AegisPathConnector {
   /**
    * Internal HTTP fetcher with timeout and automated fallback.
    */
-  private async request<T>(url: string, options: RequestInit = {}, fallbackFn?: () => T): Promise<T> {
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+  private async request<T>(
+    url: string,
+    options: RequestInit = {},
+    fallbackFn?: () => T,
+    timeoutMs: number = this.timeoutMs
+  ): Promise<T> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+    try {
       const res = await fetch(url, {
         ...options,
         signal: controller.signal,
@@ -141,24 +245,26 @@ export class AegisPathConnector {
           ...(options.headers || {}),
         },
       });
-      clearTimeout(timer);
 
       if (res.ok) {
         return (await res.json()) as T;
       }
 
-      const errData = await res.json().catch(() => ({}));
-      console.warn(`[AegisPath Connector] HTTP ${res.status} from ${url}:`, errData);
-
-      if (this.enableFallback && fallbackFn) {
-        return fallbackFn();
-      }
-      throw new Error(errData.detail || errData.title || `HTTP ${res.status}`);
-    } catch (err: any) {
+      const errData = await res.json().catch(() => null);
+      const code = typeof errData?.code === 'string' && /^[A-Z][A-Z0-9_]*$/.test(errData.code)
+        ? errData.code
+        : null;
+      const detail = typeof errData?.detail === 'string'
+        ? errData.detail
+        : typeof errData?.title === 'string' ? errData.title : `HTTP ${res.status}`;
+      throw new Error(code ? `${code}: ${detail}` : detail);
+    } catch (err) {
       if (this.enableFallback && fallbackFn) {
         return fallbackFn();
       }
       throw err;
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -218,81 +324,19 @@ export class AegisPathConnector {
   // ----------------------------------------------------------------------------
   // 3. Agent Messages & Outer/Middle/Inner Ring Verification
   // ----------------------------------------------------------------------------
-  async sendMessage(text: string, locale: string = 'en'): Promise<any> {
-    return this.request<any>(
+  async sendMessage(
+    text: string,
+    locale: string = 'en',
+    syntheticDemo: boolean = false
+  ): Promise<AgentMessageEnvelope> {
+    return this.request<AgentMessageEnvelope>(
       `${this.apiBase}/v1/agent/messages`,
       {
         method: 'POST',
-        body: JSON.stringify({ text, locale }),
+        body: JSON.stringify({ text, locale, synthetic_demo: syntheticDemo }),
       },
-      () => {
-        const lower = text.toLowerCase();
-        if (
-          lower.includes('ignore') ||
-          lower.includes('full balance') ||
-          lower.includes('account x') ||
-          lower.includes('system prompt')
-        ) {
-          return {
-            response: {
-              type: 'blocked_slip',
-              quoted_instruction: text,
-              amount_lost_usd: 0.0,
-              stamp: 'BLOCKED',
-              verdicts: [
-                {
-                  ring: 'outer',
-                  name: 'Privacy filter',
-                  status: 'flagged',
-                  text: 'Privacy filter flagged an instruction inside the memo',
-                },
-                {
-                  ring: 'middle',
-                  name: 'Spending rules',
-                  status: 'refused',
-                  text: 'Spending rules would refuse: recipient not on list',
-                },
-                {
-                  ring: 'inner',
-                  name: 'Bank limit',
-                  status: 'refused',
-                  text: 'Bank limit would refuse: unverified scoped token',
-                },
-              ],
-            },
-          };
-        } else if (
-          lower.includes('tuition') ||
-          lower.includes('18000') ||
-          lower.includes('bursar') ||
-          lower.includes('学费')
-        ) {
-          return {
-            response: {
-              type: 'approval_sheet',
-              plan_id: 'plan-tuition-2026',
-              intent_hash: 'INTENT-SHA256-32058574F1A184E7',
-              send_amount_usd: 2534.3,
-              receives_cny: 18000.0,
-              rate: 7.2,
-              fee_with_buffer_usd: 34.3,
-              eta: 'Arrives in 1 business day',
-              status: 'WAITING_APPROVAL',
-            },
-          };
-        } else {
-          return {
-            response: {
-              type: 'slip',
-              status: 'COMPLETED',
-              amount_usd: 200.0,
-              payee_name: 'Family Transfer',
-              stamp: 'SENT',
-              checks: { privacy_filter: 'pass', spending_rules: 'pass', bank_limit: 'pass' },
-            },
-          };
-        }
-      }
+      undefined,
+      35000
     );
   }
 
@@ -330,28 +374,21 @@ export class AegisPathConnector {
   }
 
   // ----------------------------------------------------------------------------
-  // 5. Plan Approval with Cryptographic Passkey (Ring 3)
+  // 5. Plan Approval with Explicit Demo UI Consent
   // ----------------------------------------------------------------------------
   async approvePlan(
     planId: string,
     intentHash: string,
-    passkeySignature: string = 'SIG_PASSKEY_VALID_01'
-  ): Promise<any> {
-    return this.request<any>(
+    passkeySignature: string = 'DEMO_UI_CONSENT_ONLY'
+  ): Promise<ApprovalReceipt> {
+    return this.request<ApprovalReceipt>(
       `${this.apiBase}/v1/plans/${encodeURIComponent(planId)}/approve`,
       {
         method: 'POST',
         body: JSON.stringify({ intent_hash: intentHash, passkey_signature: passkeySignature }),
       },
-      () => ({
-        status: 'COMPLETED',
-        plan_id: planId,
-        tx_id: 'tx_sec_' + Date.now().toString(36),
-        amount_usd: 2534.3,
-        payee_name: 'Campus Bursar Office',
-        intent_hash: intentHash,
-        stamp: 'SENT',
-      })
+      undefined,
+      35000
     );
   }
 

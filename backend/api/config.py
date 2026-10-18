@@ -1,8 +1,9 @@
+import math
 import os
 from pathlib import Path
 
 # Load .env if present
-env_file = Path(__file__).resolve().parent.parent / ".env"
+env_file = Path(__file__).resolve().parents[2] / ".env"
 if env_file.exists():
     try:
         with open(env_file, "r", encoding="utf-8") as f:
@@ -14,8 +15,8 @@ if env_file.exists():
                     v = v.strip().strip("'\"")
                     if k and k not in os.environ:
                         os.environ[k] = v
-    except Exception:
-        pass
+    except OSError:
+        raise RuntimeError("Unable to read root .env configuration") from None
 
 
 class ApiConfig:
@@ -40,6 +41,29 @@ class ApiConfig:
     TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     BANK_TRANSPORT: object = None
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "none").strip()
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "").strip()
+    GROQ: str = os.getenv("GROQ", "").strip()
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b").strip()
+    try:
+        LLM_TIMEOUT_SECONDS: float = float(os.getenv("LLM_TIMEOUT_SECONDS", "20"))
+    except ValueError:
+        raise RuntimeError("Invalid LLM_TIMEOUT_SECONDS") from None
+    if not math.isfinite(LLM_TIMEOUT_SECONDS) or LLM_TIMEOUT_SECONDS <= 0:
+        raise RuntimeError("Invalid LLM_TIMEOUT_SECONDS")
+    if LLM_PROVIDER not in {"none", "gemini", "groq"}:
+        raise RuntimeError("Invalid LLM_PROVIDER")
+    if LLM_PROVIDER == "gemini":
+        if not GEMINI_API_KEY:
+            raise RuntimeError("Missing GEMINI_API_KEY")
+        if not GEMINI_MODEL:
+            raise RuntimeError("Missing GEMINI_MODEL")
+    if LLM_PROVIDER == "groq":
+        if not GROQ:
+            raise RuntimeError("Missing GROQ")
+        if not GROQ_MODEL:
+            raise RuntimeError("Missing GROQ_MODEL")
 
 
 config = ApiConfig()

@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 # Load .env if present
-env_file = Path(__file__).resolve().parent.parent / ".env"
+env_file = Path(__file__).resolve().parents[2] / ".env"
 if env_file.exists():
     try:
         with open(env_file, "r", encoding="utf-8") as f:
@@ -14,8 +14,8 @@ if env_file.exists():
                     v = v.strip().strip("'\"")
                     if k and k not in os.environ:
                         os.environ[k] = v
-    except Exception:
-        pass
+    except OSError:
+        raise RuntimeError("Unable to read root .env configuration") from None
 
 
 class BankConfig:

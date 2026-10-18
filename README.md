@@ -19,16 +19,11 @@ The repository is structured as a modular, enterprise-grade base product with cl
 
 ```
 fintechathon/
-├── frontend/                 # [BASE PRODUK: FRONTEND]
-│   ├── css/                  # Curated design tokens & responsive styles
-│   ├── js/                   # SPA routing, screen controllers & i18n
-│   │   ├── screens/          # Modular screen views (Home, Chat, Approval, Tuition, etc.)
-│   │   ├── connector.js      # Dedicated WebApp Connector client
-│   │   ├── router.js         # Client-side router
-│   │   └── mockData.js       # Resilient local fallback fixtures
-│   ├── index.html            # Main WebApp entrypoint
-│   ├── server.js             # High-performance static application server (Port 3000)
-│   └── sw.js                 # PWA service worker with offline cache
+├── frontend/                 # Active Next.js application (Port 3000)
+│   ├── src/app/              # Page shell and styles
+│   ├── src/components/       # Chat, approval, tuition and other screens
+│   └── src/lib/              # Typed API connector and presentation-only AI gateway
+├── frontend_legacy/          # Archived static demo; not the integrated chat
 │
 ├── backend/                  # [BASE PRODUK: BACKEND]
 │   ├── api/                  # Core API Microservice (FastAPI - Port 8000)
@@ -66,8 +61,8 @@ fintechathon/
               ▼
   ┌─────────────────────────────────────────────────────────┐
   │  1. OUTER RING: Privacy & Prompt Injection Filter       │
-  │  - Scans memo, OCR invoices, and chat prompts           │
-  │  - Blocks prompt injections, role-play & leaked keys    │
+  │  - Scans chat with deterministic Sentinel patterns      │
+  │  - Cloud: synthetic attestation + limited PII guard      │
   └───────────────────────────┬─────────────────────────────┘
                               │ Sanitized Intent
                               ▼
@@ -75,7 +70,7 @@ fintechathon/
   │  2. MIDDLE RING: Policy Plane & Intent Hash             │
   │  - Enforces T0–T3 spending tiers & payee allowlists     │
   │  - Generates immutable SHA-256 Intent Hash              │
-  │  - Requires explicit user biometric / Passkey approval │
+  │  - T1 auto-send; T2 explicit demo approval + intent hash │
   └───────────────────────────┬─────────────────────────────┘
                               │ Scoped HMAC Token
                               ▼
@@ -83,7 +78,7 @@ fintechathon/
   │  3. INNER RING: Isolated Banking Gateway (Port 8100)    │
   │  - Runs on isolated process with separate crypto keys   │
   │  - Verifies cryptographic signature & single-use nonce  │
-  │  - Rejects transactions exceeding bank-side limits      │
+  │  - Checks HMAC, expiry, nonce and available balance      │
   └─────────────────────────────────────────────────────────┘
 ```
 
@@ -91,12 +86,9 @@ fintechathon/
 
 ## 🔌 Universal WebApp Connector (`connector.js`)
 
-The platform includes a dedicated **Universal Connector** (`connector.js` at root and `frontend/js/connector.js`), designed to seamlessly link any client application to the AegisPath backend ecosystem:
+The active Next.js client uses `frontend/src/lib/api/connector.ts`. Chat sends `POST /v1/agent/messages`; pending plans use `POST /v1/plans/{plan_id}/approve`. These two operations **never fall back to fabricated transactions**. Provider/network/bank failures remain errors. Some unrelated demonstration screens retain illustrative fixtures/fallbacks.
 
-- **Automatic Service Discovery**: Detects whether Backend Core (:8000) and Bank Gateway (:8100) are online.
-- **Dual-Mode Execution**:
-  - **Live Mode**: Directly interacts with FastAPI REST and Server-Sent Events (SSE) streaming.
-  - **Deterministic Fallback**: Automatically provides zero-latency deterministic mock responses if backend is booting or operating offline.
+The root `connector.js` and `frontend_legacy/` are legacy demo utilities, not the active AI integration. SSE provides heartbeat events, not model reasoning streams.
 - **CLI Self-Test Suite**: Run `node connector.js` from terminal to verify all 3 defense rings in seconds.
 
 ### Quick Connector Test
@@ -112,10 +104,10 @@ To maintain absolute transparency for competition judges and security auditors:
 
 | Capability | Current Base Implementation | Production Extension Roadmap |
 | :--- | :--- | :--- |
-| **Safety & Policy Engine** | **100% Functional (Real)**: Deterministic policy, 3 defense rings, 120-variant attack evaluation. | Ready for deployment in live container environments. |
-| **Banking Rails / Fiat Gateway** | **Simulated Bank Daemon (Port 8100)**: Complete ledger, HMAC token validation, and single-use nonces. | Decoupled adapter ready to plug into SWIFT, BI-FAST, FedNow, or partner bank APIs. |
-| **Biometric Signatures** | **Cryptographic Software Signatures**: SHA-256 intent binding with mock passkey credentials. | Drop-in WebAuthn / FIDO2 hardware enclave API integration. |
-| **AI Planning Engine** | **Deterministic Graph Parser**: Zero hallucinations, verifiable execution paths. | Can be supplemented with fine-tuned local SLMs (Small Language Models) under the same policy guardrails. |
+| **Safety & Policy Engine** | Deterministic Sentinel patterns, spending policy and scoped-token checks. | Production authentication, independent bank caps and stronger privacy controls remain separate work. |
+| **Banking Rails / Fiat Gateway** | Local simulated bank with ledger, HMAC validation and single-use nonces. | No real-bank settlement is implemented. |
+| **Approval** | Intent-hash binding and demo UI consent; not hardware passkey authentication. | WebAuthn/FIDO2 is not implemented. |
+| **AI Intent Engine** | Server-side Gemini or Groq structured extraction, or explicitly selected offline parser. Evidence validation does not guarantee semantic accuracy. | Synthetic cloud demos only; no real personal data. |
 
 ---
 
@@ -138,7 +130,8 @@ chmod +x start.sh && ./start.sh
 ### 3. Manual Launch via NPM
 ```bash
 # Start Frontend WebApp (http://127.0.0.1:3000)
-npm run dev:frontend
+npm ci --prefix frontend
+npm --prefix frontend run dev
 
 # Start Backend Core & Bank Services (Ports 8000 & 8100)
 npm run dev:backend
@@ -150,6 +143,27 @@ npm run test:connector
 npm run verify
 ```
 
+### Server-side AI configuration
+
+API and bank load the repository-root `.env`; process environment takes precedence. `backend/.env` is no longer read. Keep secrets out of `NEXT_PUBLIC_*` and browser code.
+
+```dotenv
+LLM_PROVIDER=none
+GEMINI_API_KEY=
+GROQ=
+GEMINI_MODEL=gemini-3.8-flash
+GROQ_MODEL=openai/gpt-oss-20b
+LLM_TIMEOUT_SECONDS=20
+```
+
+Select exactly one provider (`none`, `gemini`, `groq`) before starting the backend. A selected cloud provider requires its nonempty key and model. There is no automatic provider failover or offline fallback after a cloud error.
+
+In Chat, check **Synthetic demo data only — do not enter personal data** before cloud extraction. Only the current synthetic instruction is sent, not history, JWT, ledger or account profile. Sentinel runs before network; detected account/ID/email/international-phone patterns reject cloud input. This limited guard is not universal PII detection. Provide one complete instruction, e.g. `Tolong kirim USD 200 ke ibu lewat rute termurah`; clarification requires resending a complete instruction.
+
+Known-payee USD transfers within T1 policy auto-send to the sandbox. USD 600 requires demo approval. CNY 3000 tuition to Campus bursar can be reviewed with sufficient allowance; CNY 18000 exceeds the default USD 1000 daily cap and is refused. The tuition calculator is illustrative and only prepares a chat draft. Receipt transaction IDs must reconcile with the bank ledger; timeout means execution is unconfirmed, not necessarily that no debit occurred. Do not automatically resend.
+
+See [the runbook](docs/runbook.md) for isolated proof commands and failure handling.
+
 ---
 
 ## 🧪 Verification & Security Benchmarks
@@ -157,10 +171,10 @@ npm run verify
 AegisPath includes automated test suites ensuring zero regression:
 ```bash
 # 1. Run Verification Gate (ADRs, Syntax, Layout, Contracts)
-py aegispath/scripts/verify.py
+py scripts/verify.py
 
 # 2. Run Golden Flows Smoke Test (Tuition payment, Attack rejection, Balance check)
-py aegispath/scripts/smoke.py
+py scripts/smoke.py
 
 # 3. Run Security Attack Evaluation Suite (120 test cases, 95% Wilson CI)
 py -m eval.attacks
