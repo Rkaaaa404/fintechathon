@@ -11,8 +11,10 @@ sys.path.insert(0, str(ROOT))
 
 try:
     from backend.api.main import app
-except ImportError:
-    from services.api.main import app
+except ImportError as err:
+    print(f"[FAIL] Unable to import backend.api.main: {err}")
+    print("Ensure all backend dependencies are installed (e.g., sqlalchemy, fastapi, pydantic).")
+    sys.exit(1)
 
 def check_contract_drift():
     committed_file = ROOT / "packages" / "contracts" / "openapi.json"

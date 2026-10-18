@@ -23,16 +23,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from fastapi.testclient import TestClient
-try:
-    from backend.bank.main import app as bank_app
-    from backend.api.main import app as api_app
-    from backend.bank.config import config as bank_config
-    from backend.api.config import config as api_config
-except ImportError:
-    from services.bank.main import app as bank_app
-    from services.api.main import app as api_app
-    from services.bank.config import config as bank_config
-    from services.api.config import config as api_config
+from backend.bank.main import app as bank_app
+from backend.api.main import app as api_app
+from backend.bank.config import config as bank_config
+from backend.api.config import config as api_config
 
 # Set in-memory ASGI transport so API calls to Bank service route directly in-process
 api_config.BANK_TRANSPORT = httpx.ASGITransport(app=bank_app)
@@ -49,12 +43,8 @@ def run_smoke_tests():
     # 0. Health & Readiness Verification
     # ──────────────────────────────────────────────────────────
     print("\n[Stage 0] Verifying Bank & API Service Readiness...")
-    try:
-        from backend.api.database import get_connection as get_api_conn
-        from backend.bank.database import get_connection as get_bank_conn
-    except ImportError:
-        from services.api.database import get_connection as get_api_conn
-        from services.bank.database import get_connection as get_bank_conn
+    from backend.api.database import get_connection as get_api_conn
+    from backend.bank.database import get_connection as get_bank_conn
     with get_api_conn() as conn:
         conn.execute("UPDATE policy SET used_today_usd = 0, is_paused = 0 WHERE user_id = 'usr_ayu'")
     with get_bank_conn() as conn:

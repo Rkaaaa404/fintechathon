@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from services.api.main import app
+from backend.api.main import app
 
 def generate_openapi():
     schema = app.openapi()
