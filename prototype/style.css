@@ -708,6 +708,9 @@ html[lang="zh"] {
   align-items: center;
   justify-content: center;
 }
+
+/* App frame internal layout */
+.webapp-card-frame {
   overflow: hidden;
   display: flex;
   flex-direction: column;

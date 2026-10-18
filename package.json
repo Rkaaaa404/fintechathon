@@ -1,0 +1,26 @@
+{
+  "name": "aegispath-platform",
+  "version": "1.0.0",
+  "description": "AegisPath: AI Agent Digital Wallet Platform for Cross-Border Financial Operations with Safety Enforced Outside the Model",
+  "author": "FinTechathon 2026 Team",
+  "license": "Apache-2.0",
+  "main": "connector.js",
+  "scripts": {
+    "start": "node frontend/server.js",
+    "dev:frontend": "node frontend/server.js",
+    "dev:backend": "py backend/server.py",
+    "test:connector": "node connector.js",
+    "verify": "py aegispath/scripts/verify.py",
+    "smoke": "py aegispath/scripts/smoke.py",
+    "eval:attacks": "py -m aegispath.eval.attacks"
+  },
+  "keywords": [
+    "fintech",
+    "ai-agent",
+    "digital-wallet",
+    "cross-border",
+    "prompt-injection-defense",
+    "scoped-tokens",
+    "fintechathon-2026"
+  ]
+}
