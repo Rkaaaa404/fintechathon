@@ -2,14 +2,9 @@ import pytest
 import time
 import uuid
 from fastapi.testclient import TestClient
-try:
-    from backend.bank.main import app
-    from backend.bank.security import sign_scoped_token
-    from backend.bank.config import config
-except ImportError:
-    from services.bank.main import app
-    from services.bank.security import sign_scoped_token
-    from services.bank.config import config
+from backend.bank.main import app
+from backend.bank.security import sign_scoped_token
+from backend.bank.config import config
 
 client = TestClient(app)
 

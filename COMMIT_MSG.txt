@@ -1,0 +1,9 @@
+feat: upgrade fullstack to Next.js 16, FastAPI, SQLAlchemy 2, and Serwist PWA
+
+- fe: migrate frontend to Next.js 16.4.2 (App Router), React 19, TypeScript, and Tailwind CSS v4
+- fe: implement responsive desktop header, app frame, bottom navigation, and Serwist PWA offline cache
+- fe: connect live API and Bank Gateway via typed connector with instant offline fallback
+- be: upgrade FastAPI lifecycle to lifespan context managers and add Pydantic v2 schemas
+- be: modernize database layer to SQLAlchemy 2.0 with dual-mode cloud PostgreSQL and SQLite fallback
+- be: provide structured AI Gateway integration hooks (LiteLLM, Ollama, Presidio PII scrub)
+- chore: backup vanilla frontend to frontend_legacy/, update .gitignore, and provide unified demo launchers
