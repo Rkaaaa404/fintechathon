@@ -13,6 +13,7 @@ interface HomeScreenProps {
   isPaused: boolean;
   onTogglePause: () => void;
   onNavigate: (route: AppRoute) => void;
+  onShowToast?: (message: string) => void;
   emptyActivity?: boolean;
 }
 
@@ -21,6 +22,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   isPaused,
   onTogglePause,
   onNavigate,
+  onShowToast,
   emptyActivity = false,
 }) => {
   const user = SEED_DATA.user;
@@ -70,7 +72,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="home-allowance-flex flex items-center justify-between mb-2">
             <div className="allowance-amount-box flex items-baseline gap-1.5">
-              <span className="big-allowance-amount text-white text-[32px] font-bold font-mono tracking-tight">
+              <span className="big-allowance-amount text-white text-[32px] font-bold font-mono tracking-tight tabular-nums">
                 ${user.dailyAllowanceRemaining}
               </span>
               <span className="allowance-total-tag text-[#9DB8FF] text-[12px]">
@@ -80,7 +82,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             {/* Mascot Cluster: Chop with Speech Bubble */}
             <div className="mascot-header-cluster relative flex items-center">
-              <div className="speech-bubble-hi bg-white text-[#14213D] text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm mr-2 border border-[#E6ECF8]">
+              <div className="speech-bubble-hi bg-white text-[#14213D] text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm mr-2 border border-[#E6ECF8]">
                 Hi! 你好
               </div>
               <ChopMascot
@@ -99,7 +101,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </header>
 
       {/* ═══════════ OVERLAPPING GUARD STRIP ═══════════ */}
-      <div className="chop-guard-strip-card mx-4 -mt-3.5 relative z-20 bg-white rounded-[14px] p-2.5 shadow-[0_4px_16px_rgba(20,33,61,0.08)] border border-[#E6ECF8] flex items-center justify-between">
+      <div className="chop-guard-strip-card mx-4 -mt-3.5 relative z-20 bg-white rounded-[16px] p-3 shadow-[0_4px_20px_rgba(20,33,61,0.07)] border border-[#E6ECF8] flex items-center justify-between transition-all hover:shadow-[0_6px_24px_rgba(61,107,234,0.12)]">
         <div className="strip-left flex items-center gap-2">
           <ChopMascot
             bodyColor="#3D6BEA"
@@ -156,7 +158,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* 1. Send */}
           <div
             className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/tuition')}
+            onClick={() => {
+              if (onShowToast) {
+                onShowToast(locale === 'zh' ? '已转至个人转账助手 (例如："给妈妈汇 $200")' : 'Opened Ask Chop for peer transfers ("Send $200 to Mom")');
+              }
+              onNavigate('/chat');
+            }}
             role="button"
             tabIndex={0}
           >
@@ -223,7 +230,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* 5. Payees */}
           <div
             className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/safety')}
+            onClick={() => {
+              if (onShowToast) {
+                onShowToast(locale === 'zh' ? '收款人管理即将推出 (当前已绑定白名单: 妈妈、学校财务处)' : 'Payee directory coming soon in v1.1 (Active: Mom, Campus Bursar)');
+              } else {
+                onNavigate('/safety');
+              }
+            }}
             role="button"
             tabIndex={0}
           >
@@ -242,7 +255,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* 6. Rates */}
           <div
             className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/tuition')}
+            onClick={() => {
+              if (onShowToast) {
+                onShowToast(locale === 'zh' ? '实时汇率看板即将推出 (参考: 1 USD ≈ 7.1022 CNY / 15,880 IDR)' : 'Live FX rates dashboard coming in v1.1 (Ref: 1 USD ≈ 7.1022 CNY / 15,880 IDR)');
+              } else {
+                onNavigate('/tuition');
+              }
+            }}
             role="button"
             tabIndex={0}
           >
@@ -277,7 +296,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {/* 8. More */}
           <div
             className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/evidence')}
+            onClick={() => {
+              if (onShowToast) {
+                onShowToast(locale === 'zh' ? '更多设置与 WebAuthn 凭证管理即将推出' : 'More settings & Passkey management coming soon in v1.1');
+              } else {
+                onNavigate('/evidence');
+              }
+            }}
             role="button"
             tabIndex={0}
           >
@@ -295,7 +320,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         {/* Tuition Arrives In Full Banner Card */}
-        <div className="tuition-banner-card bg-gradient-to-r from-[#E6EEFF] to-[#F4F7FE] rounded-[18px] p-4 border border-[#9DB8FF]/40 shadow-sm flex items-center justify-between mb-4">
+        <div className="tuition-banner-card bg-gradient-to-r from-[#EEF4FF] via-[#F6F9FE] to-[#FFFFFF] rounded-[18px] p-4 border border-[#B9D0FF]/60 shadow-[0_4px_16px_rgba(61,107,234,0.06)] flex items-center justify-between mb-4 transition-all hover:shadow-[0_6px_20px_rgba(61,107,234,0.10)]">
           <div className="banner-text-box text-left">
             <div className="banner-headline font-bold text-[15px] text-[#1F3FA8]">
               {t('tuition_banner_title', locale)}
@@ -304,10 +329,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               {t('tuition_banner_sub', locale)}
             </div>
             <button
-              className="banner-calc-btn bg-[#3D6BEA] text-white text-[12px] font-bold px-3 py-1.5 rounded-full shadow-sm hover:bg-[#1F3FA8] transition-all"
+              className="banner-calc-btn bg-[#3D6BEA] text-white text-[12px] font-bold px-3.5 py-1.5 rounded-full shadow-sm hover:bg-[#1F3FA8] transition-all cursor-pointer inline-flex items-center gap-1.5"
               onClick={() => onNavigate('/tuition')}
             >
-              {b('btn_calculate', 'btn_calculate_sub', locale)}
+              <span>{b('btn_calculate', 'btn_calculate_sub', locale)}</span>
+              <span>→</span>
             </button>
           </div>
           <div className="banner-art-box opacity-90">
@@ -322,7 +348,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="stat-cards-row grid grid-cols-2 gap-3 mb-4">
           {/* Protection Card */}
           <div
-            className="stat-card-solid-blue cursor-pointer bg-[#3D6BEA] text-white p-3.5 rounded-[18px] shadow-sm hover:bg-[#1F3FA8] transition-all text-left"
+            className="stat-card-solid-blue cursor-pointer bg-gradient-to-br from-[#4E7FFF] to-[#2D55D6] text-white p-4 rounded-[18px] shadow-[0_4px_20px_rgba(61,107,234,0.20)] hover:shadow-[0_8px_28px_rgba(61,107,234,0.30)] transition-all text-left"
             onClick={() => onNavigate('/safety')}
             role="button"
             tabIndex={0}
@@ -333,15 +359,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
             </div>
-            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1">3/3</div>
-            <div className="stat-card-desc text-[11px] text-white/80">
+            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1 tabular-nums">3/3</div>
+            <div className="stat-card-desc text-[11px] text-white/85">
               {b('stat_protection_desc', 'stat_protection_desc_sub', locale)}
             </div>
           </div>
 
           {/* Evidence Card */}
           <div
-            className="stat-card-sky cursor-pointer bg-[#E6EEFF] text-[#1F3FA8] p-3.5 rounded-[18px] border border-[#9DB8FF]/40 shadow-sm hover:bg-[#DCE8FD] transition-all text-left"
+            className="stat-card-sky cursor-pointer bg-gradient-to-br from-[#EBF2FF] to-[#F4F8FE] text-[#1F3FA8] p-4 rounded-[18px] border border-[#B9D0FF]/60 shadow-[0_4px_16px_rgba(61,107,234,0.06)] hover:shadow-[0_6px_22px_rgba(61,107,234,0.12)] transition-all text-left"
             onClick={() => onNavigate('/evidence')}
             role="button"
             tabIndex={0}
@@ -352,7 +378,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               </svg>
             </div>
-            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1 text-[#1F3FA8]">3/3</div>
+            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1 text-[#1F3FA8] tabular-nums">3/3</div>
             <div className="stat-card-desc text-[11px] text-[#5B6B8C]">
               {b('stat_evidence_desc', 'stat_evidence_desc_sub', locale)}
             </div>

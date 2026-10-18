@@ -34,7 +34,7 @@ export default function HomePage() {
   });
   const [isAttackReplaying, setIsAttackReplaying] = useState(false);
   const [landlordShareRevoked, setLandlordShareRevoked] = useState(false);
-  const [plannerScenario, setPlannerScenario] = useState<'on_time' | 'delayed'>('on_time');
+  const [plannerScenario, setPlannerScenario] = useState<'on_time' | 'delayed' | 'optimized'>('on_time');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -190,6 +190,7 @@ export default function HomePage() {
             isPaused={isPaused}
             onTogglePause={handleTogglePause}
             onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onShowToast={showToast}
             emptyActivity={emptyActivity}
           />
         );
@@ -256,10 +257,11 @@ export default function HomePage() {
             plannerScenario={plannerScenario}
             onSelectScenario={setPlannerScenario}
             onApplyMitigation={() => {
+              setPlannerScenario('optimized');
               showToast(
                 locale === 'zh'
-                  ? '已应用缓解方案：学费分两期支付'
-                  : 'Mitigation applied: Split payment into 2 batches'
+                  ? '已应用 AI 智能优化：学费分两期支付并锁定汇率'
+                  : 'AI Optimization Applied: Split tuition into 2 batches with locked FX'
               );
             }}
           />
@@ -289,6 +291,7 @@ export default function HomePage() {
             isPaused={isPaused}
             onTogglePause={handleTogglePause}
             onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onShowToast={showToast}
             emptyActivity={emptyActivity}
           />
         );

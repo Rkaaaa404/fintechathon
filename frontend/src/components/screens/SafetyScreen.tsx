@@ -150,7 +150,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                 </div>
               </div>
               <span
-                className={`ring-verdict ${outerActive ? 'flagged' : 'refuse'}`}
+                className={`ring-verdict ${outerActive ? 'flagged' : 'bypassed'}`}
               >
                 {outerActive ? 'Flagged 已标记' : 'Bypassed 已穿透'}
               </span>
@@ -172,7 +172,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                 </div>
               </div>
               <span
-                className={`ring-verdict ${middleActive ? 'refuse' : 'refuse'}`}
+                className={`ring-verdict ${middleActive ? 'refuse' : 'bypassed'}`}
               >
                 {middleActive ? 'Would refuse 将拒绝' : 'Bypassed 已穿透'}
               </span>
@@ -193,7 +193,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                   <span className="ring-name">Bank-side limit 银行限额</span>
                 </div>
               </div>
-              <span className={`ring-verdict ${innerActive ? 'ok' : 'refuse'}`}>
+              <span className={`ring-verdict ${innerActive ? 'ok' : 'bypassed'}`}>
                 {innerActive ? 'Enforced 已拦截' : 'Bypassed 已穿透'}
               </span>
             </div>

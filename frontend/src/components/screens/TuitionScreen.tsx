@@ -141,7 +141,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
               <span className="breakdown-label text-[#5B6B8C]">
                 {b('breakdown_route_fee', 'breakdown_route_fee_sub', locale)}
               </span>
-              <span className="breakdown-val font-semibold text-[#14213D] font-mono">
+              <span className="breakdown-val font-semibold text-[#14213D] font-mono tabular-nums">
                 ${modeData.fee.toFixed(2)} ({modeData.etaEn})
               </span>
             </div>
@@ -150,7 +150,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
               <span className="breakdown-label text-[#5B6B8C]">
                 {b('breakdown_bank_buffer', 'breakdown_bank_buffer_sub', locale)}
               </span>
-              <span className="breakdown-val font-semibold text-[#1E9E6A] font-mono">
+              <span className="breakdown-val font-semibold text-[#1E9E6A] font-mono tabular-nums">
                 +${modeData.buffer.toFixed(2)}
               </span>
             </div>
@@ -159,7 +159,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
               <span className="breakdown-label font-bold text-[#14213D]">
                 {b('breakdown_you_pay', 'breakdown_you_pay_sub', locale)}
               </span>
-              <span className="breakdown-val text-[18px] font-bold text-[#3D6BEA] font-mono">
+              <span className="breakdown-val text-[18px] font-bold text-[#3D6BEA] font-mono tabular-nums">
                 ${modeData.total.toFixed(2)} USD
               </span>
             </div>
@@ -167,12 +167,32 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
           {/* Action Button */}
           <button
-            className="w-full mt-4 bg-[#3D6BEA] text-white py-3 rounded-[27px] font-bold text-[14px] shadow-sm hover:bg-[#1F3FA8] transition-all flex flex-col items-center justify-center"
+            className="w-full mt-4 bg-[#3D6BEA] text-white py-3 rounded-[27px] font-bold text-[14px] shadow-sm hover:bg-[#1F3FA8] transition-all flex flex-col items-center justify-center cursor-pointer"
             onClick={handleReview}
           >
             <span>{t('btn_review_transfer', locale)}</span>
             <span className="text-[11px] font-normal opacity-85">{t('btn_review_transfer_sub', locale)}</span>
           </button>
+        </div>
+
+        {/* Verified Payee Card (SSOT Blueprint requirement) */}
+        <div className="payee-summary-card mt-3 bg-white rounded-[16px] p-3.5 border border-[#E6ECF8] shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#E6EEFF] text-[#1F3FA8] flex items-center justify-center text-[18px] border border-[#9DB8FF]/40">
+              🏛️
+            </div>
+            <div>
+              <div className="font-bold text-[13.5px] text-[#14213D] flex items-center gap-2">
+                <span>Campus bursar 学校财务处</span>
+                <span className="text-[10px] font-bold bg-[#E3F6EE] text-[#1E9E6A] px-2 py-0.5 rounded-full border border-[#1E9E6A]/20">
+                  ✓ {locale === 'zh' ? '官方渠道' : 'Official channel'}
+                </span>
+              </div>
+              <div className="text-[11px] text-[#5B6B8C] mt-0.5">
+                {locale === 'zh' ? '新收款人 · 需通过 Passkey 签署意图哈希确认' : 'New institutional payee · Protected by locked intent hash'}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Disclaimer Card */}

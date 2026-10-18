@@ -4,7 +4,7 @@ import React from 'react';
 import { SEED_DATA } from '@/lib/mockData';
 
 interface PlannerChartProps {
-  scenarioKey?: 'on_time' | 'delayed';
+  scenarioKey?: 'on_time' | 'delayed' | 'optimized';
 }
 
 export const PlannerChart: React.FC<PlannerChartProps> = ({
@@ -12,203 +12,188 @@ export const PlannerChart: React.FC<PlannerChartProps> = ({
 }) => {
   const schedule = SEED_DATA.plannerSchedule;
   const isDelayed = scenarioKey === 'delayed';
+  const isOptimized = scenarioKey === 'optimized';
   const scenario = schedule.scenarios[scenarioKey] || schedule.scenarios.on_time;
-  const months = schedule.months;
+  const bars = scenario.bars || [
+    { month: "Oct", committed: 1.8, reserve: 3.0, total: 4.8, share: 38, netFlow: "+$450", runwayDays: "180d", status: "Healthy" },
+    { month: "Nov", committed: 1.7, reserve: 2.7, total: 4.4, share: 39, netFlow: "-$120", runwayDays: "165d", status: "Healthy" },
+    { month: "Dec", committed: 1.9, reserve: 2.3, total: 4.2, share: 45, netFlow: "-$200", runwayDays: "145d", status: "Healthy" },
+    { month: "Jan", committed: 3.2, reserve: 1.1, total: 4.3, share: 74, netFlow: "-$1,234", runwayDays: "95d", status: "Tuition Due" },
+    { month: "Feb", committed: 1.6, reserve: 2.1, total: 3.7, share: 43, netFlow: "+$600", runwayDays: "120d", status: "Healthy" },
+    { month: "Mar", committed: 1.5, reserve: 2.6, total: 4.1, share: 37, netFlow: "+$850", runwayDays: "150d", status: "Healthy" }
+  ];
 
-  const width = 330;
-  const height = 180;
-  const padLeft = 40;
-  const padRight = 20;
-  const padTop = 20;
-  const padBottom = 30;
+  // Clean, spacious coordinates for SVG bars
+  const width = 520;
+  const height = 210;
+  const padLeft = 45;
+  const padRight = 25;
+  const padTop = 25;
+  const padBottom = 28;
 
-  const chartW = width - padLeft - padRight;
-  const chartH = height - padTop - padBottom;
+  const chartW = width - padLeft - padRight; // 450px
+  const chartH = height - padTop - padBottom; // 157px
+  const chartBottom = padTop + chartH;
 
-  const maxVal = 3500;
-  const minVal = 0;
+  const colW = chartW / bars.length; // 75px per column
+  const getCenterX = (i: number) => padLeft + (i + 0.5) * colW;
 
-  const getY = (val: number) =>
-    padTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
-  const getX = (idx: number) =>
-    padLeft + (idx / (months.length - 1)) * chartW;
+  // Max scale is 5.0 ($5k)
+  const pxPerUnit = chartH / 5.0;
+  const getY = (val: number) => chartBottom - val * pxPerUnit;
 
-  const safeY = getY(1000);
-  const janX = getX(3);
+  // Safe minimum line at 1.0 ($1,000)
+  const safeY = getY(1.0);
 
-  // Path generation
-  let pathD = '';
-  scenario.points.forEach((pt: number, i: number) => {
-    const x = getX(i);
-    const y = getY(pt);
-    pathD += i === 0 ? `M ${x.toFixed(1)} ${y.toFixed(1)}` : ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
-  });
+  // Palette matched with app tokens
+  const colCommitted = isDelayed ? "#E5484D" : (isOptimized ? "#3D6BEA" : "#F5A524");
+  const colReserve = isOptimized ? "#10B981" : "#3D6BEA";
 
   return (
     <svg
       viewBox={`0 0 ${width} ${height}`}
       width="100%"
-      height={height}
+      height="auto"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
-      aria-label="Runway cashflow chart"
+      aria-label="AegisPath Runway Stacked Bar Chart"
+      style={{
+        display: 'block',
+        width: '100%',
+        fontFamily: "'IBM Plex Sans', -apple-system, sans-serif",
+      }}
     >
-      {/* Grid lines */}
-      <line
-        x1={padLeft}
-        y1={getY(3000)}
-        x2={width - padRight}
-        y2={getY(3000)}
-        stroke="#E6ECF8"
-        strokeWidth="1"
-      />
-      <text
-        x={padLeft - 6}
-        y={getY(3000) + 4}
-        textAnchor="end"
-        fontSize="9"
-        fill="#5B6B8C"
-        fontFamily="'IBM Plex Sans', sans-serif"
-      >
-        $3k
-      </text>
+      {/* Gridlines & Y-Axis Labels */}
+      {[4.0, 3.0, 2.0, 1.0].map((val) => (
+        <g key={val}>
+          <line
+            x1={padLeft}
+            y1={getY(val)}
+            x2={width - padRight}
+            y2={getY(val)}
+            stroke="#EEF2F9"
+            strokeWidth="1"
+          />
+          <text
+            x={padLeft - 8}
+            y={getY(val) + 3.5}
+            textAnchor="end"
+            fontSize="9.5"
+            fontWeight="600"
+            fill="#5B6B8C"
+          >
+            ${val.toFixed(0)}k
+          </text>
+        </g>
+      ))}
 
-      <line
-        x1={padLeft}
-        y1={getY(2000)}
-        x2={width - padRight}
-        y2={getY(2000)}
-        stroke="#E6ECF8"
-        strokeWidth="1"
-      />
-      <text
-        x={padLeft - 6}
-        y={getY(2000) + 4}
-        textAnchor="end"
-        fontSize="9"
-        fill="#5B6B8C"
-        fontFamily="'IBM Plex Sans', sans-serif"
-      >
-        $2k
-      </text>
-
-      {/* Safe minimum line ($1,000) dashed amber */}
+      {/* Safe Minimum Threshold ($1,000) Dashed Amber Line */}
       <line
         x1={padLeft}
         y1={safeY}
         x2={width - padRight}
         y2={safeY}
         stroke="#F5A524"
-        strokeWidth="1.6"
+        strokeWidth="1.5"
         strokeDasharray="4 3"
       />
       <text
-        x={padLeft - 6}
-        y={safeY + 4}
-        textAnchor="end"
-        fontSize="9"
-        fill="#F5A524"
-        fontWeight="700"
-        fontFamily="'IBM Plex Sans', sans-serif"
-      >
-        $1k
-      </text>
-      <text
-        x={width - padRight}
+        x={width - padRight - 4}
         y={safeY - 4}
         textAnchor="end"
         fontSize="8.5"
-        fill="#B7791F"
-        fontWeight="600"
-      >
-        Safe min 安全线
-      </text>
-
-      {/* Tuition vertical marker at Jan */}
-      <line
-        x1={janX}
-        y1={padTop}
-        x2={janX}
-        y2={height - padBottom}
-        stroke="#3D6BEA"
-        strokeWidth="1.2"
-        strokeDasharray="2 2"
-        opacity="0.6"
-      />
-      <rect
-        x={janX - 28}
-        y={padTop - 8}
-        width={56}
-        height={15}
-        rx={3}
-        fill="#3D6BEA"
-        opacity="0.9"
-      />
-      <text
-        x={janX}
-        y={padTop + 3}
-        textAnchor="middle"
-        fontSize="7.5"
-        fill="#FFFFFF"
         fontWeight="700"
+        fill="#B7791F"
       >
-        Tuition Jan 15
+        Safe Min $1.0k 安全线
       </text>
 
-      {/* Month labels on X axis */}
-      {months.map((m: string, i: number) => (
-        <text
-          key={m}
-          x={getX(i)}
-          y={height - 10}
-          textAnchor="middle"
-          fontSize="10"
-          fontWeight={i === 3 ? '700' : '500'}
-          fill={i === 3 ? '#3D6BEA' : '#5B6B8C'}
-          fontFamily="'IBM Plex Sans', sans-serif"
-        >
-          {m}
-        </text>
-      ))}
-
-      {/* Main Path */}
-      <path
-        d={pathD}
-        stroke={isDelayed ? '#E5484D' : '#3D6BEA'}
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+      {/* Baseline X-Axis */}
+      <line
+        x1={padLeft}
+        y1={chartBottom}
+        x2={width - padRight}
+        y2={chartBottom}
+        stroke="#CBD5E1"
+        strokeWidth="1.5"
       />
 
-      {/* Data Dots */}
-      {scenario.points.map((pt: number, i: number) => {
-        const x = getX(i);
-        const y = getY(pt);
-        const isDip = pt < 1000;
+      {/* Stacked Bars for each Month */}
+      {bars.map((b, i) => {
+        const cx = getCenterX(i);
+        const barW = 38;
+        const x = cx - barW / 2;
+
+        const committedH = Math.max(b.committed * pxPerUnit, 4);
+        const reserveH = Math.max(b.reserve * pxPerUnit, 4);
+        const totalH = committedH + reserveH;
+
+        const committedY = chartBottom - committedH;
+        const reserveY = chartBottom - totalH;
+
+        const isDipMonth = isDelayed && i === 3;
+
         return (
-          <g key={i}>
-            <circle
-              cx={x.toFixed(1)}
-              cy={y.toFixed(1)}
-              r={isDip ? 5 : 3.5}
-              fill={isDip ? '#E5484D' : '#3D6BEA'}
-              stroke="#FFFFFF"
-              strokeWidth="1.5"
+          <g key={b.month}>
+            {/* Upper Stack: Available Buffer */}
+            <rect
+              x={x}
+              y={reserveY}
+              width={barW}
+              height={reserveH}
+              fill={colReserve}
+              rx="3"
+              opacity="0.95"
             />
-            {isDip && (
-              <text
-                x={x.toFixed(1)}
-                y={(y - 8).toFixed(1)}
-                textAnchor="middle"
-                fontSize="9"
-                fontWeight="700"
-                fill="#E5484D"
-              >
-                ${pt}
-              </text>
-            )}
+
+            {/* Lower Stack: Committed Outflows / Tuition */}
+            <rect
+              x={x}
+              y={committedY}
+              width={barW}
+              height={committedH}
+              fill={colCommitted}
+              rx="3"
+            />
+
+            {/* Clean subtle divider between stacks */}
+            <line
+              x1={x + 2}
+              y1={committedY}
+              x2={x + barW - 2}
+              y2={committedY}
+              stroke="#FFFFFF"
+              strokeWidth="1.2"
+              opacity="0.8"
+            />
+
+            {/* Value on top of bar */}
+            <text
+              x={cx}
+              y={reserveY - 5}
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight="700"
+              fill={isDipMonth ? '#E5484D' : '#0A1440'}
+            >
+              ${b.total.toFixed(1)}k
+            </text>
+
+            {/* Month Label on X-Axis */}
+            <text
+              x={cx}
+              y={chartBottom + 16}
+              textAnchor="middle"
+              fontSize="10.5"
+              fontWeight={i === 3 ? '700' : '600'}
+              fill={
+                i === 3 ? (isDelayed ? '#E5484D' : '#3D6BEA') : '#5B6B8C'
+              }
+            >
+              {b.month}
+              {i === 3 ? (isOptimized ? ' (Split)' : ' (Due)') : ''}
+            </text>
           </g>
         );
       })}
