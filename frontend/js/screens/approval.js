@@ -95,7 +95,9 @@ export function renderApprovalScreen(state) {
 
         <!-- Changed Yellow Box -->
         <div class="changed-notice-box">
-          <strong>${b('changed_label', 'changed_label_sub')}</strong>: currency assumed USD 币种默认美元
+          <div class="changed-notice-text">
+            <strong>${b('changed_label', 'changed_label_sub')}:</strong> currency assumed USD (币种默认美元)
+          </div>
           <a class="changed-edit-link" id="link-edit-currency">${b('edit_action', 'edit_action_sub')}</a>
         </div>
 

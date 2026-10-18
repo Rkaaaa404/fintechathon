@@ -1,5 +1,5 @@
 // AegisPath Service Worker for Progressive Web App (PWA) Offline & Installability
-const CACHE_NAME = 'aegispath-v4';
+const CACHE_NAME = 'aegispath-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

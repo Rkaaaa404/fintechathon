@@ -131,51 +131,46 @@ export function renderHeaderArt(screenType = "home") {
       </g>
     `;
   } else if (screenType === "tuition") {
-    // Graduation cap doodle
+    // Elegant graduation mortarboard watermark in top right margin
     pageDoodle = `
-      <g transform="translate(240, 60)">
-        <!-- Mortarboard cap -->
-        <path d="M30 4 L56 16 L30 28 L4 16 Z" fill="#ffffff" stroke="#14213D" stroke-width="2"/>
-        <path d="M12 21 V32 C12 38 48 38 48 32 V21" fill="#3D6BEA" stroke="#14213D" stroke-width="2"/>
-        <!-- Tassel -->
-        <path d="M56 16 L58 32" stroke="#F5A524" stroke-width="2.5"/>
-        <circle cx="58" cy="33" r="2.5" fill="#F5A524"/>
+      <g transform="translate(315, 34) scale(0.75)" opacity="0.35">
+        <path d="M26 4 L48 14 L26 24 L4 14 Z" fill="#ffffff"/>
+        <path d="M12 18 V26 C12 30 40 30 40 26 V18" fill="#6FD3FF"/>
+        <path d="M48 14 L50 26" stroke="#F5A524" stroke-width="2"/>
+        <circle cx="50" cy="27" r="2" fill="#F5A524"/>
       </g>
     `;
   } else if (screenType === "chat") {
     // Speech bubble with three dots
     pageDoodle = `
-      <g transform="translate(225, 48)">
-        <rect x="0" y="0" width="56" height="36" rx="10" fill="#ffffff" stroke="#14213D" stroke-width="2"/>
-        <path d="M14 36 L12 44 L24 36 Z" fill="#ffffff" stroke="#14213D" stroke-width="2"/>
-        <circle cx="16" cy="18" r="2.8" fill="#3D6BEA"/>
-        <circle cx="28" cy="18" r="2.8" fill="#3D6BEA"/>
-        <circle cx="40" cy="18" r="2.8" fill="#3D6BEA"/>
+      <g transform="translate(315, 32) scale(0.75)" opacity="0.3">
+        <rect x="0" y="0" width="38" height="26" rx="8" fill="#ffffff"/>
+        <path d="M8 26 L6 31 L14 26 Z" fill="#ffffff"/>
+        <circle cx="12" cy="13" r="2.2" fill="#3D6BEA"/>
+        <circle cx="19" cy="13" r="2.2" fill="#3D6BEA"/>
+        <circle cx="26" cy="13" r="2.2" fill="#3D6BEA"/>
       </g>
     `;
   } else if (screenType === "approval") {
-    // Shield with check
+    // Subtle corner security seal (Chop mascot is already centered with shield)
     pageDoodle = `
-      <g transform="translate(235, 52)">
-        <path d="M28 2 Q52 8 52 24 Q52 46 28 58 Q4 46 4 24 Q4 8 28 2 Z" fill="#ffffff" stroke="#14213D" stroke-width="2.2"/>
-        <path d="M18 28 L25 35 L38 20" stroke="#3D6BEA" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <g transform="translate(325, 32)" opacity="0.3">
+        <circle cx="16" cy="16" r="14" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="3 3" fill="none"/>
+        <path d="M14 20 L18 24 L26 15" stroke="#6FD3FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </g>
     `;
   } else if (screenType === "evidence") {
-    // Tilted document with dashed stamp circle
+    // Subtle circular security seal watermark in top right margin
     pageDoodle = `
-      <g transform="translate(235, 50) rotate(8)">
-        <rect x="0" y="0" width="38" height="50" rx="6" fill="#ffffff" stroke="#14213D" stroke-width="2"/>
-        <line x1="8" y1="12" x2="30" y2="12" stroke="#9DB8FF" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="8" y1="20" x2="30" y2="20" stroke="#9DB8FF" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="8" y1="28" x2="22" y2="28" stroke="#9DB8FF" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="25" cy="38" r="7" stroke="#3D6BEA" stroke-width="1.8" stroke-dasharray="2 2" fill="none"/>
+      <g transform="translate(325, 32)" opacity="0.3">
+        <circle cx="16" cy="16" r="14" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="2 2" fill="none"/>
+        <path d="M11 16 L15 20 L22 12" stroke="#6FD3FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </g>
     `;
   } else if (screenType === "planner") {
     // Calendar doodle
     pageDoodle = `
-      <g transform="translate(235, 54)">
+      <g transform="translate(275, 48) scale(0.85)" opacity="0.75">
         <rect x="0" y="6" width="46" height="40" rx="8" fill="#ffffff" stroke="#14213D" stroke-width="2"/>
         <path d="M0 16 H46" stroke="#14213D" stroke-width="1.8"/>
         <rect x="10" y="2" width="4" height="8" rx="2" fill="#F5A524"/>
@@ -189,7 +184,7 @@ export function renderHeaderArt(screenType = "home") {
   } else if (screenType === "safety") {
     // Radar rings doodle
     pageDoodle = `
-      <g transform="translate(245, 60)">
+      <g transform="translate(285, 48) scale(0.85)" opacity="0.75">
         <circle cx="24" cy="24" r="22" stroke="#ffffff" stroke-width="1.8" stroke-dasharray="3 3" opacity="0.6" fill="none"/>
         <circle cx="24" cy="24" r="14" stroke="#ffffff" stroke-width="1.8" opacity="0.8" fill="none"/>
         <circle cx="24" cy="24" r="6" stroke="#F5A524" stroke-width="2" fill="#F5A524"/>
@@ -207,13 +202,13 @@ export function renderHeaderArt(screenType = "home") {
       <ellipse cx="300" cy="42" rx="30" ry="14" fill="#ffffff" opacity="0.14"/>
 
       <!-- Four-point sparkles (opacity 0.75) -->
-      <g transform="translate(28, 98) scale(1)">
+      <g transform="translate(14, 82) scale(0.75)">
         <path d="M0 -7 Q0 0 7 0 Q0 0 0 7 Q0 0 -7 0 Q0 0 0 -7 Z" fill="#ffffff" opacity="0.75"/>
       </g>
       <g transform="translate(365, 142) scale(1)">
         <path d="M0 -7 Q0 0 7 0 Q0 0 0 7 Q0 0 -7 0 Q0 0 0 -7 Z" fill="#ffffff" opacity="0.75"/>
       </g>
-      <g transform="translate(304, 72) scale(0.7)">
+      <g transform="translate(345, 60) scale(0.7)">
         <path d="M0 -7 Q0 0 7 0 Q0 0 0 7 Q0 0 -7 0 Q0 0 0 -7 Z" fill="#ffffff" opacity="0.75"/>
       </g>
 
