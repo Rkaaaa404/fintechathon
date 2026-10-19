@@ -62,7 +62,7 @@ The 24-page final document covers problem definition, requirements, architecture
 
 **Use for AegisPath:** organize the technical submission as **problem → design → implementation → evidence**.
 
-**Caveat:** results are team-reported, not independently reproduced. The document contains both FISCO BCOS and Fabric evaluation references; do not copy its implementation or performance claims without checking them.
+**Caveat:** results are team-reported, not independently reproduced. The document contains both FISCO-BCOS and Fabric evaluation references; do not copy its implementation or performance claims without checking them.
 
 ## 4. YiHuoBao — complete business-plan reference
 
