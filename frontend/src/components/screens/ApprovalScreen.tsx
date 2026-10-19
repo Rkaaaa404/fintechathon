@@ -26,7 +26,13 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
     setIsApproving(true);
     setError(null);
     try {
-      const result = await connector.approvePlan(plan.plan_id, plan.intent_hash, 'DEMO_UI_CONSENT_ONLY');
+      const result = await connector.approvePlan(
+        plan.plan_id,
+        plan.intent_hash,
+        'DEMO_UI_CONSENT_ONLY',
+        plan.send_amount_usd,
+        plan.payee_name
+      );
       if (
         result.status !== 'COMPLETED' ||
         typeof result.tx_id !== 'string' ||

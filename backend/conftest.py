@@ -4,7 +4,17 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-import pytest
+try:
+    import pytest  # type: ignore[import-not-found, import-untyped]
+except ImportError:  # pragma: no cover
+    class _DummyPytest:
+        @staticmethod
+        def fixture(*args, **kwargs):
+            def decorator(func):
+                return func
+            return decorator
+
+    pytest = _DummyPytest()  # type: ignore[assignment]
 
 ROOT_DIR = Path(__file__).resolve().parent
 REPO_DIR = ROOT_DIR.parent
