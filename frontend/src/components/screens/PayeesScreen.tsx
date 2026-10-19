@@ -5,6 +5,7 @@ import { Locale } from '@/types';
 import { AppRoute } from '@/types';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
+import { PayeesMascotCounter } from '@/components/art/PayeesMascotCounter';
 import SplitText from '@/components/SplitText';
 import { Card, CardHeader, CardTitle, CardBadge, CardBody, CardFooter } from '@/components/ui/Card';
 import {
@@ -176,23 +177,20 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
                     : `${payees.length} Whitelisted Payees`}
                 </span>
               </span>
-              <div className="mascot-header-cluster">
-                <ChopMascot
-                  bodyColor="#FFFFFF"
-                  faceColor="#DCE8FD"
-                  expression="guard"
-                  size={52}
-                />
-              </div>
             </div>
           </div>
 
-          <div className="mt-1 pr-[140px] md:pr-[180px]">
-            <p className="text-[#DBEAFE] text-[13px] max-w-[680px] leading-relaxed">
-              {locale === 'zh'
-                ? '中环支出规则强制校验收款人白名单。任何未在此列表中的收款请求均会被系统阻断，防止提示词越权或伪造账户盗刷。'
-                : 'Middle Ring spending rules strictly verify payees. Unlisted transfer targets are deterministically blocked before any request reaches the bank.'}
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
+            <div className="max-w-[620px]">
+              <p className="text-[#DBEAFE] text-[13px] leading-relaxed">
+                {locale === 'zh'
+                  ? '中环支出规则强制校验收款人白名单。任何未在此列表中的收款请求均会被系统阻断，防止提示词越权或伪造账户盗刷。'
+                  : 'Middle Ring spending rules strictly verify payees. Unlisted transfer targets are deterministically blocked before any request reaches the bank.'}
+              </p>
+            </div>
+            <div className="flex justify-end shrink-0">
+              <PayeesMascotCounter />
+            </div>
           </div>
         </div>
       </header>

@@ -49,7 +49,8 @@ export default function HomePage() {
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    const handleUrlRoute = () => {
+      if (typeof window === 'undefined') return;
       const params = new URLSearchParams(window.location.search);
       const r = params.get('route');
       const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
@@ -65,7 +66,11 @@ export default function HomePage() {
       if (s && ['default', 'agent-paused', 'waiting-approval', 'payment-sent', 'attack-blocked', 'model-offline', 'empty-activity'].includes(s)) {
         handleStateChange(s as AppPresentationState);
       }
-    }
+    };
+
+    handleUrlRoute();
+    window.addEventListener('popstate', handleUrlRoute);
+    return () => window.removeEventListener('popstate', handleUrlRoute);
   }, []);
 
   useEffect(() => {
@@ -94,6 +99,14 @@ export default function HomePage() {
     toastTimerRef.current = setTimeout(() => {
       setToastMessage(null);
     }, 2800);
+  };
+
+  const navigateTo = (route: AppRoute) => {
+    setCurrentRoute(route);
+    if (typeof window !== 'undefined') {
+      const url = route === '/' ? '/' : `/?route=${route}`;
+      window.history.pushState({}, '', url);
+    }
   };
 
   const toggleLocale = () => {
@@ -214,7 +227,7 @@ export default function HomePage() {
             locale={locale}
             isPaused={isPaused}
             onTogglePause={handleTogglePause}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
             emptyActivity={emptyActivity}
           />
@@ -223,10 +236,10 @@ export default function HomePage() {
         return (
           <TuitionScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             onRequestTuition={(mode) => {
               setChatDraft(`Pay tuition CNY 18000 to Campus bursar, ${mode} route`);
-              setCurrentRoute('/chat');
+              navigateTo('/chat');
             }}
           />
         );
@@ -235,7 +248,7 @@ export default function HomePage() {
           <ApprovalScreen
             key={pendingApproval?.plan_id ?? 'no-plan'}
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             plan={pendingApproval}
           />
         );
@@ -243,7 +256,7 @@ export default function HomePage() {
         return (
           <SafetyScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             layersState={layersState}
             onToggleLayer={(layer) => {
               setLayersState((prev) => ({
@@ -261,7 +274,7 @@ export default function HomePage() {
         return (
           <EvidenceScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             landlordShareRevoked={landlordShareRevoked}
             onToggleRevokeShare={() => {
               const next = !landlordShareRevoked;
@@ -281,7 +294,7 @@ export default function HomePage() {
         return (
           <PlannerScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             plannerScenario={plannerScenario}
             onSelectScenario={setPlannerScenario}
             onApplyMitigation={() => {
@@ -298,13 +311,13 @@ export default function HomePage() {
         return (
           <ChatScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             agentPaused={isPaused}
             onTogglePause={handleTogglePause}
             initialDraft={chatDraft}
             onReviewPlan={(plan) => {
               setPendingApproval(plan);
-              setCurrentRoute('/approve');
+              navigateTo('/approve');
             }}
           />
         );
@@ -316,20 +329,20 @@ export default function HomePage() {
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
               }
-              setCurrentRoute(route);
+              navigateTo(route);
             }}
             onLoginSuccess={(user) => {
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
               }
               setAuthUser(user);
-              setCurrentRoute('/');
+              navigateTo('/');
             }}
             onEnterAsGuest={() => {
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
               }
-              setCurrentRoute('/');
+              navigateTo('/');
             }}
             onShowToast={showToast}
           />
@@ -338,7 +351,7 @@ export default function HomePage() {
         return (
           <PayeesScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
           />
         );
@@ -346,7 +359,7 @@ export default function HomePage() {
         return (
           <RatesScreen
             locale={locale}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
           />
         );
@@ -356,7 +369,7 @@ export default function HomePage() {
             locale={locale}
             isPaused={isPaused}
             onTogglePause={handleTogglePause}
-            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
             emptyActivity={emptyActivity}
           />

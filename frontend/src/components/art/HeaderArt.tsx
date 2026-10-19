@@ -220,6 +220,66 @@ export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType = 'home' }) => 
             transform-origin: center;
             animation: starTwinkle 3.2s ease-in-out infinite 0.8s;
           }
+          @keyframes chopPayCounter {
+            0%, 100% { transform: translate(400px, 56px); }
+            50% { transform: translate(412px, 54px); }
+          }
+          @keyframes counterSlipSlide {
+            0% { transform: translate(470px, 82px) rotate(-4deg); opacity: 0; }
+            30% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { transform: translate(505px, 72px) rotate(4deg); opacity: 0; }
+          }
+          @keyframes stampBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+          }
+          @keyframes mascotJuggling {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-4px) rotate(1.5deg); }
+            75% { transform: translateY(-2px) rotate(-1.5deg); }
+          }
+          @keyframes orbitCoin1 {
+            0%, 100% { transform: translate(435px, 42px) scale(0.92); }
+            50% { transform: translate(455px, 32px) scale(1.08); }
+          }
+          @keyframes orbitCoin2 {
+            0%, 100% { transform: translate(525px, 38px) scale(1.08); }
+            50% { transform: translate(542px, 52px) scale(0.92); }
+          }
+          @keyframes orbitCoin3 {
+            0%, 100% { transform: translate(430px, 88px) scale(0.95); }
+            50% { transform: translate(448px, 102px) scale(1.05); }
+          }
+          @keyframes orbitCoin4 {
+            0%, 100% { transform: translate(530px, 86px) scale(1.05); }
+            50% { transform: translate(512px, 98px) scale(0.92); }
+          }
+          .chop-pay-anim {
+            animation: chopPayCounter 3.5s ease-in-out infinite;
+          }
+          .slip-slide-anim {
+            animation: counterSlipSlide 2.5s ease-in-out infinite;
+          }
+          .stamp-bounce-anim {
+            transform-origin: 520px 52px;
+            animation: stampBounce 2s ease-in-out infinite;
+          }
+          .chop-juggle-anim {
+            animation: mascotJuggling 2.8s ease-in-out infinite;
+          }
+          .orbit-coin-1 {
+            animation: orbitCoin1 3s ease-in-out infinite;
+          }
+          .orbit-coin-2 {
+            animation: orbitCoin2 3.4s ease-in-out infinite;
+          }
+          .orbit-coin-3 {
+            animation: orbitCoin3 3.2s ease-in-out infinite;
+          }
+          .orbit-coin-4 {
+            animation: orbitCoin4 3.6s ease-in-out infinite;
+          }
         `}</style>
       </defs>
 
@@ -659,81 +719,170 @@ export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType = 'home' }) => 
         </g>
       )}
 
-      {/* 6. PAYEES: Whitelist Guard Nodes, Floating Verified Badges */}
+      {/* 6. PAYEES: Mascot Chop Paying at Bursar Counter Animation */}
       {screenType === 'payees' && (
         <g>
-          <circle cx="500" cy="70" r="45" fill="url(#artBlueGlow)" />
-          {/* Central Verified Shield */}
-          <g className="shield-anim" transform="translate(480, 50)">
-            <path
-              d="M 20 0 L 38 7 C 38 25, 20 38, 20 38 C 20 38, 2 25, 2 7 Z"
-              fill="#FFFFFF"
-              stroke="#0E6E43"
-              strokeWidth="2"
-            />
-            <path
-              d="M 12 18 L 17 23 L 28 12"
-              stroke="#0E6E43"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
+          <circle cx="490" cy="75" r="50" fill="url(#artBlueGlow)" />
+
+          {/* ── Teller Counter Desk & Window ── */}
+          <g id="counter-desk">
+            {/* Background Teller Glass Window */}
+            <rect x="470" y="32" width="75" height="54" rx="6" fill="#FFFFFF" fillOpacity="0.22" stroke="#FFFFFF" strokeWidth="1.4" />
+            <line x1="507" y1="32" x2="507" y2="86" stroke="#FFFFFF" strokeWidth="1" strokeOpacity="0.4" />
+            <path d="M 490 86 Q 507 72 524 86" stroke="#FFFFFF" strokeWidth="1.6" fill="none" />
+
+            {/* Counter Signboard */}
+            <rect x="475" y="24" width="65" height="14" rx="4" fill="#0E6E43" />
+            <text x="507" y="34.5" fill="#FFFFFF" fontSize="7" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              BURSAR COUNTER
+            </text>
+
+            {/* Counter Surface / Wood Desk */}
+            <rect x="450" y="86" width="115" height="12" rx="3" fill="#FFFFFF" stroke="#0F172A" strokeWidth="1.5" />
+            <rect x="455" y="98" width="105" height="35" rx="2" fill="#1E3A8A" fillOpacity="0.85" stroke="#FFFFFF" strokeWidth="1.2" />
+
+            {/* Verified Stamp above counter */}
+            <g className="stamp-bounce-anim">
+              <circle cx="525" cy="50" r="14" fill="#EBF7EE" stroke="#0E6E43" strokeWidth="1.8" />
+              <path d="M 519 50 L 523 54 L 531 45" stroke="#0E6E43" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              <text x="525" y="60" fill="#0E6E43" fontSize="5.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+                WHITELIST
+              </text>
+            </g>
           </g>
 
-          {/* Floating Whitelist Badges */}
-          <g className="coin-anim-1" transform="translate(410, 40)">
-            <rect width="64" height="22" rx="11" fill="#EBF7EE" stroke="#0E6E43" strokeWidth="1.2" />
-            <text x="32" y="14.5" fill="#0E6E43" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Bursar ✓
-            </text>
+          {/* Sliding Payment Slip across counter */}
+          <g className="slip-slide-anim">
+            <rect width="18" height="11" rx="2" fill="#FEF08A" stroke="#CA8A04" strokeWidth="1" />
+            <line x1="3" y1="4" x2="15" y2="4" stroke="#854D0E" strokeWidth="0.8" />
+            <line x1="3" y1="7" x2="11" y2="7" stroke="#854D0E" strokeWidth="0.8" />
           </g>
-          <g className="coin-anim-2" transform="translate(525, 95)">
-            <rect width="60" height="20" rx="10" fill="#EEF4FF" stroke="#3D6BEA" strokeWidth="1.2" />
-            <text x="30" y="13.5" fill="#1C3EAA" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Family ✓
-            </text>
+
+          {/* ── Mascot Chop Approaching Counter to Pay ── */}
+          <g className="chop-pay-anim">
+            <g transform="translate(0, 0)">
+              {/* Teapot Handle */}
+              <path d="M 4 15 C -3 15, -3 29, 4 29" stroke="#1F3FA8" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+
+              {/* Body */}
+              <rect x="4" y="6" width="36" height="36" rx="11" fill="#FFFFFF" stroke="#1F3FA8" strokeWidth="1.6" />
+
+              {/* Gold Knob */}
+              <rect x="17" y="1" width="10" height="6" rx="2" fill="#F5A524" />
+
+              {/* Screen Face */}
+              <rect x="9" y="12" width="26" height="22" rx="6" fill="#DCE8FD" />
+
+              {/* Rosy Cheeks */}
+              <circle cx="13" cy="26" r="2" fill="#F5A524" opacity="0.8" />
+              <circle cx="31" cy="26" r="2" fill="#F5A524" opacity="0.8" />
+
+              {/* Friendly Happy Eyes */}
+              <circle cx="16" cy="22" r="2.4" fill="#14213D" />
+              <circle cx="17" cy="21" r="0.8" fill="#FFFFFF" />
+              <circle cx="28" cy="22" r="2.4" fill="#14213D" />
+              <circle cx="29" cy="21" r="0.8" fill="#FFFFFF" />
+
+              {/* Happy Smile */}
+              <path d="M 19 28 Q 22 31 25 28" stroke="#14213D" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+
+              {/* Right Arm Extending Forward Holding Bank Card */}
+              <g transform="translate(34, 18)">
+                {/* Arm */}
+                <path d="M 0 4 Q 8 2 14 6" stroke="#1F3FA8" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+                {/* Payment Card */}
+                <rect x="12" y="0" width="16" height="11" rx="2" fill="#2563EB" stroke="#FFFFFF" strokeWidth="1" />
+                <rect x="14" y="3" width="4" height="3" rx="0.5" fill="#FDE047" />
+              </g>
+
+              {/* Walking Feet */}
+              <circle cx="14" cy="44" r="3.2" fill="#1F3FA8" />
+              <circle cx="30" cy="44" r="3.2" fill="#1F3FA8" />
+            </g>
           </g>
-          <g className="coin-anim-3" transform="translate(430, 110)">
-            <rect width="62" height="20" rx="10" fill="#F8FAFC" stroke="rgba(15,23,42,0.12)" strokeWidth="1.2" />
-            <text x="31" y="13.5" fill="#14213D" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              Landlord ✓
-            </text>
-          </g>
-          {/* Orbit connector */}
-          <circle cx="500" cy="70" r="38" stroke="#FFFFFF" strokeWidth="1.2" strokeDasharray="3 3" strokeOpacity="0.5" fill="none" />
         </g>
       )}
 
-      {/* 7. RATES: Exchange Trajectory, Currency Orbits, PBOC Mid Marker */}
+      {/* 7. RATES: Mascot Juggling Multi-Currencies ($ USD, Rp IDR, ¥ CNY, € EUR) */}
       {screenType === 'rates' && (
         <g>
-          <circle cx="500" cy="70" r="48" fill="url(#artBlueGlow)" />
-          {/* Dynamic Rate Curve */}
+          <circle cx="488" cy="75" r="52" fill="url(#artBlueGlow)" />
+
+          {/* Dynamic Rate Trajectory Line */}
           <path
-            d="M 380 110 Q 430 40, 480 75 T 580 45"
+            d="M 380 115 C 410 80, 440 60, 480 82 C 520 100, 545 40, 580 48"
             stroke="url(#graphLineGrad)"
             strokeWidth="3"
             strokeLinecap="round"
             fill="none"
           />
-          {/* Orbit Currency Pills */}
-          <g className="coin-anim-1" transform="translate(425, 45)">
-            <circle cx="14" cy="14" r="14" fill="#FFFFFF" stroke="#1C3EAA" strokeWidth="1.5" />
-            <text x="14" y="18" fill="#1C3EAA" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+
+          {/* ── Center Juggling Mascot Chop ── */}
+          <g className="chop-juggle-anim" transform="translate(468, 54)">
+            {/* Teapot Handle */}
+            <path d="M 4 15 C -3 15, -3 29, 4 29" stroke="#1F3FA8" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+
+            {/* Body */}
+            <rect x="4" y="6" width="38" height="38" rx="12" fill="#FFFFFF" stroke="#1F3FA8" strokeWidth="1.6" />
+
+            {/* Gold Knob */}
+            <rect x="18" y="1" width="10" height="6" rx="2" fill="#F5A524" />
+
+            {/* Screen Face */}
+            <rect x="9" y="12" width="28" height="24" rx="7" fill="#DCE8FD" />
+
+            {/* Rosy Cheeks */}
+            <circle cx="13" cy="27" r="2" fill="#F5A524" opacity="0.8" />
+            <circle cx="33" cy="27" r="2" fill="#F5A524" opacity="0.8" />
+
+            {/* Juggling Excited Star Eyes */}
+            <text x="16" y="24" fill="#14213D" fontSize="8" fontWeight="bold" textAnchor="middle">★</text>
+            <text x="30" y="24" fill="#14213D" fontSize="8" fontWeight="bold" textAnchor="middle">★</text>
+
+            {/* Joyful Open Mouth */}
+            <path d="M 19 28 Q 23 33 27 28 Z" fill="#E11D48" />
+
+            {/* Left Arm Raised */}
+            <path d="M 4 18 Q -6 10 -4 2" stroke="#1F3FA8" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+
+            {/* Right Arm Raised */}
+            <path d="M 42 18 Q 52 10 50 2" stroke="#1F3FA8" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+          </g>
+
+          {/* ── 4 Juggled Multi-Currency Coins in Orbit ── */}
+          {/* 1. USD ($) - Gold & Blue */}
+          <g className="orbit-coin-1">
+            <circle cx="0" cy="0" r="14" fill="#FFFFFF" stroke="#1C3EAA" strokeWidth="1.8" />
+            <circle cx="0" cy="0" r="11" fill="#EFF6FF" />
+            <text x="0" y="4.5" fill="#1C3EAA" fontSize="13" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               $
             </text>
           </g>
-          <g className="coin-anim-2" transform="translate(490, 85)">
-            <circle cx="14" cy="14" r="14" fill="#FFFFFF" stroke="#0E6E43" strokeWidth="1.5" />
-            <text x="14" y="18" fill="#0E6E43" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+
+          {/* 2. IDR (Rp) - Emerald Green */}
+          <g className="orbit-coin-2">
+            <circle cx="0" cy="0" r="15" fill="#FFFFFF" stroke="#0E6E43" strokeWidth="1.8" />
+            <circle cx="0" cy="0" r="12" fill="#EBF7EE" />
+            <text x="0" y="3.5" fill="#0E6E43" fontSize="9.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              Rp
+            </text>
+          </g>
+
+          {/* 3. CNY (¥) - Crimson / Amber */}
+          <g className="orbit-coin-3">
+            <circle cx="0" cy="0" r="13" fill="#FFFFFF" stroke="#D97706" strokeWidth="1.8" />
+            <circle cx="0" cy="0" r="10.5" fill="#FFFBEB" />
+            <text x="0" y="4" fill="#B45309" fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
               ¥
             </text>
           </g>
-          <g className="coin-anim-3" transform="translate(545, 35)">
-            <rect width="48" height="20" rx="10" fill="#FFFBEB" stroke="#D97706" strokeWidth="1.2" />
-            <text x="24" y="13.5" fill="#8A5200" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
-              7.24 Mid
+
+          {/* 4. EUR (€) - Deep Cobalt */}
+          <g className="orbit-coin-4">
+            <circle cx="0" cy="0" r="13" fill="#FFFFFF" stroke="#2563EB" strokeWidth="1.8" />
+            <circle cx="0" cy="0" r="10.5" fill="#EFF6FF" />
+            <text x="0" y="4" fill="#1D4ED8" fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              €
             </text>
           </g>
         </g>

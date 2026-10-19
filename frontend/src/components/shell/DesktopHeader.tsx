@@ -17,7 +17,7 @@ export interface HeaderAuthUser {
   email: string;
   university?: string;
   avatarLetter: string;
-  provider: 'google' | 'aegispath';
+  provider: 'google' | 'aegispath' | 'guest';
   isAuthenticated: boolean;
 }
 

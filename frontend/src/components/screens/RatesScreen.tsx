@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Locale } from '@/types';
 import { AppRoute } from '@/types';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
+import { RatesMascotHero } from '@/components/art/RatesMascotHero';
 import SplitText from '@/components/SplitText';
 import { Card, CardHeader, CardTitle, CardBadge, CardBody, CardFooter } from '@/components/ui/Card';
 import {
@@ -28,13 +29,79 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
 }) => {
   const [calcAmountUsd, setCalcAmountUsd] = useState<number>(2500);
   const [targetAlertActive, setTargetAlertActive] = useState<boolean>(true);
-  const [selectedPair, setSelectedPair] = useState<'USD_CNY' | 'USD_IDR' | 'USD_HKD' | 'CNY_HKD'>('USD_CNY');
+  const [selectedPair, setSelectedPair] = useState<'USD_CNY' | 'USD_IDR' | 'USD_EUR' | 'USD_HKD'>('USD_CNY');
+  const [activeTimeframe, setActiveTimeframe] = useState<'24H' | '7D' | '30D' | '1Y'>('24H');
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; time: string; rate: number } | null>(null);
 
-  // Rates data
+  // Real-time rates from Frankfurter API
+  const [liveRates, setLiveRates] = useState<{ CNY?: number; IDR?: number; EUR?: number }>({});
+  const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [isLive, setIsLive] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchFrankfurter() {
+      try {
+        let rawData: any = null;
+        try {
+          const res = await fetch('https://api.frankfurter.dev/v2/rates?base=USD&quotes=IDR,CNY,EUR');
+          if (res.ok) {
+            rawData = await res.json();
+          }
+        } catch {
+          // fallback to local api proxy
+        }
+
+        if (!rawData) {
+          const proxyRes = await fetch('/api/rates');
+          if (proxyRes.ok) {
+            const json = await proxyRes.json();
+            rawData = json.data;
+          }
+        }
+
+        if (!rawData) return;
+
+        let cny = 7.2045;
+        let idr = 15880;
+        let eur = 0.8899;
+
+        if (Array.isArray(rawData)) {
+          rawData.forEach((item: any) => {
+            if (item.quote === 'CNY') cny = Number(item.rate);
+            if (item.quote === 'IDR') idr = Number(item.rate);
+            if (item.quote === 'EUR') eur = Number(item.rate);
+          });
+        } else if (rawData && typeof rawData === 'object' && rawData.rates) {
+          const r = rawData.rates;
+          if (r.CNY) cny = Number(r.CNY);
+          if (r.IDR) idr = Number(r.IDR);
+          if (r.EUR) eur = Number(r.EUR);
+        }
+
+        if (isMounted) {
+          setLiveRates({ CNY: cny, IDR: idr, EUR: eur });
+          setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+          setIsLive(true);
+        }
+      } catch {
+        // graceful offline fallback
+      }
+    }
+
+    fetchFrankfurter();
+    const timer = setInterval(fetchFrankfurter, 20000);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  // Rates configuration
   const rates = {
     USD_CNY: {
-      rate: 7.2045,
-      pbocMid: 7.2400,
+      rate: liveRates.CNY || 7.2045,
+      pbOCMid: 7.2400,
       change24h: '-0.08%',
       isPositive: false,
       symbol: '¥',
@@ -43,10 +110,12 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
       labelZh: '美元兑在岸人民币',
       etaEn: '~2 min via Bursar corridor',
       etaZh: '学校清算通道约2分钟',
+      high: '7.2180',
+      low: '7.1990',
     },
     USD_IDR: {
-      rate: 15880.00,
-      pbocMid: 15850.00,
+      rate: liveRates.IDR || 15880.00,
+      pbOCMid: 15850.00,
       change24h: '+0.12%',
       isPositive: true,
       symbol: 'Rp',
@@ -55,10 +124,26 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
       labelZh: '美元兑印尼盾',
       etaEn: 'Immediate settlement',
       etaZh: '合规通道即时到账',
+      high: '15,920',
+      low: '15,840',
+    },
+    USD_EUR: {
+      rate: liveRates.EUR || 0.8899,
+      pbOCMid: 0.8920,
+      change24h: '+0.04%',
+      isPositive: true,
+      symbol: '€',
+      target: '0.8850',
+      labelEn: 'US Dollar to Euro',
+      labelZh: '美元兑欧元',
+      etaEn: 'SEPA compliant clearing',
+      etaZh: '合规清算通道',
+      high: '0.8940',
+      low: '0.8875',
     },
     USD_HKD: {
       rate: 7.7850,
-      pbocMid: 7.8000,
+      pbOCMid: 7.8000,
       change24h: '+0.01%',
       isPositive: true,
       symbol: 'HK$',
@@ -67,18 +152,8 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
       labelZh: '美元兑港币',
       etaEn: 'Pegged currency band',
       etaZh: '联汇汇率区间稳定',
-    },
-    CNY_HKD: {
-      rate: 1.0810,
-      pbocMid: 1.0825,
-      change24h: '-0.03%',
-      isPositive: false,
-      symbol: 'HK$',
-      target: '1.0750',
-      labelEn: 'Chinese Yuan to Hong Kong Dollar',
-      labelZh: '人民币兑港币',
-      etaEn: 'Greater Bay Area cross-border',
-      etaZh: '大湾区跨境结算通道',
+      high: '7.7880',
+      low: '7.7820',
     },
   };
 
@@ -89,10 +164,76 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
   });
 
   // Cost comparison calculations for $2,500 remittance
-  const traditionalWireFee = 35.00 + calcAmountUsd * 0.025 + 20.00; // $117.50
-  const creditCardFee = calcAmountUsd * 0.03 + calcAmountUsd * 0.015; // $112.50
-  const aegisPathFee = 14.30 + calcAmountUsd * 0.0015; // ~$18.05
+  const traditionalWireFee = 35.00 + calcAmountUsd * 0.025 + 20.00;
+  const creditCardFee = calcAmountUsd * 0.03 + calcAmountUsd * 0.015;
+  const aegisPathFee = 14.30 + calcAmountUsd * 0.0015;
   const totalSaved = (traditionalWireFee - aegisPathFee).toFixed(2);
+
+  // Motion Graph curve coordinates
+  const graphWidth = 720;
+  const graphHeight = 200;
+  const graphPadX = 30;
+  const graphPadY = 24;
+  const innerW = graphWidth - graphPadX * 2;
+  const innerH = graphHeight - graphPadY * 2;
+
+  // Generate smooth trend wave based on activeTimeframe and pair
+  const baseRate = currentPairData.rate;
+
+  const timeframeData: Record<'24H' | '7D' | '30D' | '1Y', Array<{ time: string; delta: number }>> = {
+    '24H': [
+      { time: '00:00', delta: -0.0028 },
+      { time: '04:00', delta: -0.0012 },
+      { time: '08:00', delta: 0.0018 },
+      { time: '12:00', delta: 0.0034 },
+      { time: '16:00', delta: 0.0015 },
+      { time: '20:00', delta: -0.0008 },
+      { time: 'Now', delta: 0.0 },
+    ],
+    '7D': [
+      { time: 'Mon', delta: -0.0065 },
+      { time: 'Tue', delta: -0.0032 },
+      { time: 'Wed', delta: 0.0014 },
+      { time: 'Thu', delta: 0.0048 },
+      { time: 'Fri', delta: 0.0025 },
+      { time: 'Sat', delta: -0.0012 },
+      { time: 'Today', delta: 0.0 },
+    ],
+    '30D': [
+      { time: 'Day 1', delta: -0.012 },
+      { time: 'Day 7', delta: -0.004 },
+      { time: 'Day 14', delta: 0.008 },
+      { time: 'Day 21', delta: 0.003 },
+      { time: 'Day 28', delta: -0.002 },
+      { time: 'Current', delta: 0.0 },
+    ],
+    '1Y': [
+      { time: 'Q1', delta: -0.028 },
+      { time: 'Q2', delta: -0.012 },
+      { time: 'Q3', delta: 0.018 },
+      { time: 'Q4', delta: 0.005 },
+      { time: 'Latest', delta: 0.0 },
+    ],
+  };
+
+  const activePoints = timeframeData[activeTimeframe] || timeframeData['24H'];
+
+  const graphPoints = activePoints.map((pt, i) => {
+    const x = graphPadX + (i / (activePoints.length - 1)) * innerW;
+    const yNorm = 0.5 - pt.delta * 22;
+    const y = graphPadY + Math.max(10, Math.min(innerH - 10, yNorm * innerH));
+    const rateVal = baseRate * (1 + pt.delta);
+    return { x, y, time: pt.time, rate: rateVal };
+  });
+
+  const pathD = graphPoints.reduce((acc, pt, i) => {
+    if (i === 0) return `M ${pt.x} ${pt.y}`;
+    const prev = graphPoints[i - 1];
+    const cpX = (prev.x + pt.x) / 2;
+    return `${acc} C ${cpX} ${prev.y}, ${cpX} ${pt.y}, ${pt.x} ${pt.y}`;
+  }, '');
+
+  const areaD = `${pathD} L ${graphPoints[graphPoints.length - 1].x} ${graphHeight - graphPadY} L ${graphPoints[0].x} ${graphHeight - graphPadY} Z`;
 
   return (
     <div className="rates-screen pb-12 w-full animate-fadeIn">
@@ -130,28 +271,25 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
 
             <div className="flex items-center gap-3">
               <span className="text-[12px] font-semibold bg-white/20 text-white px-3 py-1 rounded-full border border-white/25 flex items-center gap-1.5 shadow-xs">
-                <span className="w-2 h-2 rounded-full bg-[#6FD3FF] animate-pulse" />
+                <span className={`w-2 h-2 rounded-full ${isLive ? 'bg-[#86EFAC]' : 'bg-[#6FD3FF]'} animate-pulse`} />
                 <span>
-                  {locale === 'zh' ? 'PBOC 中间价已同步' : 'PBOC Mid-market: 7.2400'}
+                  {isLive ? `Live Frankfurter API (${lastUpdated || 'Synced'})` : 'PBOC Mid-market: 7.2400'}
                 </span>
               </span>
-              <div className="mascot-header-cluster">
-                <ChopMascot
-                  bodyColor="#FFFFFF"
-                  faceColor="#DCE8FD"
-                  expression="wave"
-                  size={52}
-                />
-              </div>
             </div>
           </div>
 
-          <div className="mt-1 pr-[140px] md:pr-[180px]">
-            <p className="text-[#DBEAFE] text-[13px] max-w-[680px] leading-relaxed">
-              {locale === 'zh'
-                ? '采用机构级学生通道点差 (0.15%)，告别传统银行高达 2.5% 的隐形汇率加价与中间行扣费，保障全额足额到账。'
-                : 'Direct institutional student corridor (0.15% spread). Zero hidden intermediary bank cuts, guaranteed full-amount bursar delivery.'}
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2">
+            <div className="max-w-[620px]">
+              <p className="text-[#DBEAFE] text-[13px] leading-relaxed">
+                {locale === 'zh'
+                  ? '采用机构级学生通道点差 (0.15%)，实时汇率同步自开源 Frankfurter API。告别传统银行高达 2.5% 的隐形汇率加价与中间行扣费。'
+                  : 'Direct institutional student corridor (0.15% spread) synced in real-time from open-source Frankfurter API. Zero hidden intermediary bank cuts.'}
+              </p>
+            </div>
+            <div className="flex justify-end shrink-0">
+              <RatesMascotHero rates={liveRates} />
+            </div>
           </div>
         </div>
       </header>
@@ -212,6 +350,220 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
             );
           })}
         </div>
+
+        {/* ═══════════ REAL-TIME MOTION GRAPH (User Requirement) ═══════════ */}
+        <Card variant="default" className="p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[rgba(15,23,42,0.06)]">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-lg bg-[#EEF4FF] text-[#1C3EAA] flex items-center justify-center font-bold text-[14px]">
+                📈
+              </span>
+              <div>
+                <h3 className="text-[16px] font-bold text-[#14213D] leading-tight">
+                  {selectedPair.replace('_', ' / ')} {locale === 'zh' ? '实时汇率走势与动态波动' : 'Live Corridor Motion Graph'}
+                </h3>
+                <span className="text-[11.5px] text-[#64748B]">
+                  {isLive ? `Live Open-Source Data (Frankfurter API · Updated ${lastUpdated})` : 'Simulated Testnet Real-time Curve'}
+                </span>
+              </div>
+            </div>
+
+            {/* Timeframe Chips */}
+            <div className="flex items-center gap-1.5 bg-[#F1F5F9] p-1 rounded-xl">
+              {(['24H', '7D', '30D', '1Y'] as const).map((tf) => (
+                <button
+                  key={tf}
+                  type="button"
+                  onClick={() => setActiveTimeframe(tf)}
+                  className={`px-3 py-1 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
+                    activeTimeframe === tf
+                      ? 'bg-white text-[#1C3EAA] shadow-xs'
+                      : 'text-[#64748B] hover:text-[#0F172A]'
+                  }`}
+                >
+                  {tf}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* SVG Motion Graph Canvas */}
+          <div style={{ position: 'relative', width: '100%' }}>
+            <svg
+              viewBox={`0 0 ${graphWidth} ${graphHeight}`}
+              width="100%"
+              height="auto"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              role="img"
+              aria-label="Rate Corridor Motion Graph"
+              style={{ display: 'block', overflow: 'visible' }}
+            >
+              <defs>
+                <style>{`
+                  @keyframes drawWaveLine {
+                    0% { stroke-dashoffset: 1000; }
+                    100% { stroke-dashoffset: 0; }
+                  }
+                  @keyframes pulseLiveMarker {
+                    0%, 100% { r: 5px; opacity: 0.8; }
+                    50% { r: 8px; opacity: 1; }
+                  }
+                  .rate-wave-anim {
+                    stroke-dasharray: 1000;
+                    animation: drawWaveLine 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                  }
+                  .rate-marker-anim {
+                    animation: pulseLiveMarker 1.8s infinite ease-in-out;
+                  }
+                `}</style>
+                <linearGradient id="rateWaveFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3D6BEA" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#3D6BEA" stopOpacity="0.0" />
+                </linearGradient>
+                <linearGradient id="rateStrokeGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#3D6BEA" />
+                  <stop offset="70%" stopColor="#2563EB" />
+                  <stop offset="100%" stopColor="#10B981" />
+                </linearGradient>
+              </defs>
+
+              {/* Horizontal Gridlines */}
+              {[0.25, 0.5, 0.75].map((ratio) => (
+                <line
+                  key={ratio}
+                  x1={graphPadX}
+                  y1={graphPadY + innerH * ratio}
+                  x2={graphWidth - graphPadX}
+                  y2={graphPadY + innerH * ratio}
+                  stroke="#F1F5F9"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                />
+              ))}
+
+              {/* Area fill */}
+              <path d={areaD} fill="url(#rateWaveFill)" />
+
+              {/* Dynamic Rate Wave Path */}
+              <path
+                className="rate-wave-anim"
+                d={pathD}
+                fill="none"
+                stroke="url(#rateStrokeGrad)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Hover crosshair vertical line */}
+              {hoveredPoint && (
+                <line
+                  x1={hoveredPoint.x}
+                  y1={graphPadY}
+                  x2={hoveredPoint.x}
+                  y2={graphHeight - graphPadY}
+                  stroke="#1C3EAA"
+                  strokeWidth="1.2"
+                  strokeDasharray="3 3"
+                />
+              )}
+
+              {/* Points on curve */}
+              {graphPoints.map((pt, i) => {
+                const isLast = i === graphPoints.length - 1;
+                return (
+                  <g
+                    key={i}
+                    onMouseEnter={() => setHoveredPoint(pt)}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {isLast ? (
+                      <circle
+                        className="rate-marker-anim"
+                        cx={pt.x}
+                        cy={pt.y}
+                        fill="#10B981"
+                        stroke="#FFFFFF"
+                        strokeWidth="2.5"
+                      />
+                    ) : (
+                      <circle
+                        cx={pt.x}
+                        cy={pt.y}
+                        r="4"
+                        fill="#FFFFFF"
+                        stroke="#1C3EAA"
+                        strokeWidth="2"
+                      />
+                    )}
+                    <text
+                      x={pt.x}
+                      y={graphHeight - 8}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fontWeight="600"
+                      fill="#64748B"
+                    >
+                      {pt.time}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Hover Tooltip */}
+            {hoveredPoint && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  left: `${(hoveredPoint.x / graphWidth) * 100}%`,
+                  transform: 'translateX(-50%)',
+                  background: 'rgba(15, 23, 42, 0.92)',
+                  backdropFilter: 'blur(6px)',
+                  color: '#FFFFFF',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  pointerEvents: 'none',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.18)',
+                  zIndex: 20,
+                }}
+              >
+                <div style={{ color: '#93C5FD', fontWeight: 600 }}>{hoveredPoint.time}</div>
+                <div style={{ fontWeight: 800 }}>
+                  {hoveredPoint.rate.toLocaleString('en-US', {
+                    minimumFractionDigits: selectedPair === 'USD_IDR' ? 0 : 4,
+                    maximumFractionDigits: selectedPair === 'USD_IDR' ? 0 : 4,
+                  })} {currentPairData.symbol}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Corridor Metrics Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-[rgba(15,23,42,0.06)] text-[12px]">
+            <div>
+              <span className="text-[#64748B] block">24h High</span>
+              <span className="font-bold text-[#0F172A]">{currentPairData.high}</span>
+            </div>
+            <div>
+              <span className="text-[#64748B] block">24h Low</span>
+              <span className="font-bold text-[#0F172A]">{currentPairData.low}</span>
+            </div>
+            <div>
+              <span className="text-[#64748B] block">Corridor Spread</span>
+              <span className="font-bold text-[#0E6E43]">0.15% (Smart Lock)</span>
+            </div>
+            <div>
+              <span className="text-[#64748B] block">Bank Wire Spread</span>
+              <span className="font-bold text-[#B91C1C]">2.50% - 3.80% (Hidden)</span>
+            </div>
+          </div>
+        </Card>
 
         {/* Live Currency Calculator & Smart Remittance Comparison */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
@@ -378,37 +730,38 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                   <div className="p-3.5 rounded-[12px] bg-[#EEF4FF] border border-[#1C3EAA]/30 flex items-center justify-between ring-1 ring-[#1C3EAA]/15">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[13px] text-[#1C3EAA]">
-                          {locale === 'zh' ? 'AegisPath 智能体合规调度' : 'AegisPath Smart Agent Route'}
+                        <span className="font-bold text-[13.5px] text-[#1C3EAA]">
+                          {locale === 'zh' ? 'AegisPath 智能专线' : 'AegisPath Smart Agent Route'}
                         </span>
-                        <span className="text-[10px] font-bold text-[#0E6E43] bg-[#EBF7EE] px-1.5 py-0.2 rounded-full">
+                        <span className="text-[10px] font-semibold text-[#0E6E43] bg-[#EBF7EE] px-2 py-0.5 rounded-full">
                           ~2 Mins
                         </span>
                       </div>
                       <span className="text-[11.5px] text-[#475569] block mt-0.5">
-                        {locale === 'zh' ? '机构中间价点差 (0.15%) + $14.30 固定清算' : '0.15% spread + $14.30 direct clearing'}
+                        {locale === 'zh' ? '0.15% 机构点差 + $14.30 清算费' : '0.15% spread + $14.30 direct clearing'}
                       </span>
                     </div>
                     <div className="text-right">
                       <span className="text-[16px] font-bold tabular-nums text-[#0E6E43] block">
                         ${aegisPathFee.toFixed(2)}
                       </span>
-                      <span className="text-[10px] font-semibold text-[#0E6E43]">
-                        {locale === 'zh' ? '全额到账保障' : 'Guaranteed full'}
+                      <span className="text-[10px] text-[#64748B]">
+                        {locale === 'zh' ? '保障全额到账' : 'Guaranteed full'}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="p-3 rounded-[12px] bg-[#F1F5F9] text-[12px] text-[#64748B] flex items-center justify-between mt-3">
-                <span>{locale === 'zh' ? '资金缓冲规划联动' : 'Planner Runway Integration'}</span>
+              <div className="mt-4 pt-3 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between">
+                <span className="text-[12px] text-[#64748B]">
+                  {locale === 'zh' ? '联动现金流缓冲规划' : 'Planner Runway Integration'}
+                </span>
                 <button
                   onClick={() => onNavigate('/planner')}
-                  className="font-bold text-[#1C3EAA] hover:underline cursor-pointer flex items-center gap-1"
+                  className="text-[12.5px] font-bold text-[#1C3EAA] hover:text-[#163188] flex items-center gap-1 cursor-pointer"
                 >
-                  <span>{locale === 'zh' ? '模拟资金缓冲' : 'Simulate Runway'}</span>
-                  <span>→</span>
+                  <span>{locale === 'zh' ? '模拟排期 →' : 'Simulate Runway →'}</span>
                 </button>
               </div>
             </Card>

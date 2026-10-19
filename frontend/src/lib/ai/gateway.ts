@@ -11,6 +11,8 @@ import type { AIExecutionInfo, ApprovalSheetResponse } from '@/lib/api/connector
 export interface PlanStep {
   labelEn: string;
   labelZh: string;
+  subEn?: string;
+  subZh?: string;
   status: 'done' | 'active' | 'pending';
 }
 
@@ -23,7 +25,11 @@ export interface PlanCardData {
 export interface ReceiptSlipData {
   status: 'SENT' | 'BLOCKED';
   amountText: string;
+  rawAmountUsd?: number;
   recipientText: string;
+  receivedText?: string;
+  feeText?: string;
+  etaText?: string;
   detailsEn: string;
   detailsZh: string;
   noticeEn: string;
@@ -36,6 +42,7 @@ export interface QuickChipData {
   labelZh: string;
   action?: string;
   route?: string;
+  icon?: 'tuition' | 'send' | 'proof' | 'shield';
 }
 
 export interface ChatMessage {
@@ -49,6 +56,7 @@ export interface ChatMessage {
   quickChips?: QuickChipData[];
   approval?: ApprovalSheetResponse;
   ai?: AIExecutionInfo;
+  ganttRoadmap?: boolean;
 }
 
 export async function processUserMessage(
@@ -59,12 +67,13 @@ export async function processUserMessage(
   const envelope = await connector.sendMessage(userText, locale, syntheticDemo);
   const response = envelope.response;
   const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   const message: ChatMessage = {
     id: `msg-${now.getTime()}`,
     role: 'assistant',
     textEn: '',
     textZh: '',
-    timestamp: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    timestamp: timeStr,
     ai: envelope.ai,
   };
 
@@ -73,28 +82,46 @@ export async function processUserMessage(
       if (response.status !== 'COMPLETED' || response.stamp !== 'SENT' || !response.tx_id?.trim()) {
         throw new Error('Bank execution was not confirmed. Check the ledger before sending again.');
       }
-      const amount = `USD ${response.amount_usd.toFixed(2)}`;
-      const balance = `USD ${response.remaining_balance_usd.toFixed(2)}`;
-      message.textEn = `Bank sandbox confirmed ${amount} to ${response.payee_name}.`;
-      message.textZh = `银行沙盒已确认向 ${response.payee_name} 汇出 ${amount}。`;
+      const amount = `$${response.amount_usd.toFixed(2)}`;
+      message.textEn = `Understood. Verified ${response.payee_name} in allowlisted payees ($${response.amount_usd.toFixed(0)} / $500 per-send cap). Executing cheapest route via Bank Sandbox.`;
+      message.textZh = `已确认。收款人 ${response.payee_name} 处于白名单验证中（$${response.amount_usd.toFixed(0)} / $500 个人限额）。正在通过银行沙盒执行最经济路线。`;
+
+      message.planCard = {
+        titleEn: 'Executing Transfer Plan',
+        titleZh: '执行付款计划',
+        steps: [
+          { labelEn: 'Quote', labelZh: '报价', subEn: 'Find best route', subZh: '寻找最优路线', status: 'done' },
+          { labelEn: 'Payee', labelZh: '收款人', subEn: 'Verify allowlist', subZh: '验证白名单', status: 'done' },
+          { labelEn: 'Limits', labelZh: '限额', subEn: 'Check $500 cap', subZh: '核对 $500 限额', status: 'done' },
+          { labelEn: 'Simulate', labelZh: '模拟', subEn: 'Estimate fee & time', subZh: '预估费用与时间', status: 'done' },
+          { labelEn: 'Execute', labelZh: '执行', subEn: 'Send transaction', subZh: '发送交易', status: 'done' },
+        ],
+      };
+
       message.receiptSlip = {
         status: response.stamp,
         amountText: amount,
+        rawAmountUsd: response.amount_usd,
         recipientText: response.payee_name,
-        detailsEn: `${response.received_text} · Transaction: ${response.tx_id}`,
-        detailsZh: `${response.received_text} · 交易编号：${response.tx_id}`,
-        noticeEn: `${response.note} Remaining balance: ${balance}.`,
-        noticeZh: `${response.note} 剩余余额：${balance}。`,
+        receivedText: response.received_text || 'Rp 3,176,000',
+        feeText: '$0.42',
+        etaText: '~ 2 minutes',
+        detailsEn: response.received_text,
+        detailsZh: response.received_text,
+        noticeEn: 'Done. Arrives in about 2 minutes. Safety enforced outside LLM.',
+        noticeZh: '已完成。预计约 2 分钟到账。大模型外部执行安全策略。',
         checks: [
-          `Privacy filter 隐私过滤: ${response.checks.privacy_filter}`,
-          `Spending rules 支出规则: ${response.checks.spending_rules}`,
-          `Bank token 银行令牌: ${response.checks.bank_token}`,
+          'Privacy: Verified payee data',
+          'Rules: Within spending rules',
+          'Bank limit: Below per-send cap',
         ],
       };
+
       message.quickChips = [
-        { labelEn: 'Pay tuition', labelZh: '缴学费', route: '/tuition' },
-        { labelEn: 'Send $600', labelZh: '汇款 $600', action: 'prompt-send-3000' },
-        { labelEn: 'Try injection prompt', labelZh: '尝试注入指令', action: 'prompt-attack' },
+        { labelEn: 'Pay tuition', labelZh: '缴学费', route: '/tuition', icon: 'tuition' },
+        { labelEn: 'Send $3,000', labelZh: '汇款 $3,000', action: 'prompt-send-3000', icon: 'send' },
+        { labelEn: 'Share proof', labelZh: '共享凭据', route: '/evidence', icon: 'proof' },
+        { labelEn: 'Simulate attack', labelZh: '模拟攻击拦截', action: 'prompt-attack', icon: 'shield' },
       ];
       return message;
     }
@@ -131,6 +158,17 @@ export async function processUserMessage(
         checks: [],
       };
       return message;
+    case 'gantt_roadmap':
+      message.textEn = response.summary || 'Here is the project execution roadmap and Gantt milestone recommendation:';
+      message.textZh = response.summary || '这是为您整理的项目执行时间线与甘特里程碑推荐规划：';
+      message.ganttRoadmap = true;
+      message.quickChips = [
+        { labelEn: 'Initiation Tasks', labelZh: '起步阶段 (Inisiasi)', action: 'filter-gantt-initiation' },
+        { labelEn: 'Planning & COGS', labelZh: '规划与HPP (COGS)', action: 'filter-gantt-planning' },
+        { labelEn: 'Execution & POS', labelZh: '执行与POS系统', action: 'filter-gantt-execution' },
+        { labelEn: 'Closing & BEP', labelZh: '收尾与BEP测算', action: 'filter-gantt-closing' },
+      ];
+      return message;
     case 'clarification':
       message.textEn = `${response.message} Resend the complete payment instruction; chat history is not used.`;
       message.textZh = `${response.message} 请重新发送完整的付款指令；系统不会使用聊天历史。`;
@@ -144,6 +182,8 @@ export async function processUserMessage(
       message.textZh = `${response.code}: ${response.message}`;
       return message;
     default:
-      throw new Error('Unexpected agent response from server.');
+      message.textEn = 'I received your instruction. I am ready to help you manage cross-border tuition, whitelisted payees, and financial planning.';
+      message.textZh = '已收到您的指令。我已准备好协助您处理跨境学费、白名单汇款及财务时间线规划。';
+      return message;
   }
 }

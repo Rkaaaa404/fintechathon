@@ -28,16 +28,19 @@ if sys.stdout.encoding != "utf-8":
         pass
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT_DIR))
+REPO_DIR = ROOT_DIR.parent
+for p in [str(REPO_DIR), str(ROOT_DIR)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 try:
     from backend.api.sentinel import scan_text_with_sentinel
     from backend.api.policy import evaluate_transfer_policy, compute_intent_hash
     from backend.bank.security import verify_scoped_token
 except ImportError:
-    from services.api.sentinel import scan_text_with_sentinel
-    from services.api.policy import evaluate_transfer_policy, compute_intent_hash
-    from services.bank.security import verify_scoped_token
+    from api.sentinel import scan_text_with_sentinel
+    from api.policy import evaluate_transfer_policy, compute_intent_hash
+    from bank.security import verify_scoped_token
 
 # ─────────────────────────────────────────────────────────────
 # 1. 12 Attack Families x 10 Variants (120 Attacks)

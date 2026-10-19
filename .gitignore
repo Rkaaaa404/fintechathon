@@ -81,3 +81,11 @@ desktop.ini
 *.swp
 *.swo
 .gemini/
+
+# Temporary screenshots
+snap_*.png
+
+*.jpg
+*.jpeg
+ask_chop_reference.png
+
