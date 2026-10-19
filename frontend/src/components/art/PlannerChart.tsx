@@ -98,15 +98,26 @@ export const PlannerChart: React.FC<PlannerChartProps> = ({
         strokeWidth="1.5"
         strokeDasharray="4 3"
       />
+      {/* White background chip with 4px padding to prevent overlap with bars */}
+      <rect
+        x={width - padRight - 76}
+        y={safeY - 8}
+        width="76"
+        height="16"
+        rx="4"
+        fill="#FFFFFF"
+        stroke="#F5A524"
+        strokeWidth="1"
+      />
       <text
-        x={width - padRight - 4}
-        y={safeY - 4}
-        textAnchor="end"
+        x={width - padRight - 38}
+        y={safeY + 3.5}
+        textAnchor="middle"
         fontSize="8.5"
         fontWeight="700"
         fill="#B7791F"
       >
-        Safe Min $1.0k 安全线
+        Safe Min $1.0k
       </text>
 
       {/* Baseline X-Axis */}
@@ -132,10 +143,24 @@ export const PlannerChart: React.FC<PlannerChartProps> = ({
         const committedY = chartBottom - committedH;
         const reserveY = chartBottom - totalH;
 
-        const isDipMonth = isDelayed && i === 3;
+        const isJanDue = i === 3;
+        const isDipMonth = isDelayed && isJanDue;
 
         return (
           <g key={b.month}>
+            {/* Visual highlight background column for Jan Due */}
+            {isJanDue && (
+              <rect
+                x={x - 4}
+                y={padTop}
+                width={barW + 8}
+                height={chartH + 22}
+                fill="#FFFBEB"
+                opacity="0.8"
+                rx="6"
+              />
+            )}
+
             {/* Upper Stack: Available Buffer */}
             <rect
               x={x}
@@ -145,6 +170,8 @@ export const PlannerChart: React.FC<PlannerChartProps> = ({
               fill={colReserve}
               rx="3"
               opacity="0.95"
+              stroke={isJanDue ? '#D97706' : 'none'}
+              strokeWidth={isJanDue ? 1.5 : 0}
             />
 
             {/* Lower Stack: Committed Outflows / Tuition */}
@@ -155,6 +182,8 @@ export const PlannerChart: React.FC<PlannerChartProps> = ({
               height={committedH}
               fill={colCommitted}
               rx="3"
+              stroke={isJanDue ? '#D97706' : 'none'}
+              strokeWidth={isJanDue ? 1.5 : 0}
             />
 
             {/* Clean subtle divider between stacks */}
