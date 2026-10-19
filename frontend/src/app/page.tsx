@@ -12,6 +12,7 @@ import { SafetyScreen, LayersState } from '@/components/screens/SafetyScreen';
 import { EvidenceScreen } from '@/components/screens/EvidenceScreen';
 import { PlannerScreen } from '@/components/screens/PlannerScreen';
 import { ChatScreen } from '@/components/screens/ChatScreen';
+import { LoginScreen, AuthUserProfile } from '@/components/screens/LoginScreen';
 import { AppPresentationState, AppRoute, Locale } from '@/types';
 import { connector, type ApprovalSheetResponse } from '@/lib/api/connector';
 
@@ -24,6 +25,14 @@ export default function HomePage() {
   const [pendingApproval, setPendingApproval] = useState<ApprovalSheetResponse | null>(null);
   const [chatDraft, setChatDraft] = useState('');
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [authUser, setAuthUser] = useState<AuthUserProfile>({
+    name: 'Ayu',
+    email: 'ayu.sutanto@connect.ust.hk',
+    university: 'HKUST',
+    avatarLetter: 'AY',
+    provider: 'aegispath',
+    isAuthenticated: true,
+  });
 
   // Safety, Evidence, Planner Interactive States
   const [layersState, setLayersState] = useState<LayersState>({
@@ -36,6 +45,26 @@ export default function HomePage() {
   const [plannerScenario, setPlannerScenario] = useState<'on_time' | 'delayed' | 'optimized'>('on_time');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('route');
+      const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
+
+      if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/login'].includes(r)) {
+        setCurrentRoute(r as AppRoute);
+      } else if (!hasEntered) {
+        // First visit: present the animated welcome experience with "Enter as Guest"
+        setCurrentRoute('/login');
+      }
+
+      const s = params.get('state');
+      if (s && ['default', 'agent-paused', 'waiting-approval', 'payment-sent', 'attack-blocked', 'model-offline', 'empty-activity'].includes(s)) {
+        handleStateChange(s as AppPresentationState);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -277,6 +306,32 @@ export default function HomePage() {
             }}
           />
         );
+      case '/login':
+        return (
+          <LoginScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('aegispath_entered', 'true');
+              }
+              setCurrentRoute(route);
+            }}
+            onLoginSuccess={(user) => {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('aegispath_entered', 'true');
+              }
+              setAuthUser(user);
+              setCurrentRoute('/');
+            }}
+            onEnterAsGuest={() => {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('aegispath_entered', 'true');
+              }
+              setCurrentRoute('/');
+            }}
+            onShowToast={showToast}
+          />
+        );
       default:
         return (
           <HomeScreen
@@ -302,6 +357,7 @@ export default function HomePage() {
           locale={locale}
           onLocaleToggle={toggleLocale}
           isPaused={isPaused}
+          authUser={authUser}
         />
 
         {/* ═══════════ APPLICATION VIEWPORT FRAME (Responsive Web / Mobile) ═══════════ */}

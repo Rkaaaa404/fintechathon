@@ -7,6 +7,10 @@ import { SEED_DATA, PlannerWarningOption } from '@/lib/mockData';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
 import { PlannerChart } from '@/components/art/PlannerChart';
+import SplitText from '@/components/SplitText';
+import { PlannerRunwayIcon } from '@/components/icons/AegisIcons';
+
+import { Card, CardBadge, Badge } from '@/components/ui/Card';
 
 interface PlannerScreenProps {
   onNavigate: (route: AppRoute) => void;
@@ -37,65 +41,76 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
   ];
 
   return (
-    <div className="screen-container planner-screen">
-      {/* ═══════════ BLUE HEADER (140px) ═══════════ */}
-      <header className="screen-header-blue planner-header">
+    <div className="planner-screen pb-10 w-full">
+      {/* ═══════════ LUMINOUS PLANNER HEADER (1200px aligned) ═══════════ */}
+      <header className="screen-header-blue planner-header relative overflow-hidden rounded-[20px] p-6 md:p-8 w-full mb-6">
         <HeaderArt screenType="planner" />
 
-        <div className="header-content">
-          <div className="header-topbar">
-            <div className="brand-row">
+        <div className="header-content relative z-10 w-full">
+          <div className="flex items-center justify-between mb-3">
+            <div className="brand-row flex items-center gap-2">
               <button
-                className="nav-back-btn"
+                className="nav-back-btn p-1.5 rounded-full bg-white/15 text-white hover:bg-white/25 transition-all flex items-center justify-center cursor-pointer"
                 onClick={() => onNavigate('/')}
                 aria-label="Back to home"
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#fff',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-              <div>
-                <h1 className="brand-title" style={{ fontSize: '19px' }}>
-                  {b('planner_title', 'planner_sub', locale)}
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-lg bg-white/20 text-white">
+                  <PlannerRunwayIcon size={20} color="#FFFFFF" />
+                </span>
+                <h1 className="brand-title text-white font-bold text-[20px] tracking-tight">
+                  <SplitText
+                    text={locale === 'zh' ? '现金流调度与缓冲规划' : 'Buffer & Cashflow Planner'}
+                    tag="span"
+                    delay={25}
+                    duration={0.6}
+                    effect="fade"
+                  />
                 </h1>
-                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '2px' }}>
-                  {b('planner_subtitle', 'planner_subtitle_sub', locale)}
-                </div>
               </div>
             </div>
 
-            <div className="mascot-header-cluster">
-              <ChopMascot
-                bodyColor="#FFFFFF"
-                faceColor="#DCE8FD"
-                expression={isDelayed ? "guard" : "idle"}
-                size={48}
-              />
+            <div className="flex items-center gap-3">
+              <span className={`text-[12px] font-semibold px-3 py-1 rounded-full border border-white/25 flex items-center gap-1.5 ${
+                isDelayed
+                  ? 'bg-[#B91C1C]/40 text-white'
+                  : isOptimized
+                  ? 'bg-[#0E6E43]/40 text-white'
+                  : 'bg-white/20 text-white'
+              }`}>
+                <span>
+                  {isDelayed
+                    ? (locale === 'zh' ? '⚠️ 延期风险 (28d)' : '⚠️ Delay Risk (28d)')
+                    : isOptimized
+                    ? (locale === 'zh' ? '✨ 智能优化 (180d)' : '✨ AI Optimized (180d)')
+                    : (locale === 'zh' ? '安全缓冲充足 (95d)' : 'Sufficient Buffer (95d)')}
+                </span>
+              </span>
+              <div className="mascot-header-cluster">
+                <ChopMascot
+                  bodyColor="#FFFFFF"
+                  faceColor="#DCE8FD"
+                  expression={isDelayed ? "guard" : "idle"}
+                  size={52}
+                />
+              </div>
             </div>
+          </div>
+
+          <div className="mt-1 pr-[140px] md:pr-[180px]">
+            <p className="text-[#DBEAFE] text-[13px] max-w-[660px] leading-relaxed">
+              {b('planner_subtitle', 'planner_subtitle_sub', locale)}
+            </p>
           </div>
         </div>
       </header>
 
-      {/* ═══════════ SCREEN BODY ═══════════ */}
-      <main className="screen-body" style={{ paddingTop: '14px' }}>
+      {/* ═══════════ SCREEN BODY (W-FULL ALIGNED) ═══════════ */}
+      <main className="screen-body w-full">
         {/* 4-Tile Financial KPI Grid */}
         <div className="planner-kpi-grid">
           <div className="planner-kpi-card">
@@ -130,23 +145,23 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
           <div className="planner-kpi-card">
             <div className="planner-kpi-label">FX Protection</div>
             <div className="planner-kpi-val" style={{ color: 'var(--blue)' }}>
-              100% Locked
+              {locale === 'zh' ? '全额锁定' : 'Fully Locked'}
             </div>
             <div className="planner-kpi-sub">Forward hedge @ 7.1022</div>
           </div>
         </div>
 
         {/* ═══════════ STACKED BAR CHART CARD ═══════════ */}
-        <div className="planner-chart-card">
+        <Card className="p-6 mb-6">
           {/* Scenario Selection Chips */}
-          <div className="chart-scenario-chips">
+          <div className="chart-scenario-chips mb-3">
             <button
               className={`scenario-chip-btn ${
                 plannerScenario === 'on_time' ? 'active' : ''
               }`}
               onClick={() => onSelectScenario('on_time')}
             >
-              <span>On-time 按时</span>
+              <span>{locale === 'zh' ? '按时 (1月15日)' : 'On-time'}</span>
             </button>
             <button
               className={`scenario-chip-btn ${
@@ -154,7 +169,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
               }`}
               onClick={() => onSelectScenario('delayed')}
             >
-              <span>Delayed (+30d) 延后</span>
+              <span>{locale === 'zh' ? '延后 (+30天)' : 'Delayed (+30d)'}</span>
             </button>
             <button
               className={`scenario-chip-btn ${
@@ -170,12 +185,12 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
                   : undefined
               }
             >
-              <span>✨ AI-Optimized 智能分期</span>
+              <span>{locale === 'zh' ? '✨ 智能分期优化' : '✨ AI-Optimized'}</span>
             </button>
           </div>
 
-          {/* Trend Trajectory Insights Banner (Clear, uncollided CAGR callouts) */}
-          <div className="planner-trajectory-banner">
+          {/* Trend Trajectory Insights Banner */}
+          <div className="planner-trajectory-banner mb-3">
             <div className="planner-trajectory-pill" style={{ color: 'var(--ink)' }}>
               <span>📉</span>
               <span>{scenario.cagr1}</span>
@@ -195,20 +210,18 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
             </div>
           </div>
 
-          {/* Legend Bar Matching App Colors */}
-          <div className="planner-legend-bar">
+          {/* Legend Bar Matching App Colors (English-only tokens) */}
+          <div className="planner-legend-bar mb-3">
             <div className="legend-items-cluster">
               <div className="legend-item">
                 <span
                   className="legend-swatch"
                   style={{
-                    backgroundColor: isOptimized ? '#10B981' : '#3D6BEA',
+                    backgroundColor: isOptimized ? '#0E6E43' : '#1C3EAA',
                   }}
                 />
                 <span>
-                  {isOptimized
-                    ? 'AI Liquid Buffer (流动性储备)'
-                    : 'Liquid Buffer (可用储备)'}
+                  {isOptimized ? 'AI Liquid Buffer (Reserve)' : 'Liquid Buffer (Available)'}
                 </span>
               </div>
               <div className="legend-item">
@@ -216,24 +229,22 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
                   className="legend-swatch"
                   style={{
                     backgroundColor: isDelayed
-                      ? '#E5484D'
+                      ? '#B91C1C'
                       : isOptimized
-                      ? '#3D6BEA'
-                      : '#F5A524',
+                      ? '#1C3EAA'
+                      : '#D97706',
                   }}
                 />
                 <span>
-                  {isOptimized
-                    ? 'Tranche Split (智能分期)'
-                    : 'Committed Outflows (学费与刚需)'}
+                  {isOptimized ? 'Tranche Split (AI)' : 'Committed Outflows (Tuition)'}
                 </span>
               </div>
             </div>
             <div
               style={{
-                fontSize: '10.5px',
+                fontSize: '11.5px',
                 fontWeight: 700,
-                color: 'var(--slate)',
+                color: '#334155',
               }}
             >
               $5.0k Cap Horizon
@@ -244,133 +255,122 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
           <div style={{ width: '100%', overflowX: 'auto' }}>
             <PlannerChart scenarioKey={plannerScenario} />
           </div>
-        </div>
+        </Card>
 
         {/* ═══════════ DETAILED FINANCIAL METRICS DATA MATRIX ═══════════ */}
-        <div className="planner-data-table-card">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '12px',
-            }}
-          >
-            <div
-              style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink)' }}
-            >
-              Integrated Financial Metrics (综合财务指标矩阵)
-            </div>
-            <div style={{ fontSize: '11px', color: 'var(--slate)' }}>
+        <Card className="p-5 md:p-6 mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h2 className="text-[18px] font-semibold text-[#14213D] leading-none">
+              Integrated Financial Metrics
+            </h2>
+            <span className="text-[13px] text-[#64748B]">
               Aligned with Monthly Schedule
-            </div>
+            </span>
           </div>
 
-          <table className="planner-data-table">
-            <thead>
-              <tr>
-                <th className="col-metric">Financial Metric</th>
-                <th>Oct</th>
-                <th>Nov</th>
-                <th>Dec</th>
-                <th
-                  className={`highlight-col ${isDelayed ? 'danger' : ''}`}
-                >
-                  Jan {isOptimized ? '(Split)' : '(Due)'}
-                </th>
-                <th>Feb</th>
-                <th>Mar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Row 1: Committed Share (%) [Matching reference image's Buyout share (%)] */}
-              <tr>
-                <td className="metric-name">Committed Share (%)</td>
-                {bars.map((b, i) => (
-                  <td
-                    key={b.month}
-                    className={
-                      i === 3
-                        ? `highlight-col ${b.share > 70 ? 'danger' : ''}`
-                        : ''
+          <div className="planner-data-table-container">
+            <table className="planner-data-table">
+              <thead>
+                <tr>
+                  <th className="col-metric">Financial Metric</th>
+                  <th>Oct</th>
+                  <th>Nov</th>
+                  <th>Dec</th>
+                  <th className="col-jan-highlight">
+                    Jan {isOptimized ? '(Split)' : '(Due)'}
+                  </th>
+                  <th>Feb</th>
+                  <th>Mar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* Row 1: Committed Share (%) [74% as the only red number] */}
+                <tr>
+                  <td className="col-metric">Committed Share (%)</td>
+                  {bars.map((b, i) => {
+                    const isJan = i === 3;
+                    const isRed = isJan && b.share > 70;
+                    return (
+                      <td
+                        key={b.month}
+                        className={isJan ? 'col-jan-highlight' : ''}
+                        style={{
+                          color: isRed ? '#B91C1C' : '#14213D',
+                          fontWeight: isRed ? 700 : 500,
+                        }}
+                      >
+                        {b.share}%
+                      </td>
+                    );
+                  })}
+                </tr>
+
+                {/* Row 2: Net Monthly Flow ($) - green for positive, red for negative with +/- */}
+                <tr>
+                  <td className="col-metric">Net Flow ($)</td>
+                  {bars.map((b, i) => {
+                    const isJan = i === 3;
+                    const isNeg = b.netFlow.startsWith('-');
+                    return (
+                      <td
+                        key={b.month}
+                        className={isJan ? 'col-jan-highlight' : ''}
+                        style={{
+                          color: isNeg ? '#B91C1C' : '#0E6E43',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {b.netFlow}
+                      </td>
+                    );
+                  })}
+                </tr>
+
+                {/* Row 3: Runway Buffer (Days) */}
+                <tr>
+                  <td className="col-metric">Runway Horizon</td>
+                  {bars.map((b, i) => {
+                    const isJan = i === 3;
+                    return (
+                      <td
+                        key={b.month}
+                        className={isJan ? 'col-jan-highlight' : ''}
+                        style={{ fontWeight: 500 }}
+                      >
+                        {b.runwayDays}
+                      </td>
+                    );
+                  })}
+                </tr>
+
+                {/* Row 4: Safety Status Badges */}
+                <tr>
+                  <td className="col-metric">Safety Status</td>
+                  {bars.map((b, i) => {
+                    const isJan = i === 3;
+                    let badgeVariant: 'green' | 'amber' | 'red' = 'green';
+                    if (b.status === 'Critical Dip') {
+                      badgeVariant = isDelayed ? 'red' : 'amber';
+                    } else if (b.status === 'Tuition Due') {
+                      badgeVariant = 'amber';
                     }
-                    style={
-                      b.share > 70
-                        ? { color: 'var(--red)', fontWeight: 700 }
-                        : undefined
-                    }
-                  >
-                    {b.share}%
-                  </td>
-                ))}
-              </tr>
+                    return (
+                      <td key={b.month} className={isJan ? 'col-jan-highlight' : ''}>
+                        <Badge variant={badgeVariant}>
+                          {b.status}
+                        </Badge>
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-              {/* Row 2: Net Monthly Flow ($) */}
-              <tr>
-                <td className="metric-name">Net Flow ($)</td>
-                {bars.map((b, i) => {
-                  const isNeg = b.netFlow.startsWith('-');
-                  return (
-                    <td
-                      key={b.month}
-                      className={i === 3 ? 'highlight-col' : ''}
-                      style={{
-                        color: isNeg ? 'var(--red)' : 'var(--green)',
-                      }}
-                    >
-                      {b.netFlow}
-                    </td>
-                  );
-                })}
-              </tr>
-
-              {/* Row 3: Runway Buffer (Days) */}
-              <tr>
-                <td className="metric-name">Runway Horizon</td>
-                {bars.map((b, i) => (
-                  <td
-                    key={b.month}
-                    className={i === 3 ? 'highlight-col' : ''}
-                    style={
-                      parseInt(b.runwayDays) < 40
-                        ? { color: 'var(--red)', fontWeight: 700 }
-                        : undefined
-                    }
-                  >
-                    {b.runwayDays}
-                  </td>
-                ))}
-              </tr>
-
-              {/* Row 4: Safety Status Badges */}
-              <tr>
-                <td className="metric-name">Safety Status</td>
-                {bars.map((b, i) => {
-                  let pillClass = 'healthy';
-                  if (
-                    b.status === 'Critical Dip' ||
-                    b.status === 'Tuition Due'
-                  ) {
-                    pillClass = isDelayed ? 'alert' : 'warning';
-                  } else if (b.status === 'Optimal') {
-                    pillClass = 'optimal';
-                  }
-                  return (
-                    <td key={b.month} className={i === 3 ? 'highlight-col' : ''}>
-                      <span className={`status-pill ${pillClass}`}>
-                        {b.status}
-                      </span>
-                    </td>
-                  );
-                })}
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* ═══════════ MITIGATION / ADVISORY CARD ═══════════ */}
+        {/* ═══════════ MITIGATION / ADVISORY CARD (24px top margin, 16px 20px padding) ═══════════ */}
         {isDelayed ? (
-          <div className="planner-warning-card">
+          <div className="planner-warning-card mt-6 p-4 md:px-5 rounded-[16px] mb-4">
             <div
               className="planner-warning-title"
               style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
@@ -414,16 +414,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
                 key={opt.labelEn}
               >
                 <div>
-                  <strong>👉 {opt.labelEn}</strong>
-                  <div
-                    style={{
-                      fontSize: '11px',
-                      color: 'var(--slate)',
-                      marginTop: '2px',
-                    }}
-                  >
-                    {opt.labelZh}
-                  </div>
+                  <strong>👉 {locale === 'zh' ? opt.labelZh : opt.labelEn}</strong>
                 </div>
                 <span
                   style={{
@@ -436,7 +427,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  Apply 优化
+                  {locale === 'zh' ? '应用优化' : 'Apply'}
                 </span>
               </div>
             ))}
@@ -445,11 +436,9 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
           <div
             style={{
               background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-              borderRadius: '14px',
-              padding: '16px',
               border: '1px solid #A7F3D0',
-              marginBottom: '14px',
             }}
+            className="mt-6 p-4 md:px-5 rounded-[16px] mb-4"
           >
             <div
               style={{
@@ -494,12 +483,10 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
         ) : (
           <div
             style={{
-              background: 'var(--mist)',
-              borderRadius: '14px',
-              padding: '14px 16px',
-              border: '1px solid var(--line)',
-              marginBottom: '14px',
+              background: '#F8FAFC',
+              border: '1px solid rgba(15,23,42,0.08)',
             }}
+            className="mt-6 p-4 md:px-5 rounded-[16px] mb-4"
           >
             <div
               style={{
@@ -525,8 +512,8 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
             </div>
             <div
               style={{
-                fontSize: '11.5px',
-                color: 'var(--slate)',
+                fontSize: '12.5px',
+                color: '#334155',
                 marginTop: '4px',
               }}
             >
@@ -541,8 +528,8 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
           className="app-footer-disclaimer"
           style={{
             textAlign: 'center',
-            fontSize: '11px',
-            color: 'var(--slate)',
+            fontSize: '12px',
+            color: '#475569',
             lineHeight: 1.4,
             padding: '6px 0',
           }}

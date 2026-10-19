@@ -7,6 +7,19 @@ import { FiveSegmentBar } from '@/components/art/FiveSegmentBar';
 import { SEED_DATA } from '@/lib/mockData';
 import { t, b } from '@/lib/i18n';
 import { AppRoute, Locale } from '@/types';
+import SplitText from '@/components/SplitText';
+import { Card, CardHeader, CardTitle, CardBadge, CardBody, CardFooter } from '@/components/ui/Card';
+import {
+  AegisShieldIcon,
+  TuitionGradCapIcon,
+  PlannerRunwayIcon,
+  EvidenceDocIcon,
+  SafetyRingsIcon,
+  AskChopBotIcon,
+  ArrowUpRightIcon,
+  PayeesBookIcon,
+  RatesExchangeIcon,
+} from '@/components/icons/AegisIcons';
 
 interface HomeScreenProps {
   locale: Locale;
@@ -26,434 +39,689 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   emptyActivity = false,
 }) => {
   const user = SEED_DATA.user;
+  const tuition = SEED_DATA.tuition;
   const activities = emptyActivity ? [] : SEED_DATA.recentActivities;
 
+  // Derive dynamic calculated numbers strictly from seed & planner models
+  const tuitionDueCny = tuition.dueAmountCny; // 18,000
+  const tuitionSendUsd = tuition.modes.cheapest.total.toFixed(2); // 2,534.30
+  const onTimePlan = SEED_DATA.plannerSchedule.scenarios.on_time;
+  const janBar = onTimePlan.bars?.[3] || { total: 4.3, reserve: 1.1, runwayDays: '95d' };
+  const plannerTotalFormatted = (janBar.total * 1000).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }); // 4,300.00
+  const plannerRunway = janBar.runwayDays || '95d';
+
   return (
-    <div className="home-screen pb-16">
-      {/* ═══════════ BLUE HEADER (214px) ═══════════ */}
-      <header className="screen-header-blue home-header relative overflow-hidden">
+    <div className="home-screen pb-10 w-full">
+      {/* ═══════════ LUMINOUS HERO HEADER (Max-width 1200px aligned) ═══════════ */}
+      <header className="screen-header-blue home-header relative overflow-hidden rounded-[20px] p-6 md:p-8 w-full mb-6">
         <HeaderArt screenType="home" />
 
-        <div className="header-content relative z-10">
-          {/* Top row */}
-          <div className="header-topbar flex items-center justify-between mb-3">
+        <div className="header-content relative z-10 w-full">
+          {/* Top Bar on Mobile */}
+          <div className="header-topbar flex items-center justify-between mb-4 md:hidden">
             <div className="brand-row flex items-center gap-2">
-              <span className="brand-title text-white font-bold text-[18px]">AegisPath</span>
-              <span className="pill-testnet text-[11px] font-semibold bg-[#1F3FA8]/80 text-[#6FD3FF] px-2.5 py-0.5 rounded-full border border-[#6FD3FF]/30">
-                {b('testnet_pill', 'testnet_pill_sub', locale)}
+              <SplitText
+                text="AegisPath"
+                tag="span"
+                className="brand-title text-white font-bold text-[18px] tracking-tight"
+                delay={25}
+                duration={0.6}
+                effect="fade"
+              />
+              <span className="pill-testnet text-[11px] font-semibold bg-[#0A1440]/60 text-white px-2.5 py-0.5 rounded-full border border-white/25">
+                {locale === 'zh' ? '测试网' : 'Testnet'}
               </span>
             </div>
 
             <div className="header-actions flex items-center gap-2">
               <button
-                className="bell-btn p-1.5 text-white/90 hover:text-white transition-colors relative"
+                className="bell-btn p-1.5 text-white hover:text-white/80 transition-colors relative"
                 aria-label="Notifications"
+                title={locale === 'zh' ? '通知' : 'Notifications'}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
-                <span className="bell-badge absolute -top-1 -right-1 bg-[#E5484D] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                <span className="bell-badge absolute -top-1 -right-1 bg-[#D97706] text-white text-[11px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                   2
                 </span>
               </button>
             </div>
           </div>
 
-          {/* Greeting */}
-          <div className="home-hero-greeting text-white font-medium text-[15px] opacity-90 mb-1">
-            {b('greeting', 'greeting_sub', locale)}
-          </div>
-
-          {/* Daily Allowance Label */}
-          <div className="home-allowance-label text-[#E6EEFF] text-[12px] opacity-80 mb-0.5">
-            {b('daily_allowance', 'daily_allowance_sub', locale)}
-          </div>
-
-          <div className="home-allowance-flex flex items-center justify-between mb-2">
-            <div className="allowance-amount-box flex items-baseline gap-1.5">
-              <span className="big-allowance-amount text-white text-[32px] font-bold font-mono tracking-tight tabular-nums">
-                ${user.dailyAllowanceRemaining}
-              </span>
-              <span className="allowance-total-tag text-[#9DB8FF] text-[12px]">
-                {b('of_total', 'of_total_sub', locale)}
-              </span>
-            </div>
-
-            {/* Mascot Cluster: Chop with Speech Bubble */}
-            <div className="mascot-header-cluster relative flex items-center">
-              <div className="speech-bubble-hi bg-white text-[#14213D] text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm mr-2 border border-[#E6ECF8]">
-                Hi! 你好
+          {/* Desktop & Mobile Responsive 2-Column Hero Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            {/* Left Column: Greeting, Allowance, Quick Jump */}
+            <div className="md:col-span-7 lg:col-span-8 pr-0 md:pr-4">
+              <div className="hidden md:flex items-center gap-2 mb-2">
+                <span className="text-[12px] font-semibold tracking-wide text-white bg-white/20 px-3 py-1 rounded-full border border-white/25">
+                  {locale === 'zh' ? '确定性 AI 智能钱包 · 测试网' : 'Deterministic AI Agent Wallet · Testnet'}
+                </span>
               </div>
-              <ChopMascot
-                bodyColor="#FFFFFF"
-                faceColor="#DCE8FD"
-                expression={isPaused ? 'paused' : 'wave'}
-                size={58}
-                className="home-main-chop"
-              />
+
+              {/* Personal Greeting to Ayu (Optional single line sub) */}
+              <div className="home-hero-greeting text-white font-medium text-[16px] md:text-[18px] mb-3 flex items-baseline gap-2">
+                <SplitText
+                  text={locale === 'zh' ? '欢迎回来，Ayu' : 'Welcome back, Ayu'}
+                  tag="span"
+                  className="text-white font-bold"
+                  delay={20}
+                  duration={0.5}
+                  effect="fade"
+                />
+              </div>
+
+              {/* Allowance Display */}
+              <div className="home-allowance-block mb-4 max-w-[420px]">
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <span className="text-white font-semibold text-[13px] tracking-wide uppercase">
+                    {locale === 'zh' ? '今日可用额度' : 'Daily Allowance'}
+                  </span>
+                  <span className="text-[11px] font-medium text-white/90 bg-[#0A1440]/40 px-2 py-0.5 rounded-full border border-white/20">
+                    {locale === 'zh' ? '6小时后重置' : 'Resets in 6h'}
+                  </span>
+                </div>
+
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="big-allowance-amount text-white text-[36px] md:text-[40px] font-semibold tabular-nums tracking-tight">
+                    ${user.dailyAllowanceRemaining}
+                  </span>
+                  <span className="text-white text-[13px] font-medium opacity-90">
+                    {locale === 'zh' ? `总额 $${user.dailyAllowanceTotal}` : `of $${user.dailyAllowanceTotal}`}
+                  </span>
+                </div>
+
+                {/* 5-Segment Allowance Indicator Bar */}
+                <FiveSegmentBar filledCount={4} total={5} />
+              </div>
+
+              {/* Quick Jump Action Pills */}
+              <div className="flex flex-wrap items-center gap-3 pt-1">
+                <button
+                  onClick={() => onNavigate('/tuition')}
+                  className="px-4 py-2 rounded-full bg-white text-[#1C3EAA] font-bold text-[13px] shadow-sm hover:bg-[#F4F7FE] transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <TuitionGradCapIcon size={15} color="#1C3EAA" />
+                  <span>
+                    {locale === 'zh'
+                      ? `学费待缴 ¥${tuitionDueCny.toLocaleString('en-US')} →`
+                      : `Pay Tuition: ¥${tuitionDueCny.toLocaleString('en-US')} Due →`}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('/planner')}
+                  className="px-3.5 py-2 rounded-full bg-white/20 text-white font-semibold text-[13px] border border-white/30 hover:bg-white/30 transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <PlannerRunwayIcon size={14} color="#FFFFFF" />
+                  <span>
+                    {locale === 'zh'
+                      ? `资金缓冲规划 (${plannerRunway})`
+                      : `Buffer Runway: ${plannerRunway}`}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Interactive Chop Companion Stage */}
+            <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center md:items-end justify-center mt-2 md:mt-0">
+              <div className="companion-stage flex flex-col items-center text-center max-w-[320px] w-full">
+                {/* Speech Bubble */}
+                <div className="speech-bubble-companion bg-white text-[#14213D] text-[12px] font-semibold p-3.5 rounded-[16px] shadow-sm mb-3 border border-[#E6ECF8] w-full relative">
+                  <div className="text-[13px] font-bold text-[#1C3EAA] mb-0.5">
+                    {locale === 'zh' ? 'Ayu 你好！' : 'Hi Ayu!'}
+                  </div>
+                  <div className="text-[12px] text-[#475569] leading-relaxed">
+                    {locale === 'zh'
+                      ? '三环安全已就绪，正在监控学费交割缓冲。'
+                      : 'All 3 security layers are active. Monitoring tuition buffers.'}
+                  </div>
+                </div>
+
+                {/* Substantial Mascot Element */}
+                <div className="mascot-mount py-1">
+                  <ChopMascot
+                    bodyColor="#FFFFFF"
+                    faceColor="#DCE8FD"
+                    expression={isPaused ? 'paused' : 'wave'}
+                    size={84}
+                    className="home-main-chop hover:scale-105 transition-transform cursor-pointer"
+                  />
+                </div>
+
+                {/* Agent Guard Status & Styled Pause Button */}
+                <div className="w-full pt-3 mt-1 flex items-center justify-between text-[12px]">
+                  <div className="flex items-center gap-2 text-white font-semibold">
+                    <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-[#FF6B6F]' : 'bg-[#6FD3FF]'}`} />
+                    <span>
+                      {isPaused
+                        ? locale === 'zh' ? '已暂停守护' : 'Agent Paused'
+                        : locale === 'zh' ? '智能体在线守护' : 'Chop Guarding'}
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={onTogglePause}
+                    className={`px-3.5 py-1.5 rounded-full font-bold text-[12px] transition-all cursor-pointer shadow-xs ${
+                      isPaused
+                        ? 'bg-[#B91C1C] text-white hover:bg-[#A81E23]'
+                        : 'bg-white text-[#1C3EAA] hover:bg-[#F4F7FE]'
+                    }`}
+                  >
+                    {isPaused
+                      ? locale === 'zh' ? '▶ 恢复' : '▶ Resume'
+                      : locale === 'zh' ? '⏸ 暂停' : '⏸ Pause'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* 5-segment allowance bar */}
-          <FiveSegmentBar filledCount={4} total={5} />
         </div>
       </header>
 
-      {/* ═══════════ OVERLAPPING GUARD STRIP ═══════════ */}
-      <div className="chop-guard-strip-card mx-4 -mt-3.5 relative z-20 bg-white rounded-[16px] p-3 shadow-[0_4px_20px_rgba(20,33,61,0.07)] border border-[#E6ECF8] flex items-center justify-between transition-all hover:shadow-[0_6px_24px_rgba(61,107,234,0.12)]">
-        <div className="strip-left flex items-center gap-2">
-          <ChopMascot
-            bodyColor="#3D6BEA"
-            faceColor="#FFFFFF"
-            expression={isPaused ? 'paused' : 'guard'}
-            size={24}
-          />
-          <span className="strip-title font-semibold text-[13px] text-[#14213D]">
-            {b('chop_guard_strip', 'chop_guard_sub', locale)}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="strip-tag-green text-[11px] font-bold bg-[#E3F6EE] text-[#1E9E6A] px-2 py-0.5 rounded-full">
-            3/3 {b('three_layers_tag', 'three_layers_tag_sub', locale)}
-          </span>
-          <button
-            onClick={onTogglePause}
-            className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border transition-all ${
-              isPaused
-                ? 'bg-[#E5484D] text-white border-[#E5484D]'
-                : 'bg-[#F4F7FE] text-[#5B6B8C] border-[#E6ECF8] hover:text-[#14213D]'
-            }`}
-          >
-            {isPaused ? (locale === 'zh' ? '已暂停' : 'Paused') : (locale === 'zh' ? '暂停' : 'Pause')}
-          </button>
-        </div>
-      </div>
-
-      {/* Kill Switch Paused Banner if Paused */}
+      {/* Kill Switch Alert Banner when Agent is Paused */}
       {isPaused && (
-        <div className="mx-4 mt-3 p-3 bg-[#FFF4DC] border border-[#F5A524] rounded-[14px] text-[12px] text-[#B7791F] flex items-center justify-between">
-          <span>{b('agent_paused_banner', 'agent_paused_banner_sub', locale)}</span>
-          <button
-            onClick={onTogglePause}
-            className="ml-2 font-bold underline cursor-pointer text-[#1F3FA8]"
-          >
-            {b('btn_resume_passkey', 'btn_resume_passkey_sub', locale)}
-          </button>
+        <div className="w-full mb-6">
+          <div className="p-4 bg-[#FFFBEB] border border-[#D97706]/40 rounded-[16px] text-[13px] text-[#8A5200] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A5200" strokeWidth="2.2" className="shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span className="leading-relaxed">
+                {locale === 'zh'
+                  ? '智能体已被紧急暂停。所有自主调度与转账请求已锁止。'
+                  : 'AI agent is paused. All autonomous transfers and scheduling locked.'}
+              </span>
+            </div>
+            <button
+              onClick={onTogglePause}
+              className="ml-3 font-bold underline cursor-pointer text-[#173595] text-[13px] shrink-0"
+            >
+              {locale === 'zh' ? '恢复运行' : 'Resume agent'}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* ═══════════ SCREEN BODY ═══════════ */}
-      <main className="screen-body px-4 pt-4">
-        {/* Services Section Header */}
-        <div className="section-header-title flex items-center gap-2 mb-3">
-          <span className="section-accent-bar w-1 h-3.5 bg-[#3D6BEA] rounded-full" />
-          <span className="font-bold text-[14px] text-[#14213D]">
-            {b('services_title', 'services_sub', locale)}
+      {/* ═══════════ SAFETY KERNEL CARD (Refined Spacing & Balanced Typography) ═══════════ */}
+      <section className="safety-kernel-section w-full mb-6">
+        <Card variant="default" className="p-4 md:p-5">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+            {/* Left: Title, Tag, Core Guarantee Wording & CTA */}
+            <div className="md:col-span-5 flex flex-col justify-center gap-2.5 pr-0 md:pr-5 border-b md:border-b-0 md:border-r border-[rgba(15,23,42,0.06)] pb-4 md:pb-0">
+              <div>
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#EBF7EE] text-[#0E6E43] flex items-center justify-center border border-[#0E6E43]/20 shrink-0 shadow-xs">
+                    <AegisShieldIcon size={18} color="#0E6E43" />
+                  </div>
+                  <CardTitle className="text-[16px] text-[#14213D] font-bold">
+                    {locale === 'zh' ? '安全核心' : 'Safety kernel'}
+                  </CardTitle>
+                  <CardBadge variant="green">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0E6E43] mr-1.5 animate-pulse" />
+                    {locale === 'zh' ? '3/3 层有效' : '3/3 layers active'}
+                  </CardBadge>
+                </div>
+
+                <p className="text-[12.5px] text-[#64748B] leading-relaxed max-w-sm">
+                  {locale === 'zh'
+                    ? '安全防护在语言模型外部独立执行，银行侧限额隔离保护资金。'
+                    : 'Deterministic security rules run strictly outside the LLM. Bank-side limits protect funds.'}
+                </p>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => onNavigate('/safety')}
+                  className="group inline-flex items-center gap-2 h-9 px-3.5 rounded-[10px] bg-[#F4F7FE] hover:bg-[#EEF4FF] text-[#1C3EAA] border border-[rgba(15,23,42,0.08)] hover:border-[#3D6BEA]/30 transition-all font-semibold text-[12.5px] cursor-pointer"
+                >
+                  <span>{locale === 'zh' ? '查看三环防护' : 'Inspect Kernel'}</span>
+                  <span className="w-4 h-4 rounded-full bg-white text-[#1C3EAA] flex items-center justify-center text-[10px] shadow-xs group-hover:translate-x-0.5 transition-transform">
+                    →
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Three Compact Layer Items with clean padding & symmetric status dots */}
+            <div className="md:col-span-7 flex flex-col gap-2">
+              {/* Item 1: Outer Privacy Filter */}
+              <div className="py-2.5 px-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] hover:bg-white transition-all flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-white text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#E6ECF8] shadow-xs">
+                    <AegisShieldIcon size={14} color="#1C3EAA" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
+                      {locale === 'zh' ? '外环 · 隐私过滤' : 'Outer · Privacy Filter'}
+                    </span>
+                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                      {locale === 'zh'
+                        ? '阻断提示词注入攻击，隐藏敏感身份凭据'
+                        : 'Blocks prompt injections & redacts sensitive student PII'}
+                    </span>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-[#0E6E43] shrink-0 shadow-xs" title="Active" />
+              </div>
+
+              {/* Item 2: Middle Spending Rules */}
+              <div className="py-2.5 px-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] hover:bg-white transition-all flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-white text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#E6ECF8] shadow-xs">
+                    <SafetyRingsIcon size={14} color="#1C3EAA" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
+                      {locale === 'zh' ? '中环 · 支出规则' : 'Middle · Spending Rules'}
+                    </span>
+                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                      {locale === 'zh'
+                        ? '强制每日 $1,000 额度，校验收款人白名单'
+                        : 'Enforces $1,000/day allowance & verifies payee whitelist'}
+                    </span>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-[#0E6E43] shrink-0 shadow-xs" title="Active" />
+              </div>
+
+              {/* Item 3: Inner Bank Limits */}
+              <div className="py-2.5 px-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] hover:bg-white transition-all flex items-center justify-between gap-3 shadow-2xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-white text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#E6ECF8] shadow-xs">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C3EAA" strokeWidth="2.2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
+                      {locale === 'zh' ? '内环 · 银行限额' : 'Inner · Bank Limits'}
+                    </span>
+                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                      {locale === 'zh'
+                        ? '银行侧转账限额，模型外部独立锁定保护'
+                        : 'Bank-side transfer limits outside agent control'}
+                    </span>
+                  </div>
+                </div>
+                <span className="w-2 h-2 rounded-full bg-[#0E6E43] shrink-0 shadow-xs" title="Active" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      {/* ═══════════ SERVICES SECTION (8-ICON GRID RESTORING PAYEES & RATES) ═══════════ */}
+      <section className="services-section w-full mb-6">
+        <div className="section-header-title mb-3 flex items-center justify-between">
+          <h2 className="font-semibold text-[18px] text-[#14213D] tracking-tight">
+            {locale === 'zh' ? '服务' : 'Services'}
+          </h2>
+          <span className="text-[13px] text-[#64748B]">
+            {locale === 'zh' ? '跨境金融服务与智能调度' : 'Cross-border Student Services'}
           </span>
         </div>
 
-        {/* 4x2 Services Grid */}
-        <div className="services-grid-4x2 grid grid-cols-4 gap-2 mb-4">
-          {/* 1. Send */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => {
-              if (onShowToast) {
-                onShowToast(locale === 'zh' ? '已转至个人转账助手 (例如："给妈妈汇 $200")' : 'Opened Ask Chop for peer transfers ("Send $200 to Mom")');
-              }
-              onNavigate('/chat');
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="7" y1="17" x2="17" y2="7" />
-                <polyline points="7 7 17 7 17 17" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_send', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_send_sub', locale)}</span>
-          </div>
+        {/* 8-Icon Service Grid (Gojek-Style Reference) Restoring Payees and Rates */}
+        <Card variant="default" className="p-4 md:p-5 mb-6">
+          <div className="grid grid-cols-4 md:grid-cols-8 gap-3 sm:gap-4 items-start justify-items-center">
+            {/* 1. Send */}
+            <button
+              onClick={() => {
+                onShowToast?.(locale === 'zh' ? '打开个人汇款对话' : 'Opened Ask Chop for transfers');
+                onNavigate('/chat');
+              }}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <ArrowUpRightIcon size={20} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
+                  7.24
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '转账' : 'Send'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '即时汇款' : 'Remit'}
+              </span>
+            </button>
 
-          {/* 2. Tuition */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
+            {/* 2. Tuition */}
+            <button
+              onClick={() => onNavigate('/tuition')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <TuitionGradCapIcon size={20} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#FFFBEB] text-[#D97706] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#D97706]/20">
+                  14d
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '学费' : 'Tuition'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '跨境缴纳' : 'Pay'}
+              </span>
+            </button>
+
+            {/* 3. Evidence */}
+            <button
+              onClick={() => onNavigate('/evidence')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <EvidenceDocIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EBF7EE] text-[#0E6E43] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#0E6E43]/20">
+                  Tier 1
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '证明' : 'Evidence'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '财力包' : 'Proof'}
+              </span>
+            </button>
+
+            {/* 4. Safety */}
+            <button
+              onClick={() => onNavigate('/safety')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <SafetyRingsIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EBF7EE] text-[#0E6E43] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#0E6E43]/20">
+                  3/3
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '安全' : 'Safety'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '三环防御' : 'Kernel'}
+              </span>
+            </button>
+
+            {/* 5. Payees (Restored!) */}
+            <button
+              onClick={() => {
+                onShowToast?.(locale === 'zh' ? '查看收款人白名单' : 'Viewing whitelisted payees');
+                onNavigate('/safety');
+              }}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <PayeesBookIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
+                  3
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '收款人' : 'Payees'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '白名单' : 'Allowed'}
+              </span>
+            </button>
+
+            {/* 6. Rates (Restored!) */}
+            <button
+              onClick={() => {
+                onShowToast?.(locale === 'zh' ? '查看实时汇率' : 'Live PBOC exchange rates');
+                onNavigate('/tuition');
+              }}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <RatesExchangeIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
+                  Live
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '汇率' : 'Rates'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '中间价' : 'PBOC Mid'}
+              </span>
+            </button>
+
+            {/* 7. Planner */}
+            <button
+              onClick={() => onNavigate('/planner')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <PlannerRunwayIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EBF7EE] text-[#0E6E43] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#0E6E43]/20">
+                  95d
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '规划' : 'Planner'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '现金缓冲' : 'Runway'}
+              </span>
+            </button>
+
+            {/* 8. Ask Chop */}
+            <button
+              onClick={() => onNavigate('/chat')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+            >
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+                <AskChopBotIcon size={19} color="currentColor" />
+                <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
+                  AI
+                </span>
+              </div>
+              <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
+                {locale === 'zh' ? '智能体' : 'Ask Chop'}
+              </span>
+              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+                {locale === 'zh' ? '助手咨询' : 'Chat'}
+              </span>
+            </button>
+          </div>
+        </Card>
+
+        {/* Featured Cards: Pay Tuition & Buffer Planner */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
+          {/* Featured Card 1: Pay Tuition */}
+          <Card
+            variant="default"
+            className="p-4 md:p-5 flex flex-col justify-between cursor-pointer hover:border-[#1C3EAA]/30 hover:shadow-xs transition-all"
             onClick={() => onNavigate('/tuition')}
             role="button"
             tabIndex={0}
           >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_tuition', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_tuition_sub', locale)}</span>
-          </div>
+            <div>
+              {/* Header */}
+              <CardHeader className="pb-2.5 mb-2.5 border-b border-[rgba(15,23,42,0.06)]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#EEF4FF] text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#3D6BEA]/20 shadow-xs">
+                    <TuitionGradCapIcon size={18} color="#1C3EAA" />
+                  </div>
+                  <CardTitle className="text-[14.5px] text-[#14213D] font-bold leading-tight tracking-tight">
+                    {locale === 'zh' ? '缴纳学费 (跨境汇款)' : 'Pay Tuition (Cross-Border)'}
+                  </CardTitle>
+                </div>
+                <CardBadge variant="amber">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] mr-1.5 animate-pulse" />
+                  {locale === 'zh' ? '14天内截止' : 'Due in 14 days'}
+                </CardBadge>
+              </CardHeader>
 
-          {/* 3. Evidence */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/evidence')}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
+              {/* Amount Display Widget (Reference-matched balanced scale) */}
+              <div className="my-2 p-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.04)]">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[22px] md:text-[24px] font-bold tabular-nums text-[#14213D] tracking-tight">
+                    ¥{tuitionDueCny.toLocaleString('en-US')}
+                  </span>
+                  <span className="text-[11.5px] font-semibold text-[#64748B] uppercase tracking-wider">
+                    CNY
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#64748B] leading-normal mt-1">
+                  {locale === 'zh'
+                    ? `应缴 ¥${tuitionDueCny.toLocaleString('en-US')} · 需汇出 $${tuitionSendUsd} USD 至学校财务处`
+                    : `Due ¥${tuitionDueCny.toLocaleString('en-US')} · Send $${tuitionSendUsd} USD to Campus bursar`}
+                </p>
+              </div>
             </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_evidence', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_evidence_sub', locale)}</span>
-          </div>
 
-          {/* 4. Safety */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => onNavigate('/safety')}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_safety', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_safety_sub', locale)}</span>
-          </div>
+            {/* Footer link with divider */}
+            <CardFooter className="pt-2.5 mt-auto border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[12.5px] font-semibold text-[#1C3EAA]">
+              <span>
+                {locale === 'zh' ? '选择支付方案 (快/省/稳)' : 'Select Schedule (Fast/Cheapest)'}
+              </span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[11px] font-semibold text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full border border-[rgba(15,23,42,0.06)]">
+                  Fall 2026
+                </span>
+                <span className="w-5 h-5 rounded-full bg-[#1C3EAA] text-white flex items-center justify-center text-[10px] shadow-xs">
+                  →
+                </span>
+              </div>
+            </CardFooter>
+          </Card>
 
-          {/* 5. Payees */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => {
-              if (onShowToast) {
-                onShowToast(locale === 'zh' ? '收款人管理即将推出 (当前已绑定白名单: 妈妈、学校财务处)' : 'Payee directory coming soon in v1.1 (Active: Mom, Campus Bursar)');
-              } else {
-                onNavigate('/safety');
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_payees', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_payees_sub', locale)}</span>
-          </div>
-
-          {/* 6. Rates */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => {
-              if (onShowToast) {
-                onShowToast(locale === 'zh' ? '实时汇率看板即将推出 (参考: 1 USD ≈ 7.1022 CNY / 15,880 IDR)' : 'Live FX rates dashboard coming in v1.1 (Ref: 1 USD ≈ 7.1022 CNY / 15,880 IDR)');
-              } else {
-                onNavigate('/tuition');
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_rates', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_rates_sub', locale)}</span>
-          </div>
-
-          {/* 7. Planner */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
+          {/* Featured Card 2: Cashflow & Buffer Planner */}
+          <Card
+            variant="default"
+            className="p-4 md:p-5 flex flex-col justify-between cursor-pointer hover:border-[#1C3EAA]/30 hover:shadow-xs transition-all"
             onClick={() => onNavigate('/planner')}
             role="button"
             tabIndex={0}
           >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
-            </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_planner', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_planner_sub', locale)}</span>
-          </div>
+            <div>
+              {/* Header */}
+              <CardHeader className="pb-2.5 mb-2.5 border-b border-[rgba(15,23,42,0.06)]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#EEF4FF] text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#3D6BEA]/20 shadow-xs">
+                    <PlannerRunwayIcon size={18} color="#1C3EAA" />
+                  </div>
+                  <CardTitle className="text-[14.5px] text-[#14213D] font-bold leading-tight tracking-tight">
+                    {locale === 'zh' ? '现金流调度与缓冲规划' : 'Buffer & Cashflow Planner'}
+                  </CardTitle>
+                </div>
+                <CardBadge variant="green">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E6E43] mr-1.5 animate-pulse" />
+                  {locale === 'zh' ? `缓冲充足 · ${plannerRunway}` : `Runway: ${plannerRunway}`}
+                </CardBadge>
+              </CardHeader>
 
-          {/* 8. More */}
-          <div
-            className="service-tile cursor-pointer flex flex-col items-center justify-center p-2.5 bg-white rounded-[15px] border border-[#E6ECF8] shadow-sm hover:border-[#3D6BEA] transition-all"
-            onClick={() => {
-              if (onShowToast) {
-                onShowToast(locale === 'zh' ? '更多设置与 WebAuthn 凭证管理即将推出' : 'More settings & Passkey management coming soon in v1.1');
-              } else {
-                onNavigate('/evidence');
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="tile-icon-bubble w-9 h-9 rounded-full bg-[#E6EEFF] text-[#3D6BEA] flex items-center justify-center mb-1.5">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
+              {/* Amount Display Widget (Reference-matched balanced scale) */}
+              <div className="my-2 p-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.04)]">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-[22px] md:text-[24px] font-bold tabular-nums text-[#14213D] tracking-tight">
+                    ${plannerTotalFormatted}
+                  </span>
+                  <span className="text-[11.5px] font-semibold text-[#64748B] uppercase tracking-wider">
+                    USD
+                  </span>
+                </div>
+                <p className="text-[12px] text-[#64748B] leading-normal mt-1">
+                  {locale === 'zh'
+                    ? `1月总资产 ($${janBar.reserve}k 储备缓冲) · ${plannerRunway} 充足安全线`
+                    : `Jan Total Assets ($${janBar.reserve}k Reserve) · ${plannerRunway} healthy runway`}
+                </p>
+              </div>
             </div>
-            <span className="tile-label-primary text-[12px] font-semibold text-[#14213D]">{t('service_more', locale)}</span>
-            <span className="tile-label-sub text-[10px] text-[#5B6B8C]">{t('service_more_sub', locale)}</span>
-          </div>
-        </div>
 
-        {/* Tuition Arrives In Full Banner Card */}
-        <div className="tuition-banner-card bg-gradient-to-r from-[#EEF4FF] via-[#F6F9FE] to-[#FFFFFF] rounded-[18px] p-4 border border-[#B9D0FF]/60 shadow-[0_4px_16px_rgba(61,107,234,0.06)] flex items-center justify-between mb-4 transition-all hover:shadow-[0_6px_20px_rgba(61,107,234,0.10)]">
-          <div className="banner-text-box text-left">
-            <div className="banner-headline font-bold text-[15px] text-[#1F3FA8]">
-              {t('tuition_banner_title', locale)}
-            </div>
-            <div className="banner-subhead text-[11px] text-[#5B6B8C] mb-2.5">
-              {t('tuition_banner_sub', locale)}
-            </div>
-            <button
-              className="banner-calc-btn bg-[#3D6BEA] text-white text-[12px] font-bold px-3.5 py-1.5 rounded-full shadow-sm hover:bg-[#1F3FA8] transition-all cursor-pointer inline-flex items-center gap-1.5"
-              onClick={() => onNavigate('/tuition')}
-            >
-              <span>{b('btn_calculate', 'btn_calculate_sub', locale)}</span>
-              <span>→</span>
-            </button>
-          </div>
-          <div className="banner-art-box opacity-90">
-            <svg width="84" height="60" viewBox="0 0 118 84" fill="none">
-              <path d="M4 78 H114" stroke="#9DB8FF" strokeWidth="2" />
-              <path d="M62 10 L106 24 L84 44 L78 34 Z" fill="#ffffff" stroke="#14213D" strokeWidth="2" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Two Stat Cards: Protection & Evidence */}
-        <div className="stat-cards-row grid grid-cols-2 gap-3 mb-4">
-          {/* Protection Card */}
-          <div
-            className="stat-card-solid-blue cursor-pointer bg-gradient-to-br from-[#4E7FFF] to-[#2D55D6] text-white p-4 rounded-[18px] shadow-[0_4px_20px_rgba(61,107,234,0.20)] hover:shadow-[0_8px_28px_rgba(61,107,234,0.30)] transition-all text-left"
-            onClick={() => onNavigate('/safety')}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="stat-card-header flex items-center justify-between text-white/90 text-[12px] font-semibold mb-1">
-              <span>{b('stat_protection_title', 'stat_protection_sub', locale)}</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-            </div>
-            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1 tabular-nums">3/3</div>
-            <div className="stat-card-desc text-[11px] text-white/85">
-              {b('stat_protection_desc', 'stat_protection_desc_sub', locale)}
-            </div>
-          </div>
-
-          {/* Evidence Card */}
-          <div
-            className="stat-card-sky cursor-pointer bg-gradient-to-br from-[#EBF2FF] to-[#F4F8FE] text-[#1F3FA8] p-4 rounded-[18px] border border-[#B9D0FF]/60 shadow-[0_4px_16px_rgba(61,107,234,0.06)] hover:shadow-[0_6px_22px_rgba(61,107,234,0.12)] transition-all text-left"
-            onClick={() => onNavigate('/evidence')}
-            role="button"
-            tabIndex={0}
-          >
-            <div className="stat-card-header flex items-center justify-between text-[#1F3FA8]/90 text-[12px] font-semibold mb-1">
-              <span>{b('stat_evidence_title', 'stat_evidence_sub', locale)}</span>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              </svg>
-            </div>
-            <div className="stat-card-big-num text-[34px] font-bold leading-none mb-1 text-[#1F3FA8] tabular-nums">3/3</div>
-            <div className="stat-card-desc text-[11px] text-[#5B6B8C]">
-              {b('stat_evidence_desc', 'stat_evidence_desc_sub', locale)}
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity Card */}
-        <div className="activity-card bg-white rounded-[18px] p-4 border border-[#E6ECF8] shadow-sm text-left">
-          <div className="flex items-center justify-between mb-3">
-            <div className="section-header-title flex items-center gap-2">
-              <span className="section-accent-bar w-1 h-3.5 bg-[#3D6BEA] rounded-full" />
-              <span className="font-bold text-[14px] text-[#14213D]">
-                {b('recent_activity', 'recent_activity_sub', locale)}
+            {/* Footer link with divider */}
+            <CardFooter className="pt-2.5 mt-auto border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[12.5px] font-semibold text-[#1C3EAA]">
+              <span className="truncate">
+                {locale === 'zh' ? '模拟资金延期 / 优化场景' : 'Simulate Delayed / Optimized Scenarios'}
               </span>
-            </div>
-            <button
-              onClick={() => onNavigate('/safety')}
-              className="text-[11.5px] font-semibold text-[#3D6BEA] hover:underline"
-            >
-              See all →
-            </button>
-          </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[11px] font-semibold text-[#0E6E43] bg-[#EBF7EE] px-2 py-0.5 rounded-full border border-[#0E6E43]/20">
+                  Healthy Buffer
+                </span>
+                <span className="w-5 h-5 rounded-full bg-[#1C3EAA] text-white flex items-center justify-center text-[10px] shadow-xs">
+                  →
+                </span>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+      </section>
 
-          {activities.length === 0 ? (
-            <div className="p-6 text-center text-[#5B6B8C] text-[13px]">
-              {locale === 'zh' ? '暂无交易动态' : 'No recent activities recorded'}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {activities.map((act) => (
-                <div key={act.id} className="activity-row flex items-center justify-between py-1 border-b border-[#E6ECF8] last:border-none">
-                  <div className="activity-left flex items-center gap-2.5">
-                    <div
-                      className={`activity-icon-bubble w-8 h-8 rounded-full flex items-center justify-center ${
-                        act.type === 'success' ? 'bg-[#E3F6EE] text-[#1E9E6A]' : 'bg-[#FDE8E9] text-[#E5484D]'
-                      }`}
-                    >
-                      {act.type === 'success' ? (
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
+      {/* ═══════════ RECENT ACTIVITY SECTION (Unified 1200px Spacing) ═══════════ */}
+      <section className="recent-activity-section w-full">
+        <div className="section-header-title mb-3 flex items-center justify-between">
+          <h3 className="font-bold text-[16px] text-[#14213D] tracking-tight">
+            {locale === 'zh' ? '最近活动' : 'Recent Activity'}
+          </h3>
+          <span className="text-[12.5px] text-[#475569]">
+            {activities.length} {locale === 'zh' ? '条记录' : 'events'}
+          </span>
+        </div>
+
+        <div className="bg-[#F8FAFE] p-1.5 rounded-[26px] border border-[#E2E8F0] shadow-xs">
+          <div className="bg-white rounded-[20px] divide-y divide-[#F1F5F9] overflow-hidden">
+            {activities.length === 0 ? (
+              <div className="p-6 text-center text-[#475569] text-[13px]">
+                {locale === 'zh' ? '暂无交易记录' : 'No recent transactions'}
+              </div>
+            ) : (
+              activities.map((act) => (
+                <div
+                  key={act.id}
+                  className="activity-item px-5 py-4 hover:bg-[#F8FAFE] transition-colors flex items-center justify-between gap-4 cursor-pointer"
+                >
+                  {/* Left: Custom SVG Icon + Title + Caption */}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-9 h-9 rounded-full bg-[#EEF4FF] text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[#3D6BEA]/15">
+                      {act.type === 'blocked' ? (
+                        <AegisShieldIcon size={17} color="#1C3EAA" />
                       ) : (
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18" />
-                          <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+                        <ArrowUpRightIcon size={18} color="#1C3EAA" />
                       )}
                     </div>
-                    <div>
-                      <div className="activity-title text-[13px] font-semibold text-[#14213D]">
+                    <div className="min-w-0">
+                      <div className="font-bold text-[13.5px] text-[#14213D] truncate">
                         {locale === 'zh' ? act.titleZh : act.titleEn}
                       </div>
-                      <div className="activity-sub text-[11px] text-[#5B6B8C]">
-                        {locale === 'zh' ? act.timestampZh : act.timestamp}
+                      <div className="text-[12px] text-[#475569] mt-0.5 truncate">
+                        {locale === 'zh' ? act.timestampZh : act.timestamp} · {act.receivedText || (locale === 'zh' ? '已拦截' : 'Blocked')}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div
-                      className={`text-[13px] font-bold font-mono ${
-                        act.type === 'success' ? 'text-[#1E9E6A]' : 'text-[#E5484D]'
-                      }`}
-                    >
+
+                  {/* Right: Amount Right-Aligned + Tag Below Amount */}
+                  <div className="text-right shrink-0">
+                    <div className="font-semibold tabular-nums text-[15px] text-[#14213D] amount-condensed">
                       {act.amount}
                     </div>
-                    <div className="text-[10px] text-[#5B6B8C]">
-                      {act.type === 'success' ? 'Delivered ✓' : 'Blocked 已拦截'}
+                    <div className="mt-0.5">
+                      <span
+                        className={`inline-block text-[11px] font-semibold ${
+                          act.type === 'blocked' ? 'text-[#B91C1C]' : 'text-[#0E6E43]'
+                        }`}
+                      >
+                        {act.type === 'blocked'
+                          ? locale === 'zh' ? '已拦截' : 'Blocked'
+                          : locale === 'zh' ? '已验证' : 'Verified'}
+                      </span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              ))
+            )}
+          </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 };

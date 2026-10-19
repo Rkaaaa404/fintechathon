@@ -16,8 +16,9 @@ export type AppRoute =
   | '/approve'
   | '/evidence'
   | '/safety'
-  | '/planner';
+  | '/planner'
+  | '/login';
 
 export type Locale = 'en' | 'zh';
 
-export type ChopExpression = 'idle' | 'wave' | 'guard' | 'block' | 'paused';
+export type ChopExpression = 'idle' | 'wave' | 'guard' | 'block' | 'paused' | 'inspect' | 'detective';

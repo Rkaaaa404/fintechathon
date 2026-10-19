@@ -2,6 +2,24 @@
 
 import React from 'react';
 import { AppRoute, Locale } from '@/types';
+import {
+  AegisShieldIcon,
+  HomeVaultIcon,
+  TuitionGradCapIcon,
+  AskChopBotIcon,
+  EvidenceDocIcon,
+  SafetyRingsIcon,
+  PlannerRunwayIcon,
+} from '@/components/icons/AegisIcons';
+
+export interface HeaderAuthUser {
+  name: string;
+  email: string;
+  university?: string;
+  avatarLetter: string;
+  provider: 'google' | 'aegispath';
+  isAuthenticated: boolean;
+}
 
 interface DesktopHeaderProps {
   currentRoute: AppRoute;
@@ -9,6 +27,7 @@ interface DesktopHeaderProps {
   locale: Locale;
   onLocaleToggle: () => void;
   isPaused: boolean;
+  authUser?: HeaderAuthUser | null;
 }
 
 export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
@@ -17,155 +36,207 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   locale,
   onLocaleToggle,
   isPaused,
+  authUser,
 }) => {
+  const navItems = [
+    {
+      route: '/' as AppRoute,
+      labelEn: 'Home',
+      labelZh: '首页',
+      Icon: HomeVaultIcon,
+    },
+    {
+      route: '/tuition' as AppRoute,
+      labelEn: 'Pay Tuition',
+      labelZh: '缴纳学费',
+      Icon: TuitionGradCapIcon,
+    },
+    {
+      route: '/chat' as AppRoute,
+      labelEn: 'Ask Chop',
+      labelZh: '问智能体',
+      Icon: AskChopBotIcon,
+    },
+    {
+      route: '/evidence' as AppRoute,
+      labelEn: 'Evidence',
+      labelZh: '财力证明',
+      Icon: EvidenceDocIcon,
+    },
+    {
+      route: '/safety' as AppRoute,
+      labelEn: 'Safety',
+      labelZh: '安全防护',
+      Icon: SafetyRingsIcon,
+    },
+    {
+      route: '/planner' as AppRoute,
+      labelEn: 'Planner',
+      labelZh: '资金规划',
+      Icon: PlannerRunwayIcon,
+    },
+  ];
+
   return (
     <header className="web-desktop-header" id="web-desktop-header">
-      <div className="web-header-inner">
-        {/* Brand Logo & Name */}
-        <div className="web-header-left">
+      <div className="web-header-inner flex items-center justify-between w-full min-w-0 gap-3">
+        {/* Brand Logo & Name (Left) */}
+        <div className="web-header-left flex items-center gap-2.5 shrink-0">
           <div
-            className="web-brand-cluster cursor-pointer"
+            className="web-brand-cluster cursor-pointer flex items-center gap-2.5 group"
             onClick={() => onRouteChange('/')}
             role="button"
             tabIndex={0}
+            title={locale === 'zh' ? 'AegisPath - 跨境学生数字钱包' : 'AegisPath - Cross-Border Student Wallet'}
           >
-            <div className="web-logo-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
+            <div className="web-logo-icon w-8 h-8 rounded-[8px] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 shadow-sm">
+              <img
+                src="/brand/aegis-logo.png"
+                alt="AegisPath Shield Logo"
+                className="w-full h-full object-contain"
+                width={32}
+                height={32}
+              />
             </div>
-            <div className="web-brand-text">
-              <span className="web-brand-name">AegisPath</span>
-              <span className="web-brand-tag">AI Agent Digital Wallet</span>
+            <div className="web-brand-text flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="web-brand-name font-bold text-[16px] text-[#14213D] tracking-tight leading-tight">
+                  AegisPath
+                </span>
+                <span className="pill-testnet text-[10px] font-bold bg-[#EEF4FF] text-[#1F3FA8] px-1.5 py-0.5 rounded-full border border-[#3D6BEA]/20">
+                  {locale === 'zh' ? '测试网' : 'Testnet'}
+                </span>
+              </div>
             </div>
           </div>
-          <span className="pill-testnet">Testnet 测试网</span>
         </div>
 
-        {/* 6 Core Functional Navigation Items (No /art) */}
-        <nav className="web-header-nav" aria-label="Desktop Navigation">
-          <button
-            className={`web-nav-btn ${currentRoute === '/' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/')}
-            aria-current={currentRoute === '/' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '首页' : 'Home'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Home' : '首页'}</span>
-          </button>
-
-          <button
-            className={`web-nav-btn ${currentRoute === '/tuition' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/tuition')}
-            aria-current={currentRoute === '/tuition' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-              <line x1="1" y1="10" x2="23" y2="10" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '缴纳学费' : 'Pay Tuition'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Tuition' : '学费'}</span>
-          </button>
-
-          <button
-            className={`web-nav-btn ${currentRoute === '/chat' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/chat')}
-            aria-current={currentRoute === '/chat' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '智能体' : 'Ask Chop'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Ask Chop' : '问智能体'}</span>
-          </button>
-
-          <button
-            className={`web-nav-btn ${currentRoute === '/evidence' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/evidence')}
-            aria-current={currentRoute === '/evidence' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '财力证明' : 'Evidence'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Evidence' : '证明包'}</span>
-          </button>
-
-          <button
-            className={`web-nav-btn ${currentRoute === '/safety' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/safety')}
-            aria-current={currentRoute === '/safety' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '安全防护' : 'Safety'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Safety' : '三环防护'}</span>
-          </button>
-
-          <button
-            className={`web-nav-btn ${currentRoute === '/planner' ? 'active' : ''}`}
-            onClick={() => onRouteChange('/planner')}
-            aria-current={currentRoute === '/planner' ? 'page' : undefined}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="20" x2="18" y2="10" />
-              <line x1="12" y1="20" x2="12" y2="4" />
-              <line x1="6" y1="20" x2="6" y2="14" />
-            </svg>
-            <span className="web-nav-label">{locale === 'zh' ? '现金流规划' : 'Planner'}</span>
-            <span className="web-nav-sub">{locale === 'zh' ? 'Planner' : '资金线'}</span>
-          </button>
+        {/* 6 Core Functional Navigation Items with Bespoke Icons (Center) */}
+        <nav
+          className="web-header-nav flex items-center gap-1 min-w-0"
+          aria-label="Desktop Navigation"
+        >
+          {navItems.map((item) => {
+            const isActive = currentRoute === item.route;
+            const Icon = item.Icon;
+            const label = locale === 'zh' ? item.labelZh : item.labelEn;
+            return (
+              <button
+                key={item.route}
+                className={`web-nav-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  isActive
+                    ? 'active bg-[#EEF4FF] text-[#1C3EAA] shadow-xs'
+                    : 'text-[#475569] hover:text-[#1C3EAA] hover:bg-[#F4F7FE]'
+                }`}
+                onClick={() => onRouteChange(item.route)}
+                aria-current={isActive ? 'page' : undefined}
+                title={label}
+              >
+                <Icon size={16} color="currentColor" />
+                <span className="web-nav-label">
+                  {label}
+                </span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#1C3EAA] ml-0.5" />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-        {/* User Status, Notification Bell, User Badge, Language Switcher */}
-        <div className="web-header-right">
-          <div className="agent-status-indicator" title={isPaused ? 'Agent Paused' : 'Agent Ready'}>
-            <span className={`status-dot ${isPaused ? 'paused' : 'active'}`} />
-            <span className="status-label">
+        {/* User Status, Notification Bell, User Badge, Language Switcher (Right) */}
+        <div className="web-header-right flex items-center gap-2 shrink-0 ml-auto">
+          {/* AI Agent Realtime Guard Status */}
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-semibold border transition-all ${
+              isPaused
+                ? 'bg-[#FEF2F2] border-[#B91C1C]/25 text-[#B91C1C]'
+                : 'bg-[#EBF7EE] border-[#0E6E43]/25 text-[#0E6E43]'
+            }`}
+            title={isPaused ? 'AI Agent Paused' : 'AI Agent Actively Guarding (3/3 Layers Locked)'}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isPaused ? 'bg-[#B91C1C]' : 'bg-[#0E6E43]'
+              }`}
+            />
+            <span>
               {isPaused
                 ? locale === 'zh'
                   ? '已暂停'
                   : 'Paused'
                 : locale === 'zh'
-                ? '在线就绪'
-                : 'Active'}
+                ? '智能体守护中'
+                : 'Guarding'}
             </span>
           </div>
 
+          {/* Visible Bell Notification Button */}
           <button
-            className="bell-btn"
+            className="p-1.5 rounded-full border border-[#E6ECF8] bg-[#F8FAFE] text-[#14213D] hover:bg-[#EEF4FF] transition-all relative flex items-center justify-center cursor-pointer"
             id="web-header-bell-btn"
             aria-label="Notifications"
-            title="Notifications / 通知"
+            title={locale === 'zh' ? '通知' : 'Notifications'}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
-            <span className="bell-badge">2</span>
+            <span className="absolute -top-1 -right-1 bg-[#D97706] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+              2
+            </span>
           </button>
 
-          {/* User Profile Badge */}
-          <div className="web-user-profile-badge" title="Authenticated Student Account">
-            <div className="web-user-avatar">AY</div>
-            <div className="web-user-info">
-              <span className="web-user-name">Ayu</span>
-              <span className="web-user-role">Student</span>
-            </div>
-          </div>
+          {/* User Profile Badge or Sign In Button */}
+          {authUser?.isAuthenticated !== false ? (
+            <button
+              onClick={() => onRouteChange('/login')}
+              className="web-user-profile-badge flex items-center gap-1.5 pl-1 pr-2 py-0.5 rounded-full bg-[#F8FAFE] border border-[#E6ECF8] hover:border-[#1C3EAA]/40 transition-all cursor-pointer shadow-2xs"
+              title={
+                locale === 'zh'
+                  ? `已认证学生账户: ${authUser?.name || 'Ayu'} (点击管理账户)`
+                  : `Authenticated Student: ${authUser?.name || 'Ayu'} (Click to manage)`
+              }
+            >
+              <div className="web-user-avatar w-6 h-6 rounded-full bg-gradient-to-br from-[#1C3EAA] to-[#2554D7] text-white text-[10px] font-bold flex items-center justify-center shadow-xs">
+                {authUser?.avatarLetter || 'AY'}
+              </div>
+              <span className="web-user-name text-[12px] font-bold text-[#14213D] leading-none">
+                {authUser?.name || 'Ayu'}
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={() => onRouteChange('/login')}
+              className="px-3 py-1 rounded-full bg-[#1C3EAA] text-white text-[12px] font-semibold hover:bg-[#153285] transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+            >
+              <span>{locale === 'zh' ? '登录' : 'Sign In'}</span>
+            </button>
+          )}
 
+          {/* Language Switcher */}
           <button
-            className="lang-toggle-btn"
+            className="lang-toggle-btn px-2 py-1 rounded-full border border-[#E6ECF8] bg-[#F8FAFE] text-[11px] font-semibold text-[#334155] hover:bg-[#EEF4FF] transition-all flex items-center gap-1 cursor-pointer"
             id="lang-toggle-desktop"
             onClick={onLocaleToggle}
-            title="Toggle Language / 切换语言"
+            title={locale === 'zh' ? '切换语言' : 'Toggle Language'}
           >
-            <span className={locale === 'en' ? 'active' : ''}>EN</span>
-            <span className="lang-sep">/</span>
-            <span className={locale === 'zh' ? 'active' : ''}>中文</span>
+            <span className={locale === 'en' ? 'text-[#1C3EAA] font-bold' : 'text-[#64748B]'}>
+              EN
+            </span>
+            <span className="text-[#CBD5E1]">/</span>
+            <span className={locale === 'zh' ? 'text-[#1C3EAA] font-bold' : 'text-[#64748B]'}>
+              中文
+            </span>
           </button>
         </div>
       </div>

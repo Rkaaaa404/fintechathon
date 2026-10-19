@@ -228,32 +228,3 @@ body, p, .text-body {
   line-height: 1.7 !important;
   line-break: strict !important;
 }
-
-/* Welcome Screen & Mascot Craft Animations */
-@keyframes aegis-fade-slide-up {
-  0% {
-    opacity: 0;
-    transform: translateY(18px) scale(0.985);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes aegis-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-.welcome-card-animate {
-  animation: aegis-fade-slide-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.mascot-float-animate {
-  animation: aegis-float 4.2s ease-in-out infinite;
-}
