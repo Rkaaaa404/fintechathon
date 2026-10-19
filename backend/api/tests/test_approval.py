@@ -11,8 +11,11 @@ from backend.bank.database import get_connection as bank_connection
 
 @pytest.fixture
 def client(monkeypatch):
+    from backend.api.auth import generate_tokens_for_user
     monkeypatch.setattr(config, "BANK_TRANSPORT", httpx.ASGITransport(app=bank_app))
     with TestClient(app) as client:
+        token = generate_tokens_for_user("usr_ayu", "Ayu")["access_token"]
+        client.headers["Authorization"] = f"Bearer {token}"
         yield client
     app.dependency_overrides.pop(get_current_user, None)
 

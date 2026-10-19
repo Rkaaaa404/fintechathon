@@ -1,17 +1,17 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Header, HTTPException, status
+from contextlib import asynccontextmanager, closing
+from fastapi import FastAPI, Request, Header, HTTPException
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
 import uuid
 import time
 import json
-from typing import Optional, Dict, Any, List
+import hashlib
+from decimal import Decimal
+from typing import Optional
 
 from .config import config
-from .database import get_connection, init_db, get_db
-from .security import verify_scoped_token
-from .schemas import ScopedTokenPayload, TransferRequest
+from .database import get_connection, init_db
+from .security import canonical_json, verify_scoped_token
+from .schemas import TransferRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,13 +27,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # ── Middleware for Request ID & Timing ────────────────────────
 @app.middleware("http")
@@ -42,6 +35,10 @@ async def request_middleware(request: Request, call_next):
     request.state.request_id = req_id
     response = await call_next(request)
     response.headers["X-Request-ID"] = req_id
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
     return response
 
 # ── Problem+JSON Helper ────────────────────────────────────────
@@ -116,100 +113,111 @@ def execute_transfer(
     idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key")
 ):
     req_id = getattr(request.state, "request_id", str(uuid.uuid4()))
-    conn = get_connection()
-
-    # 1. Check Idempotency Cache
-    if idempotency_key:
-        cur = conn.execute("SELECT response_json FROM idempotency_records WHERE idempotency_key = ?", (idempotency_key,))
-        row = cur.fetchone()
-        if row:
-            # Return cached idempotency response
-            cached = json.loads(row["response_json"])
-            cached["idempotent_replay"] = True
-            return cached
-
-    # 2. Verify Scoped Token Signature, Expiry, & Replay
-    token_dict = req.token.model_dump()
+    token = req.token
+    token_dict = token.model_dump()
     valid, err_msg = verify_scoped_token(token_dict, req.signature)
     if not valid:
-        return problem_response(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            title="Scoped Token Validation Failed",
-            detail=err_msg or "Signature verification failed",
-            code="INVALID_SCOPED_TOKEN",
-            request_id=req_id
-        )
+        return problem_response(401, "Scoped Token Validation Failed", err_msg,
+                                "INVALID_SCOPED_TOKEN", req_id)
+    if idempotency_key != token.idempotency_key:
+        return problem_response(400, "Idempotency Key Mismatch",
+                                "The header must match the signed idempotency key.",
+                                "IDEMPOTENCY_KEY_MISMATCH", req_id)
 
-    # 3. Check Account Balance
-    cur = conn.execute("SELECT balance_usd FROM accounts WHERE account_id = ?", (req.token.account_id,))
-    row = cur.fetchone()
-    if not row:
-        return problem_response(
-            status_code=status.HTTP_404_NOT_FOUND,
-            title="Account Not Found",
-            detail=f"Account {req.token.account_id} does not exist",
-            code="ACCOUNT_NOT_FOUND",
-            request_id=req_id
-        )
+    token_hash = hashlib.sha256(canonical_json(token_dict)).hexdigest()
+    with closing(get_connection()) as conn, conn:
+        # Serialize every decision with its effects, including cache and nonce lookup.
+        conn.execute("BEGIN IMMEDIATE")
+        # A request may have waited for another writer past its token's expiry.
+        if token.expires_at <= time.time():
+            return problem_response(401, "Scoped Token Validation Failed", "Scoped token expired",
+                                    "INVALID_SCOPED_TOKEN", req_id)
+        cached = conn.execute(
+            "SELECT response_json FROM idempotency_records WHERE idempotency_key = ?",
+            (idempotency_key,),
+        ).fetchone()
+        if cached:
+            recorded = conn.execute(
+                "SELECT scoped_token_hash FROM ledger WHERE idempotency_key = ? AND account_id = ?",
+                (idempotency_key, token.account_id),
+            ).fetchone()
+            if not recorded or recorded["scoped_token_hash"] != token_hash:
+                return problem_response(409, "Idempotency Conflict",
+                                        "This key belongs to a different authorized request.",
+                                        "IDEMPOTENCY_CONFLICT", req_id)
+            response_data = json.loads(cached["response_json"])
+            response_data["idempotent_replay"] = True
+            return response_data
 
-    total_debit = req.token.amount + req.token.fee_usd
-    current_balance = row["balance_usd"]
-    if current_balance < total_debit:
-        return problem_response(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            title="Insufficient Funds",
-            detail=f"Required ${total_debit:.2f} but available balance is ${current_balance:.2f}",
-            code="INSUFFICIENT_FUNDS",
-            request_id=req_id
-        )
+        if conn.execute("SELECT 1 FROM used_nonces WHERE nonce = ?", (token.nonce,)).fetchone():
+            return problem_response(401, "Scoped Token Validation Failed",
+                                    "Replay detected: nonce already consumed",
+                                    "INVALID_SCOPED_TOKEN", req_id)
+        if config.ALLOWED_PAYEES.get(token.account_id, {}).get(token.payee_id) != token.payee_name:
+            return problem_response(403, "Payee Not Allowed",
+                                    "The bank has not authorized this account and recipient.",
+                                    "PAYEE_NOT_ALLOWED", req_id)
+        if token.amount > config.SINGLE_SEND_CAP_USD or token.fee_usd > config.MAX_FEE_USD:
+            return problem_response(422, "Bank Limit Exceeded",
+                                    "Principal or fee exceeds the bank's independent limit.",
+                                    "BANK_LIMIT_EXCEEDED", req_id)
+        now = time.time()
+        day_start = int(now // 86400) * 86400
+        spent_cents = conn.execute(
+            "SELECT COALESCE(SUM(CAST(ROUND(amount_usd * 100) AS INTEGER)), 0) FROM ledger "
+            "WHERE account_id = ? AND direction = 'DEBIT' AND status = 'COMPLETED' "
+            "AND created_at >= ? AND created_at < ?",
+            (token.account_id, day_start, day_start + 86400),
+        ).fetchone()[0]
+        amount_cents = int(Decimal(str(token.amount)) * 100)
+        fee_cents = int(Decimal(str(token.fee_usd)) * 100)
+        if spent_cents + amount_cents > int(Decimal(str(config.DAILY_CAP_USD)) * 100):
+            return problem_response(422, "Daily Bank Limit Exceeded",
+                                    "The bank's UTC-day principal limit would be exceeded.",
+                                    "BANK_DAILY_LIMIT_EXCEEDED", req_id)
+        account = conn.execute(
+            "SELECT balance_usd FROM accounts WHERE account_id = ?", (token.account_id,),
+        ).fetchone()
+        if not account:
+            return problem_response(404, "Account Not Found", "Account does not exist.",
+                                    "ACCOUNT_NOT_FOUND", req_id)
+        balance_cents = int(round(Decimal(str(account["balance_usd"])) * 100))
+        debit_cents = amount_cents + fee_cents
+        if balance_cents < debit_cents:
+            return problem_response(422, "Insufficient Funds",
+                                    "Available balance is less than principal plus fee.",
+                                    "INSUFFICIENT_FUNDS", req_id)
 
-    # 4. Atomic Execution: Debit & Record to Ledger
-    tx_id = f"TX-SIM-{uuid.uuid4().hex[:12].upper()}"
-    now = time.time()
-    new_balance = current_balance - total_debit
-
-    with conn:
+        new_balance = (balance_cents - debit_cents) / 100
+        tx_id = f"TX-SIM-{uuid.uuid4().hex.upper()}"
+        conn.execute("INSERT INTO used_nonces (nonce, used_at) VALUES (?, ?)", (token.nonce, now))
         conn.execute(
             "UPDATE accounts SET balance_usd = ?, updated_at = ? WHERE account_id = ?",
-            (new_balance, now, req.token.account_id)
+            (new_balance, now, token.account_id),
         )
         conn.execute(
-            """
-            INSERT INTO ledger (
-                tx_id, account_id, payee_id, payee_name, amount_usd, fee_usd,
-                direction, status, idempotency_key, scoped_token_hash, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 'DEBIT', 'COMPLETED', ?, ?, ?)
-            """,
-            (
-                tx_id, req.token.account_id, req.token.payee_id, req.token.payee_name,
-                req.token.amount, req.token.fee_usd, idempotency_key, req.signature[:16], now
-            )
+            "INSERT INTO ledger (tx_id, account_id, payee_id, payee_name, amount_usd, fee_usd, "
+            "direction, status, idempotency_key, scoped_token_hash, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, 'DEBIT', 'COMPLETED', ?, ?, ?)",
+            (tx_id, token.account_id, token.payee_id, token.payee_name, token.amount,
+             token.fee_usd, idempotency_key, token_hash, now),
         )
-
         response_data = {
             "tx_id": tx_id,
             "status": "COMPLETED",
-            "account_id": req.token.account_id,
-            "payee_id": req.token.payee_id,
-            "payee_name": req.token.payee_name,
-            "amount_usd": req.token.amount,
-            "fee_usd": req.token.fee_usd,
-            "remaining_balance_usd": round(new_balance, 2),
+            "account_id": token.account_id,
+            "payee_id": token.payee_id,
+            "payee_name": token.payee_name,
+            "amount_usd": token.amount,
+            "fee_usd": token.fee_usd,
+            "remaining_balance_usd": new_balance,
             "created_at": now,
-            "checks": {
-                "privacy_filter": "pass",
-                "spending_rules": "pass",
-                "bank_limit": "pass"
-            },
+            "checks": {"spending_rules": "pass", "bank_limit": "pass"},
             "network": "Testnet",
-            "simulated": True
+            "simulated": True,
         }
-
-        # Save Idempotency Record
-        if idempotency_key:
-            conn.execute(
-                "INSERT INTO idempotency_records (idempotency_key, response_json, created_at) VALUES (?, ?, ?)",
-                (idempotency_key, json.dumps(response_data), now)
-            )
-
+        conn.execute(
+            "INSERT INTO idempotency_records (idempotency_key, response_json, created_at) VALUES (?, ?, ?)",
+            (idempotency_key, json.dumps(response_data), now),
+        )
     return response_data

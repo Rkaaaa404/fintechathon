@@ -3,6 +3,8 @@
 > **AI Agent that automates cross-border financial operations and tuition payments with deterministic security enforced outside the language model.**  
 > *Official Submission for FinTechathon 2026*
 
+Security revalidation: [plan, reproduced findings, patches and verification](docs/security-revalidation.md). The original self-assessment is historical, not a current PASS attestation. Local demo sessions and approval consent are synthetic; do not expose this sandbox as a production banking service.
+
 ---
 
 ## 🏛️ Executive Summary
@@ -78,7 +80,7 @@ fintechathon/
   │  3. INNER RING: Isolated Banking Gateway (Port 8100)    │
   │  - Runs on isolated process with separate crypto keys   │
   │  - Verifies cryptographic signature & single-use nonce  │
-  │  - Checks HMAC, expiry, nonce and available balance      │
+  │  - Enforces payees, intent, caps and atomic ledger writes│
   └─────────────────────────────────────────────────────────┘
 ```
 
@@ -104,7 +106,7 @@ To maintain absolute transparency for competition judges and security auditors:
 
 | Capability | Current Base Implementation | Production Extension Roadmap |
 | :--- | :--- | :--- |
-| **Safety & Policy Engine** | Deterministic Sentinel patterns, spending policy and scoped-token checks. | Production authentication, independent bank caps and stronger privacy controls remain separate work. |
+| **Safety & Policy Engine** | Deterministic Sentinel patterns, spending policy, scoped-token checks, and independent bank caps. | Production authentication and stronger privacy controls remain separate work. |
 | **Banking Rails / Fiat Gateway** | Local simulated bank with ledger, HMAC validation and single-use nonces. | No real-bank settlement is implemented. |
 | **Approval** | Intent-hash binding and demo UI consent; not hardware passkey authentication. | WebAuthn/FIDO2 is not implemented. |
 | **AI Intent Engine** | Server-side Gemini or Groq structured extraction, or explicitly selected offline parser. Evidence validation does not guarantee semantic accuracy. | Synthetic cloud demos only; no real personal data. |

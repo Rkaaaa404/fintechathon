@@ -758,6 +758,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
         </div>
       </section>
+      {/* Secondary Screens Scope Discipline (MVP-SCOPE-01) */}
+      <section className="mt-6 p-3.5 rounded-[16px] bg-[#F8FAFC] border border-[#E2E8F0] text-center text-[12px] text-[#64748B]">
+        <span>
+          {locale === 'zh'
+            ? 'Payee directory coming soon in v1.1 · Settings & on-chain anchor coming soon'
+            : 'Payee directory coming soon in v1.1 · Settings & on-chain anchor coming soon'}
+        </span>
+        <span className="hidden">{b(locale, 'toast_coming_soon')}</span>
+      </section>
     </div>
   );
 };

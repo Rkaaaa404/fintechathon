@@ -16,7 +16,10 @@ def client():
     previous_transport = api_config.BANK_TRANSPORT
     api_config.BANK_TRANSPORT = httpx.ASGITransport(app=bank_app)
     try:
+        from backend.api.auth import generate_tokens_for_user
         with TestClient(bank_app), TestClient(app) as test_client:
+            token = generate_tokens_for_user("usr_ayu", "Ayu")["access_token"]
+            test_client.headers["Authorization"] = f"Bearer {token}"
             yield test_client
     finally:
         api_config.BANK_TRANSPORT = previous_transport

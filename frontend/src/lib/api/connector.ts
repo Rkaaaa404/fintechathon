@@ -178,6 +178,28 @@ export class AegisPathConnector {
   private bankBase: string;
   private timeoutMs: number;
   private enableFallback: boolean;
+  private demoToken?: string;
+  private demoTokenExpires = 0;
+  private demoLogin?: Promise<string>;
+
+  private async getDemoToken(): Promise<string> {
+    if (this.demoToken && Date.now() < this.demoTokenExpires) return this.demoToken;
+    if (!this.demoLogin) {
+      this.demoLogin = (async () => {
+        const response = await fetch(`${this.apiBase}/v1/auth/demo-login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'Ayu' }), signal: AbortSignal.timeout(this.timeoutMs),
+        });
+        if (!response.ok) throw new Error('Synthetic demo login is unavailable or disabled');
+        const session = await response.json();
+        if (typeof session.access_token !== 'string' || session.simulated !== true) throw new Error('Invalid synthetic demo session');
+        this.demoToken = session.access_token;
+        this.demoTokenExpires = Date.now() + Math.max(0, session.expires_in - 30) * 1000;
+        return session.access_token as string;
+      })().finally(() => { this.demoLogin = undefined; });
+    }
+    return this.demoLogin;
+  }
 
   constructor(config: { apiBase?: string; bankBase?: string; timeoutMs?: number; enableFallback?: boolean } = {}) {
     this.apiBase =
@@ -239,6 +261,9 @@ export class AegisPathConnector {
     fallbackFn?: () => T,
     timeoutMs: number = this.timeoutMs
   ): Promise<T> {
+    const protectedApi = url.startsWith(`${this.apiBase}/v1/`) && !url.endsWith('/health') && !url.includes('/tuition/quote')
+      || url.startsWith('/api/agent/') || url.startsWith('/api/plans/');
+    const authorization = protectedApi ? `Bearer ${await this.getDemoToken()}` : undefined;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -249,6 +274,7 @@ export class AegisPathConnector {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
+          ...(authorization ? { Authorization: authorization } : {}),
           ...(options.headers || {}),
         },
       });
@@ -266,7 +292,7 @@ export class AegisPathConnector {
         : typeof errData?.title === 'string' ? errData.title : `HTTP ${res.status}`;
       throw new Error(code ? `${code}: ${detail}` : detail);
     } catch (err) {
-      if (this.enableFallback && fallbackFn) {
+      if (!protectedApi && this.enableFallback && fallbackFn) {
         return fallbackFn();
       }
       throw err;
@@ -317,12 +343,12 @@ export class AegisPathConnector {
     );
   }
 
-  async resumeAgent(passkeySignature: string = 'SIG_PASSKEY_VALID_01'): Promise<{ is_paused: boolean }> {
+  async resumeAgent(): Promise<{ is_paused: boolean }> {
     return this.request<{ is_paused: boolean }>(
       `${this.apiBase}/v1/agent/resume`,
       {
         method: 'POST',
-        body: JSON.stringify({ passkey_signature: passkeySignature }),
+        body: JSON.stringify({ demo_consent: true }),
       },
       () => ({ is_paused: false })
     );
@@ -333,171 +359,14 @@ export class AegisPathConnector {
     locale: string = 'en',
     syntheticDemo: boolean = false
   ): Promise<AgentMessageEnvelope> {
-    const fallbackDispatcher = (): AgentMessageEnvelope => {
-      const lower = text.toLowerCase();
-
-      // 1. Attack / Prompt Injection
-      const isAttack =
-        lower.includes('ignore') ||
-        lower.includes('bypass') ||
-        lower.includes('override') ||
-        lower.includes('hack') ||
-        lower.includes('prompt injection') ||
-        (lower.includes('balance') && (lower.includes('account x') || lower.includes('all') || lower.includes('steal') || lower.includes('zero')));
-
-      if (isAttack) {
-        return {
-          user_id: 'usr_student_ayu',
-          input: text,
-          parsed: { action: 'attack_detected', intent: 'override_rules' },
-          response: {
-            type: 'blocked_slip',
-            quoted_instruction: text,
-            amount_lost_usd: 0.0,
-            verdicts: [
-              {
-                ring: 'outer',
-                name: 'Privacy Filter',
-                status: 'flagged',
-                text: 'Prompt injection pattern intercepted before reaching language model',
-              },
-              {
-                ring: 'middle',
-                name: 'Spending Rules',
-                status: 'refused',
-                text: 'Unverified payee account blocked by whitelist policy',
-              },
-              {
-                ring: 'inner',
-                name: 'Bank Limits',
-                status: 'inactive',
-                text: 'Zero scoped bank token issued',
-              },
-            ],
-            conclusion: 'Prompt injection detected: Attempt to override spending rules was blocked deterministically outside LLM.',
-            stamp: 'BLOCKED',
-          },
-          ai: {
-            source: 'blocked',
-            provider: 'none',
-            model: null,
-          },
-        };
-      }
-
-      // 2. Project Schedule / Gantt Roadmap Inquiry
-      const isProject =
-        lower.includes('timeline') ||
-        lower.includes('jadwal') ||
-        lower.includes('gantt') ||
-        lower.includes('proyek') ||
-        lower.includes('project') ||
-        lower.includes('cogs') ||
-        lower.includes('hpp') ||
-        lower.includes('pos') ||
-        lower.includes('bep') ||
-        lower.includes('milestone') ||
-        lower.includes('rekomendasi');
-
-      if (isProject) {
-        return {
-          user_id: 'usr_student_ayu',
-          input: text,
-          parsed: { action: 'project_roadmap', topic: 'project_schedule_gantt' },
-          response: {
-            type: 'gantt_roadmap',
-            title: locale === 'zh' ? '项目时间线与里程碑规划 (Gantt Chart)' : 'Project Schedule & Roadmap Recommendation',
-            summary: locale === 'zh'
-              ? '已加载 5 大执行阶段（起步、规划、执行、监控与收尾）共计 32 个任务项与里程碑。'
-              : 'Loaded 5 Project Execution Phases: Initiation, Planning, Execution, Monitoring & Controlling, and Closing with 32 tasks and key milestones.',
-          },
-          ai: {
-            source: 'deterministic',
-            provider: 'none',
-            model: null,
-          },
-        };
-      }
-
-      // 3. Over-Cap Transfers ($600 to Mom)
-      const isOverCap = lower.includes('600') || lower.includes('3000') || lower.includes('3,000') || lower.includes('1000');
-      if (isOverCap) {
-        return {
-          user_id: 'usr_student_ayu',
-          input: text,
-          parsed: { action: 'transfer', amount_usd: 600.0, payee: 'Mom' },
-          response: {
-            type: 'approval_sheet',
-            plan_id: 'plan_sim_over_cap_01',
-            payee_name: 'Mom (Ibu Ayu)',
-            you_asked: text,
-            understood: 'Send USD 600.00 to Mom',
-            send_amount_usd: 600.0,
-            receives_idr: 9528000,
-            rate: 15880.0,
-            rate_pair: 'USD/IDR',
-            fee_with_buffer_usd: 0.42,
-            eta: '~ 2 minutes',
-            intent_hash: 'hash_sim_600_usd',
-            why_approval_needed: 'Amount $600.00 exceeds daily single-transaction limit of $500.00.',
-            status: 'WAITING_APPROVAL',
-          },
-          ai: {
-            source: 'deterministic',
-            provider: 'none',
-            model: null,
-          },
-        };
-      }
-
-      // 4. Standard transfer (e.g. $200 to Mom)
-      return {
-        user_id: 'usr_student_ayu',
-        input: text,
-        parsed: { action: 'transfer', amount_usd: 200.0, payee: 'Mom' },
-        response: {
-          type: 'slip',
-          plan_chips: ['Quote', 'Payee', 'Limits', 'Simulate', 'Execute'],
-          status: 'COMPLETED',
-          amount_usd: 200.0,
-          payee_name: 'Mom',
-          received_text: 'Received (IDR): Rp 3,176,000',
-          tx_id: 'tx_sim_sandbox_20261019_01',
-          remaining_balance_usd: 12250.0,
-          stamp: 'SENT',
-          checks: {
-            privacy_filter: 'pass',
-            spending_rules: 'pass',
-            bank_token: 'pass',
-          },
-          note: 'Done. Arrives in about 2 minutes. Safety enforced outside LLM.',
-        },
-        ai: {
-          source: 'deterministic',
-          provider: 'none',
-          model: null,
-        },
-      };
-    };
-
     // Primary route: Next.js API route or Core backend API
     const targetUrl = typeof window !== 'undefined'
       ? '/api/agent/messages'
       : `${this.apiBase}/v1/agent/messages`;
 
-    try {
-      return await this.request<AgentMessageEnvelope>(
-        targetUrl,
-        {
-          method: 'POST',
-          body: JSON.stringify({ text, locale, synthetic_demo: syntheticDemo }),
-        },
-        fallbackDispatcher,
-        4000
-      );
-    } catch {
-      return fallbackDispatcher();
-    }
+    return this.request<AgentMessageEnvelope>(targetUrl, {
+      method: 'POST', body: JSON.stringify({ text, locale, synthetic_demo: syntheticDemo }),
+    }, undefined, 35000);
   }
 
   // ----------------------------------------------------------------------------
@@ -536,46 +405,13 @@ export class AegisPathConnector {
   // ----------------------------------------------------------------------------
   // 5. Plan Approval with Explicit Demo UI Consent
   // ----------------------------------------------------------------------------
-  async approvePlan(
-    planId: string,
-    intentHash: string,
-    passkeySignature: string = 'DEMO_UI_CONSENT_ONLY',
-    amountUsd?: number,
-    payeeName?: string
-  ): Promise<ApprovalReceipt> {
-    const fallbackFn = (): ApprovalReceipt => ({
-      status: 'COMPLETED',
-      plan_id: planId,
-      tx_id: `tx_apprv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
-      amount_usd: typeof amountUsd === 'number' && Number.isFinite(amountUsd) ? amountUsd : 600.0,
-      payee_name: payeeName || 'Mom (Ibu Ayu)',
-      remaining_balance_usd: 11850.0,
-      intent_hash: intentHash,
-      stamp: 'SENT',
-      checks: {
-        privacy_filter: 'pass',
-        spending_rules: 'pass',
-        bank_token: 'pass',
-      },
-    });
-
+  async approvePlan(planId: string, intentHash: string): Promise<ApprovalReceipt> {
     const targetUrl = typeof window !== 'undefined'
       ? `/api/plans/${encodeURIComponent(planId)}/approve`
       : `${this.apiBase}/v1/plans/${encodeURIComponent(planId)}/approve`;
-
-    try {
-      return await this.request<ApprovalReceipt>(
-        targetUrl,
-        {
-          method: 'POST',
-          body: JSON.stringify({ intent_hash: intentHash, passkey_signature: passkeySignature }),
-        },
-        fallbackFn,
-        4000
-      );
-    } catch {
-      return fallbackFn();
-    }
+    return this.request<ApprovalReceipt>(targetUrl, {
+      method: 'POST', body: JSON.stringify({ intent_hash: intentHash, demo_consent: true }),
+    }, undefined, 20000);
   }
 
   // ----------------------------------------------------------------------------

@@ -48,12 +48,17 @@ def run_smoke_tests():
     with get_api_conn() as conn:
         conn.execute("UPDATE policy SET used_today_usd = 0, is_paused = 0 WHERE user_id = 'usr_ayu'")
     with get_bank_conn() as conn:
+        conn.execute("DELETE FROM ledger")
+        conn.execute("DELETE FROM idempotency_records")
+        conn.execute("DELETE FROM used_nonces")
         conn.execute("UPDATE accounts SET balance_usd = 12450.0 WHERE account_id = 'acc_student_ayu'")
-
     r_bank_h = bank_client.get("/v1/health")
     assert r_bank_h.status_code == 200, f"Bank health check failed: {r_bank_h.text}"
     r_api_h = api_client.get("/v1/health")
     assert r_api_h.status_code == 200, f"API health check failed: {r_api_h.text}"
+    r_login = api_client.post("/v1/auth/demo-login", json={"username": "Ayu"})
+    assert r_login.status_code == 200, f"Demo login failed: {r_login.text}"
+    api_client.headers["Authorization"] = f"Bearer {r_login.json()['access_token']}"
     print("  [OK] Both services online, healthy, and reporting Testnet mode.")
 
     # ──────────────────────────────────────────────────────────

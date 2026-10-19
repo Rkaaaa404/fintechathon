@@ -142,7 +142,7 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
             return {"type": "refused_note", "reason": policy_eval.get("reason"), "stamp": "BLOCKED"}
 
         plan_id = f"plan-tuition-{uuid.uuid4().hex[:8]}"
-        intent_hash = policy_eval.get("intent_hash") or compute_intent_hash("p2", "Campus bursar", amount_usd, "CNY", SIMULATED_FX_USD_CNY)
+        intent_hash = compute_intent_hash("p2", "Campus bursar", amount_usd, "CNY", quote["rate"], fee_usd=quote["fee_usd"], route_id=quote["mode"])
 
         # Store plan in WAITING_APPROVAL state
         conn = get_connection()
@@ -162,7 +162,10 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
                         "amount_cny": amount,
                         "payee_id": "p2",
                         "payee_name": "Campus bursar",
-                        "fee_usd": quote["fee_usd"]
+                        "fee_usd": quote["fee_usd"],
+                        "currency": "CNY",
+                        "rate": quote["rate"],
+                        "route_id": quote["mode"],
                     }),
                     time.time()
                 )
@@ -217,7 +220,10 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
                         "amount_usd": amount_usd,
                         "payee_id": policy_eval["payee"]["id"],
                         "payee_name": payee_name,
-                        "fee_usd": 0.42
+                        "fee_usd": 0.42,
+                        "currency": "USD",
+                        "rate": 1.0,
+                        "route_id": "default",
                     }),
                     time.time()
                 )
@@ -243,27 +249,37 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
 
     # ── Flow A: Tier 1 Auto-Approved Transfer (Send $200 to Mom) ─────────
     # Auto-executes directly by calling Bank Daemon
+    conn = get_connection()
+    with conn:
+        reserved = conn.execute(
+            "UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ? AND is_paused = 0 AND ? <= single_send_cap_usd AND used_today_usd + ? <= daily_cap_usd",
+            (amount_usd, user_id, amount_usd, amount_usd),
+        )
+        if reserved.rowcount != 1:
+            return {"type": "refused_note", "reason": "Agent paused or allowance unavailable.", "stamp": "BLOCKED"}
+    idempotency_key = f"auto-{uuid.uuid4().hex}"
     payee_id = policy_eval["payee"]["id"]
     token_payload, signature = create_scoped_bank_token(
         account_id="acc_student_ayu",
         amount_usd=amount_usd,
         payee_id=payee_id,
         payee_name=payee_name,
-        fee_usd=0.42
+        fee_usd=0.42,
+        intent_hash=compute_intent_hash(payee_id, payee_name, amount_usd),
+        idempotency_key=idempotency_key,
     )
 
-    bank_res_data = await execute_bank_transfer(token_payload, signature, f"auto-{uuid.uuid4().hex}")
+    bank_res_data = await execute_bank_transfer(token_payload, signature, idempotency_key)
     if bank_res_data is None:
+        with conn:
+            conn.execute("UPDATE policy SET used_today_usd = used_today_usd - ? WHERE user_id = ?", (amount_usd, user_id))
         return {
             "type": "execution_error",
             "code": "BANK_EXECUTION_FAILED",
             "message": "Bank execution was not confirmed. Check the ledger before sending again.",
         }
 
-    # Record used daily allowance & audit event
-    conn = get_connection()
-    with conn:
-        conn.execute("UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ?", (amount_usd, user_id))
+    # Allowance was reserved before execution and stays reserved on unknown outcomes.
 
     record_audit_event(
         "TRANSFER_AUTO_EXECUTED",

@@ -21,7 +21,9 @@ if env_file.exists():
 class BankConfig:
     PORT: int = int(os.getenv("BANK_PORT", "8100"))
     HOST: str = os.getenv("BANK_HOST", "127.0.0.1")
-    SECRET_KEY: str = os.getenv("BANK_SECRET_KEY", "dev_bank_shared_secret_key_32chars_min_safe")
+    SECRET_KEY: str = os.getenv("BANK_SECRET_KEY", "")
+    if len(SECRET_KEY) < 32 or SECRET_KEY.startswith("dev_"):
+        raise RuntimeError("BANK_SECRET_KEY must be explicitly configured with a non-default secret of at least 32 characters")
     DATA_DIR: Path = Path(os.getenv("BANK_DATA_DIR", "./data"))
     DATABASE_PATH: Path = DATA_DIR / "bank.db"
     
@@ -34,8 +36,14 @@ class BankConfig:
         DATABASE_URL: str = f"sqlite:///{DATABASE_PATH.as_posix()}"
         IS_SQLITE: bool = True
 
-    SINGLE_SEND_CAP_USD: float = 500.0
+    SINGLE_SEND_CAP_USD: float = 1000.0
     DAILY_CAP_USD: float = 1000.0
+    # Largest fee among the sandbox's cheapest, balanced, and fastest routes.
+    MAX_FEE_USD: float = 18.0
+    MAX_TOKEN_TTL_SECONDS: int = 300
+    ALLOWED_PAYEES = {
+        "acc_student_ayu": {"p1": "Mom", "p2": "Campus bursar", "p3": "Dad"},
+    }
 
 
 config = BankConfig()

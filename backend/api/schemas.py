@@ -26,12 +26,23 @@ class PolicyProposalRequest(BaseSchema):
 
 class ApprovePlanRequest(BaseSchema):
     intent_hash: str = Field(..., min_length=10, description="Cryptographic intent hash bound to user approval")
-    passkey_signature: str = Field(..., description="Demo consent marker; not a verified WebAuthn or hardware passkey signature")
+    demo_consent: bool = Field(default=False, description="Explicit synthetic demo consent only; not WebAuthn authentication")
+    passkey_signature: Optional[str] = Field(default=None, description="Legacy parameter for demo consent marker")
+
+    @field_validator("demo_consent", mode="before")
+    @classmethod
+    def coerce_consent(cls, value):
+        return bool(value)
 
 
 class ResumeAgentRequest(BaseSchema):
-    passkey_signature: str = Field(..., description="Demo resume marker; not verified hardware passkey authentication")
+    demo_consent: bool = Field(default=False, description="Explicit synthetic demo resume consent; not WebAuthn authentication")
+    passkey_signature: Optional[str] = Field(default=None, description="Legacy parameter for demo consent marker")
 
+    @field_validator("demo_consent", mode="before")
+    @classmethod
+    def coerce_consent(cls, value):
+        return bool(value)
 
 class AgentMessageRequest(BaseSchema):
     text: str = Field(..., min_length=1, max_length=4000, description="Natural language prompt for financial agent")

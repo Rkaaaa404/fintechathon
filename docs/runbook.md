@@ -9,6 +9,10 @@
 - Both services read root `.env`; process environment wins. `backend/.env` is not read.
 - AI selection: `LLM_PROVIDER=none|gemini|groq`. Default `none` is explicit offline parsing. Cloud keys: `GEMINI_API_KEY` and exactly `GROQ`; models: `GEMINI_MODEL=gemini-3.8-flash`, `GROQ_MODEL=openai/gpt-oss-20b`. Timeout: positive `LLM_TIMEOUT_SECONDS=20`. No live startup probe, retry or automatic provider failover.
 - Never expose keys in browser configuration or `NEXT_PUBLIC_*`.
+- Synthetic demo authentication is opt-in: `API_DEMO_AUTH_ENABLED=true`. With it disabled, demo login is unavailable. With it enabled, anyone able to call demo login can act as the one synthetic owner; it is not production authentication. Protected API calls require the returned access Bearer token, never the refresh token. The active client keeps its demo access token in memory.
+- Set distinct random `API_SECRET_KEY` and `BANK_SECRET_KEY` (at least 32 characters, no development defaults); API and bank must share the latter. Changing either invalidates tokens signed with the old key. Never publish this synthetic stack to an untrusted network.
+- `CORS_ORIGINS` defaults to `http://localhost:3000,http://127.0.0.1:3000`; configure exact trusted frontend origins for alternate ports. Wildcard origins are rejected. Bank endpoints do not grant browser CORS access. APIs send `no-store`, `nosniff` and anti-framing headers; Next.js also denies framing.
+- See [security revalidation](security-revalidation.md) for superseding evidence and residual limitations.
 
 ## Isolated verification (PowerShell, repository root)
 
@@ -23,6 +27,7 @@ $dbRoot = $proof.Replace('\','/')
 $env:DATABASE_URL = "sqlite:///$dbRoot/api.db"
 $env:BANK_DATABASE_URL = "sqlite:///$dbRoot/bank.db"
 $env:LLM_PROVIDER = 'none'
+$env:API_DEMO_AUTH_ENABLED = 'true'
 py -m pytest backend/api/tests backend/bank/tests -q
 py scripts/smoke.py
 py scripts/generate-openapi.py
@@ -53,8 +58,8 @@ Capture chat/approval/error screenshots and reconcile receipts with ledger. Neve
 - Empty/refused/truncated/invalid structured output: 502 `AI_OUTPUT_INVALID`.
 - Missing or inconsistent payment evidence: clarification, no plan/token/debit. Resend one complete instruction; there is no implicit chat memory.
 - Bank failure/malformed receipt: `BANK_EXECUTION_FAILED`. A timeout means **unconfirmed**, not necessarily no debit. Check the ledger before manually sending again; no automatic retry.
-- Approval is demo UI consent plus intent-hash binding, not WebAuthn/hardware authentication. T1 known-payee USD transfers still auto-send under policy. Bank validates HMAC/expiry/nonce/balance; independent bank spending caps are not enforced.
-- Kill switch: `POST /v1/agent/pause`; policy then refuses new execution, including pending-plan approval. Resume uses the existing demo signature, not production passkey verification.
+- Approval requires authenticated demo consent (`demo_consent: true`) plus recomputed intent-hash binding, not WebAuthn/hardware authentication. T1 known-payee USD transfers still auto-send under policy. Bank independently enforces a USD 1000 principal/send and USD 1000 principal/UTC-day ceiling, recipient allowlist, signature, expiry, nonce, intent, fees and balance inside an atomic transaction. The API USD 500 threshold is for auto-approval, not the hard bank cap.
+- Kill switch: authenticated `POST /v1/agent/pause`; policy then refuses new execution, including pending-plan approval. Resume requires explicit `demo_consent: true`, not a simulated passkey signature. This does not revoke bank tokens already issued or cancel an in-flight debit.
 - Other screens may retain illustrative data/fallbacks; integrated chat and approval never synthesize transaction success.
 
 ## Integration changes

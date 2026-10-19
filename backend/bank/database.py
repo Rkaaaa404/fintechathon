@@ -65,12 +65,6 @@ def init_db():
             )
             db.add(account)
             db.commit()
-        else:
-            # Ensure sufficient testnet balance for repeated demo/smoke runs
-            if existing_acc.balance_usd < 12450.00:
-                existing_acc.balance_usd = 12450.00
-                existing_acc.updated_at = now
-                db.commit()
 
 
 # Run schema init on startup

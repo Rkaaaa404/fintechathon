@@ -22,9 +22,20 @@ if env_file.exists():
 class ApiConfig:
     PORT: int = int(os.getenv("API_PORT", "8000"))
     HOST: str = os.getenv("API_HOST", "127.0.0.1")
-    SECRET_KEY: str = os.getenv("API_SECRET_KEY", "dev_api_secret_key_change_in_production_32chars")
-    BANK_SECRET_KEY: str = os.getenv("BANK_SECRET_KEY", "dev_bank_shared_secret_key_32chars_min_safe")
+    DEMO_AUTH_ENABLED: bool = os.getenv("API_DEMO_AUTH_ENABLED", "false").lower() == "true"
+    SECRET_KEY: str = os.getenv("API_SECRET_KEY", "")
+    BANK_SECRET_KEY: str = os.getenv("BANK_SECRET_KEY", "")
+    for _name, _secret in (("API_SECRET_KEY", SECRET_KEY), ("BANK_SECRET_KEY", BANK_SECRET_KEY)):
+        if len(_secret) < 32 or _secret.startswith("dev_"):
+            raise RuntimeError(f"{_name} must be an explicit non-development secret of at least 32 characters")
     BANK_SERVICE_URL: str = os.getenv("BANK_SERVICE_URL", "http://127.0.0.1:8100")
+    CORS_ORIGINS: list[str] = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+        if origin.strip()
+    ]
+    if "*" in CORS_ORIGINS:
+        raise RuntimeError("CORS_ORIGINS must contain explicit trusted origins")
     DATA_DIR: Path = Path(os.getenv("API_DATA_DIR", "./data"))
     DATABASE_PATH: Path = DATA_DIR / "api.db"
     

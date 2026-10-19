@@ -12,13 +12,15 @@ client = TestClient(app)
 
 @pytest.fixture(autouse=True)
 def reset_policy_state():
+    from backend.api.auth import generate_tokens_for_user
+    token = generate_tokens_for_user("usr_ayu", "Ayu")["access_token"]
+    client.headers["Authorization"] = f"Bearer {token}"
     conn = get_connection()
     with conn:
         conn.execute("UPDATE policy SET is_paused = 0, used_today_usd = 200.0 WHERE user_id = 'usr_ayu'")
     yield
     with conn:
         conn.execute("UPDATE policy SET is_paused = 0, used_today_usd = 200.0 WHERE user_id = 'usr_ayu'")
-
 def test_api_health_and_ready():
     r = client.get("/v1/health")
     assert r.status_code == 200

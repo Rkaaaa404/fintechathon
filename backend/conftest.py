@@ -1,6 +1,7 @@
 """Never run backend tests against operator/demo databases."""
 import os
 import sys
+import secrets
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -30,6 +31,9 @@ os.environ.update(
     DATABASE_URL=f"sqlite:///{_db_root}/api.db",
     BANK_DATABASE_URL=f"sqlite:///{_db_root}/bank.db",
     LLM_PROVIDER="none",
+    API_SECRET_KEY=secrets.token_hex(32),
+    BANK_SECRET_KEY=secrets.token_hex(32),
+    API_DEMO_AUTH_ENABLED="true",
 )
 
 
@@ -44,6 +48,9 @@ def reset_sandbox_state():
     with api_connection() as conn:
         conn.execute("UPDATE policy SET is_paused = 0, used_today_usd = 200, daily_cap_usd = 1000, single_send_cap_usd = 500 WHERE user_id = 'usr_ayu'")
     with bank_connection() as conn:
+        conn.execute("DELETE FROM ledger")
+        conn.execute("DELETE FROM idempotency_records")
+        conn.execute("DELETE FROM used_nonces")
         conn.execute("UPDATE accounts SET balance_usd = 12450 WHERE account_id = 'acc_student_ayu'")
     yield
 

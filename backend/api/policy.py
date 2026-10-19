@@ -1,23 +1,10 @@
-import hashlib
+import math
 import json
 import time
 from typing import Dict, Any, List, Tuple, Optional
 from .database import get_connection
+from backend.transfer_intent import compute_intent_hash
 
-def compute_intent_hash(
-    payee_id: str,
-    payee_name: str,
-    amount_usd: float,
-    currency: str = "USD",
-    rate: float = 1.0
-) -> str:
-    """
-    Computes cryptographic intent hash.
-    Ties user visual confirmation to transaction execution parameters.
-    """
-    canonical_repr = f"recipient:{payee_id}:{payee_name}|amount:{amount_usd:.2f}|currency:{currency}|rate:{rate:.4f}"
-    h = hashlib.sha256(canonical_repr.encode('utf-8')).hexdigest()
-    return f"INTENT-SHA256-{h[:16].upper()}"
 
 def evaluate_transfer_policy(
     user_id: str,
@@ -30,6 +17,8 @@ def evaluate_transfer_policy(
       - Tier 1: Auto-approved (<= $500, known payee, within daily limit)
       - Tier 2: Step-up approval required (new payee or > $500)
     """
+    if isinstance(amount_usd, bool) or not isinstance(amount_usd, (int, float)) or not math.isfinite(amount_usd) or amount_usd <= 0:
+        return {"tier": "REFUSED", "allowed": False, "reason": "Amount must be finite and positive."}
     conn = get_connection()
     cur = conn.execute(
         "SELECT single_send_cap_usd, daily_cap_usd, used_today_usd, allowed_payees_json, is_paused "
@@ -45,7 +34,7 @@ def evaluate_transfer_policy(
         return {
             "tier": "REFUSED",
             "allowed": False,
-            "reason": "Agent is paused via kill switch. Resume with passkey first."
+            "reason": "Agent is paused via kill switch. Explicit demo consent is required to resume."
         }
 
     single_cap = row["single_send_cap_usd"]
@@ -56,7 +45,7 @@ def evaluate_transfer_policy(
     # Match payee
     matched_payee = None
     for p in allowed_payees:
-        if (payee_id and p["id"] == payee_id) or p["name"].lower() == payee_name.lower():
+        if p["name"].lower() == payee_name.lower() and (payee_id is None or p["id"] == payee_id):
             matched_payee = p
             break
 
@@ -88,8 +77,9 @@ def evaluate_transfer_policy(
         return {
             "tier": "T2_APPROVAL_REQUIRED",
             "allowed": True,
+            "requires_demo_consent": True,
             "requires_passkey": True,
-            "reason": "Step-up authorization required: " + " and ".join(reasons) + ".",
+            "reason": "Synthetic demo consent required: " + " and ".join(reasons) + ".",
             "intent_hash": intent_hash,
             "payee": matched_payee or {"id": "new_payee", "name": payee_name, "relation": "New"}
         }
@@ -104,6 +94,7 @@ def evaluate_transfer_policy(
     return {
         "tier": "T1_AUTO_APPROVED",
         "allowed": True,
+        "requires_demo_consent": False,
         "requires_passkey": False,
         "reason": f"Within limits: <= ${single_cap:,.2f} and recipient on list.",
         "intent_hash": intent_hash,

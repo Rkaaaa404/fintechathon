@@ -70,6 +70,9 @@ def run_suite_3_privilege_escalation_and_tampering():
     print("=" * 70)
 
     all_passed = True
+    from backend.api.database import get_connection
+    with get_connection() as conn:
+        conn.execute("UPDATE policy SET used_today_usd = 0, is_paused = 0 WHERE user_id = 'usr_ayu'")
 
     # Test 3a: Cryptographic Intent Hash Tampering Detection
     user_id = "usr_ayu"

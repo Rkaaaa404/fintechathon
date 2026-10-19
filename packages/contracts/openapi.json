@@ -30,6 +30,12 @@
       },
       "ApprovePlanRequest": {
         "properties": {
+          "demo_consent": {
+            "default": false,
+            "description": "Explicit synthetic demo consent only; not WebAuthn authentication",
+            "title": "Demo Consent",
+            "type": "boolean"
+          },
           "intent_hash": {
             "description": "Cryptographic intent hash bound to user approval",
             "minLength": 10,
@@ -37,14 +43,20 @@
             "type": "string"
           },
           "passkey_signature": {
-            "description": "Demo consent marker; not a verified WebAuthn or hardware passkey signature",
-            "title": "Passkey Signature",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Legacy parameter for demo consent marker",
+            "title": "Passkey Signature"
           }
         },
         "required": [
-          "intent_hash",
-          "passkey_signature"
+          "intent_hash"
         ],
         "title": "ApprovePlanRequest",
         "type": "object"
@@ -138,15 +150,25 @@
       },
       "ResumeAgentRequest": {
         "properties": {
+          "demo_consent": {
+            "default": false,
+            "description": "Explicit synthetic demo resume consent; not WebAuthn authentication",
+            "title": "Demo Consent",
+            "type": "boolean"
+          },
           "passkey_signature": {
-            "description": "Demo resume marker; not verified hardware passkey authentication",
-            "title": "Passkey Signature",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Legacy parameter for demo consent marker",
+            "title": "Passkey Signature"
           }
         },
-        "required": [
-          "passkey_signature"
-        ],
         "title": "ResumeAgentRequest",
         "type": "object"
       },
@@ -451,6 +473,22 @@
               "title": "Limit",
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
           }
         ],
         "responses": {
@@ -479,6 +517,24 @@
     "/v1/audit/verify": {
       "get": {
         "operationId": "verify_audit_v1_audit_verify_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -487,6 +543,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Verify Audit"
@@ -798,6 +864,22 @@
             "schema": {
               "title": "Plan Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
             }
           }
         ],

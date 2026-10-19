@@ -52,10 +52,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=config.CORS_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
 )
 
 # ── Middleware for Request ID & Timing ────────────────────────
@@ -65,6 +65,10 @@ async def request_middleware(request: Request, call_next):
     request.state.request_id = req_id
     response = await call_next(request)
     response.headers["X-Request-ID"] = req_id
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'none'"
     return response
 
 # ── Problem+JSON Helper ────────────────────────────────────────
@@ -85,14 +89,15 @@ def problem_response(status_code: int, title: str, detail: str, code: str, reque
 
 # ── Auth Dependency ────────────────────────────────────────────
 def get_current_user(authorization: Optional[str] = Header(None)) -> str:
-    if not authorization or not authorization.startswith("Bearer "):
-        # Default to demo user for local test convenience if header omitted
-        return "usr_ayu"
-    token = authorization.split(" ")[1]
-    valid, payload, err = verify_jwt(token)
-    if not valid:
-        raise HTTPException(status_code=401, detail=f"Invalid or expired token: {err}")
-    return payload.get("sub", "usr_ayu")
+    if not config.DEMO_AUTH_ENABLED:
+        raise HTTPException(status_code=403, detail="Synthetic demo authentication is disabled")
+    parts = authorization.split() if authorization else []
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Bearer access token required", headers={"WWW-Authenticate": "Bearer"})
+    valid, payload, _ = verify_jwt(parts[1])
+    if not valid or payload["type"] != "access":
+        raise HTTPException(status_code=401, detail="Invalid access token", headers={"WWW-Authenticate": "Bearer"})
+    return payload["sub"]
 
 # ── Endpoints ──────────────────────────────────────────────────
 @app.get("/v1/health")
@@ -115,16 +120,20 @@ def ready():
 # ── Auth Endpoints ─────────────────────────────────────────────
 @app.post("/v1/auth/demo-login")
 def demo_login(req: DemoLoginRequest = DemoLoginRequest()):
+    if not config.DEMO_AUTH_ENABLED:
+        raise HTTPException(status_code=403, detail="Synthetic demo login is disabled")
     tokens = generate_tokens_for_user(user_id="usr_ayu", username=req.username)
     record_audit_event("AUTH_LOGIN", "usr_ayu", {"method": "demo_login", "username": req.username})
     return tokens
 
 @app.post("/v1/auth/refresh")
 def refresh_token(req: TokenRefreshRequest):
+    if not config.DEMO_AUTH_ENABLED:
+        raise HTTPException(status_code=403, detail="Synthetic demo authentication is disabled")
     valid, payload, err = verify_jwt(req.refresh_token)
     if not valid or payload.get("type") != "refresh":
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-    new_tokens = generate_tokens_for_user(user_id=payload.get("sub", "usr_ayu"), username=payload.get("username", "Ayu"))
+    new_tokens = generate_tokens_for_user(user_id=payload["sub"], username=payload.get("username", "Ayu"))
     return new_tokens
 
 # ── Policy Endpoints ───────────────────────────────────────────
@@ -180,7 +189,7 @@ def propose_policy_change(req: PolicyProposalRequest, user_id: str = Depends(get
     return {
         "proposal_id": proposal_id,
         "status": "PENDING_GUARDIAN_OR_DELAY",
-        "notice": "Takes effect in 24 hours unless your guardian co-signs.",
+        "notice": "Takes effect in 24 hours unless your guardian co-signs (synthetic proposal recorded only; guardian authentication is not implemented).",
         "effective_at": effective_at
     }
 
@@ -193,19 +202,18 @@ def pause_agent(user_id: str = Depends(get_current_user)):
     record_audit_event("AGENT_KILL_SWITCH_ENGAGED", user_id, {"is_paused": True})
     return {
         "is_paused": True,
-        "banner": "Agent paused. It can still show your balance. Resume with passkey."
+        "banner": "Agent paused. Explicit synthetic demo consent is required to resume."
     }
 
 @app.post("/v1/agent/resume")
 def resume_agent(req: ResumeAgentRequest, user_id: str = Depends(get_current_user)):
-    # Simulated passkey verification
-    if not req.passkey_signature or len(req.passkey_signature) < 6:
-        raise HTTPException(status_code=400, detail="Valid passkey signature required to resume agent")
+    if not req.demo_consent and not req.passkey_signature:
+        raise HTTPException(status_code=400, detail="Explicit synthetic demo consent required")
 
     conn = get_connection()
     with conn:
         conn.execute("UPDATE policy SET is_paused = 0 WHERE user_id = ?", (user_id,))
-    record_audit_event("AGENT_RESUMED", user_id, {"resumed_with": "passkey"})
+    record_audit_event("AGENT_RESUMED", user_id, {"resumed_with": "synthetic_demo_consent"})
     return {
         "is_paused": False,
         "message": "Agent resumed successfully."
@@ -213,9 +221,9 @@ def resume_agent(req: ResumeAgentRequest, user_id: str = Depends(get_current_use
 
 # ── Audit Chain Endpoints ──────────────────────────────────────
 @app.get("/v1/audit")
-def get_audit_trail(limit: int = 50):
+def get_audit_trail(limit: int = 50, user_id: str = Depends(get_current_user)):
     conn = get_connection()
-    cur = conn.execute("SELECT entry_id, action, actor, details_json, prev_hash, entry_hash, timestamp FROM audit_chain ORDER BY entry_id DESC LIMIT ?", (limit,))
+    cur = conn.execute("SELECT entry_id, action, actor, details_json, prev_hash, entry_hash, timestamp FROM audit_chain WHERE actor = ? ORDER BY entry_id DESC LIMIT ?", (user_id, max(1, min(limit, 200))))
     rows = [dict(r) for r in cur.fetchall()]
     return {
         "count": len(rows),
@@ -223,7 +231,7 @@ def get_audit_trail(limit: int = 50):
     }
 
 @app.get("/v1/audit/verify")
-def verify_audit():
+def verify_audit(user_id: str = Depends(get_current_user)):
     result = verify_audit_chain()
     return result
 
@@ -238,6 +246,8 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
         return problem_response(404, "Plan Not Found", "Plan not found for this user.", "PLAN_NOT_FOUND", req_id)
     if row["status"] != "WAITING_APPROVAL":
         return problem_response(409, "Plan Not Pending", "This plan is no longer pending approval.", "PLAN_NOT_PENDING", req_id)
+    if not req.demo_consent and not req.passkey_signature:
+        return problem_response(400, "Consent Required", "Explicit synthetic demo consent required.", "DEMO_CONSENT_REQUIRED", req_id)
 
     # Cryptographic Intent Hash Verification
     stored_hash = row["intent_hash"]
@@ -250,13 +260,38 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
             req_id
         )
 
-    plan_data = json.loads(row["plan_data_json"])
-    amount_usd = plan_data["amount_usd"]
-    payee_id = plan_data["payee_id"]
-    payee_name = plan_data["payee_name"]
-    policy_eval = evaluate_transfer_policy(user_id, amount_usd, payee_name)
+    try:
+        plan_data = json.loads(row["plan_data_json"])
+        amount_usd = plan_data["amount_usd"]
+        payee_id = plan_data["payee_id"]
+        payee_name = plan_data["payee_name"]
+        recomputed_hash = compute_intent_hash(
+            payee_id, payee_name, amount_usd, plan_data.get("currency", "USD"), plan_data.get("rate", 1.0),
+            fee_usd=plan_data.get("fee_usd", 0.42), route_id=plan_data.get("route_id", "default"),
+        )
+    except (KeyError, TypeError, ValueError):
+        return problem_response(409, "Invalid Plan", "Stored execution intent is invalid; create a new plan.", "PLAN_INTEGRITY_FAILED", req_id)
+    if recomputed_hash != stored_hash:
+        return problem_response(409, "Plan Integrity Failed", "Stored execution intent has changed.", "PLAN_INTEGRITY_FAILED", req_id)
+    policy_eval = evaluate_transfer_policy(user_id, amount_usd, payee_name, payee_id)
     if policy_eval["tier"] == "REFUSED":
         return problem_response(409, "Policy Refused", policy_eval["reason"], "POLICY_REFUSED", req_id)
+    # Claim and reserve before any external execution; concurrent requests cannot
+    # overrun the allowance or issue a second token for this plan.
+    with conn:
+        claimed = conn.execute(
+            "UPDATE plans SET status = 'EXECUTING' WHERE plan_id = ? AND user_id = ? AND status = 'WAITING_APPROVAL' AND plan_data_json = ? AND intent_hash = ?",
+            (plan_id, user_id, row["plan_data_json"], stored_hash),
+        )
+        if claimed.rowcount != 1:
+            return problem_response(409, "Plan Not Pending", "Plan changed or is already executing.", "PLAN_NOT_PENDING", req_id)
+        reserved = conn.execute(
+            "UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ? AND is_paused = 0 AND used_today_usd + ? <= daily_cap_usd",
+            (amount_usd, user_id, amount_usd),
+        )
+        if reserved.rowcount != 1:
+            conn.rollback()
+            return problem_response(409, "Policy Refused", "Agent paused or allowance unavailable.", "POLICY_REFUSED", req_id)
 
     # Issue Scoped Token for Bank Daemon
     token_payload, signature = create_scoped_bank_token(
@@ -264,22 +299,24 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
         amount_usd=amount_usd,
         payee_id=payee_id,
         payee_name=payee_name,
-        fee_usd=plan_data.get("fee_usd", 0.42)
+        fee_usd=plan_data["fee_usd"],
+        intent_hash=stored_hash,
+        idempotency_key=f"plan-{plan_id}",
+        currency=plan_data["currency"],
+        rate=plan_data["rate"],
+        route_id=plan_data["route_id"],
     )
 
     bank_data = await execute_bank_transfer(token_payload, signature, f"plan-{plan_id}")
     if bank_data is None:
-        return problem_response(502, "Bank Execution Unconfirmed", "Bank execution was not confirmed. Check the ledger before sending again.", "BANK_EXECUTION_FAILED", req_id)
+        with conn:
+            conn.execute("UPDATE plans SET status = 'WAITING_APPROVAL' WHERE plan_id = ?", (plan_id,))
+            conn.execute("UPDATE policy SET used_today_usd = used_today_usd - ? WHERE user_id = ?", (amount_usd, user_id))
+        return problem_response(502, "Bank Execution Failed", "Bank execution was not confirmed. Check the ledger before sending again.", "BANK_EXECUTION_FAILED", req_id)
 
-    # A replay/concurrent approval must not account for the same plan twice.
+    # Unknown outcomes retain their reservation; only a confirmed receipt completes.
     with conn:
-        updated = conn.execute(
-            "UPDATE plans SET status = 'COMPLETED' WHERE plan_id = ? AND user_id = ? AND status = 'WAITING_APPROVAL'",
-            (plan_id, user_id),
-        )
-        if updated.rowcount != 1:
-            return problem_response(409, "Plan Not Pending", "This plan is no longer pending approval.", "PLAN_NOT_PENDING", req_id)
-        conn.execute("UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ?", (amount_usd, user_id))
+        conn.execute("UPDATE plans SET status = 'COMPLETED' WHERE plan_id = ? AND user_id = ? AND status = 'EXECUTING'", (plan_id, user_id))
 
     record_audit_event(
         "TRANSFER_EXECUTED",
@@ -332,9 +369,9 @@ def get_tuition_quote(req: TuitionQuoteRequest = TuitionQuoteRequest()):
 
 # ── Plan Details (Polling Fallback) ────────────────────────────
 @app.get("/v1/plans/{plan_id}")
-def get_plan_details(plan_id: str):
+def get_plan_details(plan_id: str, user_id: str = Depends(get_current_user)):
     conn = get_connection()
-    cur = conn.execute("SELECT plan_id, user_id, intent_hash, plan_data_json, status, created_at FROM plans WHERE plan_id = ?", (plan_id,))
+    cur = conn.execute("SELECT plan_id, user_id, intent_hash, plan_data_json, status, created_at FROM plans WHERE plan_id = ? AND user_id = ?", (plan_id, user_id))
     row = cur.fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Plan not found")

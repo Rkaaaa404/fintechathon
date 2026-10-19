@@ -4,10 +4,12 @@ import json
 import time
 from typing import Tuple, Dict, Any, Optional
 from .config import config
-from .database import get_connection
+from backend.transfer_intent import compute_intent_hash
+from .schemas import ScopedTokenPayload
+from pydantic import ValidationError
 
 def canonical_json(obj: Dict[str, Any]) -> bytes:
-    return json.dumps(obj, sort_keys=True, separators=(',', ':')).encode('utf-8')
+    return json.dumps(obj, sort_keys=True, separators=(',', ':'), allow_nan=False).encode('utf-8')
 
 def sign_scoped_token(payload: Dict[str, Any], secret_key: str = config.SECRET_KEY) -> str:
     """Utility used by API to sign scoped tokens with shared secret"""
@@ -15,34 +17,23 @@ def sign_scoped_token(payload: Dict[str, Any], secret_key: str = config.SECRET_K
     return hmac.new(secret_key.encode('utf-8'), data, hashlib.sha256).hexdigest()
 
 def verify_scoped_token(token_data: Dict[str, Any], signature: str) -> Tuple[bool, Optional[str]]:
-    """
-    Bank-side verification of scoped token:
-    1. Check expiry
-    2. Check signature
-    3. Check and record single-use nonce
-    """
-    now = time.time()
-    expires_at = token_data.get("expires_at", 0)
-    if now > expires_at:
-        return False, "Scoped token expired"
-
-    # Verify HMAC signature
-    expected_sig = sign_scoped_token(token_data, config.SECRET_KEY)
-    if not hmac.compare_digest(expected_sig, signature):
-        return False, "Invalid token cryptographic signature"
-
-    nonce = token_data.get("nonce")
-    if not nonce:
-        return False, "Missing single-use nonce"
-
-    conn = get_connection()
-    with conn:
-        # Check if nonce is already consumed
-        cur = conn.execute("SELECT nonce FROM used_nonces WHERE nonce = ?", (nonce,))
-        if cur.fetchone():
-            return False, f"Replay detected: nonce {nonce} already consumed"
-        
-        # Mark nonce as consumed
-        conn.execute("INSERT INTO used_nonces (nonce, used_at) VALUES (?, ?)", (nonce, now))
-
+    """Verify authorization without mutating nonce or ledger state."""
+    try:
+        token = ScopedTokenPayload.model_validate(token_data)
+        expected_sig = sign_scoped_token(token.model_dump(), config.SECRET_KEY)
+        if not hmac.compare_digest(expected_sig, signature):
+            return False, "Invalid token cryptographic signature"
+        now = time.time()
+        if token.expires_at <= now:
+            return False, "Scoped token expired"
+        if token.expires_at > now + config.MAX_TOKEN_TTL_SECONDS:
+            return False, "Scoped token lifetime exceeds bank maximum"
+        expected_hash = compute_intent_hash(
+            token.payee_id, token.payee_name, token.amount, token.currency, token.rate,
+            fee_usd=token.fee_usd, route_id=token.route_id,
+        )
+        if not hmac.compare_digest(expected_hash, token.intent_hash):
+            return False, "Scoped token intent hash mismatch"
+    except (ValidationError, ValueError, TypeError, OverflowError):
+        return False, "Malformed scoped token"
     return True, None
