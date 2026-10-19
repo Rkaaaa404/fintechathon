@@ -183,7 +183,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           </h1>
 
           {/* Narrative Paragraph */}
-          <p className="text-[13.5px] md:text-[14px] text-[#64748B] leading-relaxed max-w-[460px] mx-auto">
+          <p className="text-[13.5px] md:text-[14px] text-[#334155] leading-relaxed max-w-[460px] mx-auto">
             {locale === 'zh'
               ? '专为留学生打造的跨境学费、财力证明与资金安全守护钱包。三环确定性安全隔离，守护每一笔学费与生活开销。'
               : 'A place for international students to navigate cross-border tuition, proof of funds, and living expenses with deterministic non-custodial safety.'}
@@ -207,7 +207,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   <div className="text-[14.5px] font-bold text-[#14213D] leading-tight">
                     {locale === 'zh' ? '以访客身份直接体验 (无需登录)' : 'Enter as Guest (No Login Required)'}
                   </div>
-                  <div className="text-[12px] text-[#64748B] mt-0.5">
+                  <div className="text-[12px] text-[#334155] font-medium mt-0.5">
                     {locale === 'zh' ? '预载 Ayu (HKUST) 演示数据与三环防御' : 'Instant access with preloaded demo student data'}
                   </div>
                 </div>
@@ -229,9 +229,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           {/* Section Divider */}
           <div className="relative my-5 flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[rgba(15,23,42,0.08)]" />
+              <div className="w-full border-t border-[rgba(15,23,42,0.12)]" />
             </div>
-            <span className="relative bg-white px-3 text-[11.5px] uppercase font-semibold text-[#94A3B8] tracking-wider">
+            <span className="relative bg-white px-3 text-[11.5px] uppercase font-bold text-[#475569] tracking-wider">
               {locale === 'zh' ? '或绑定个人学生账号' : 'or sign in with your account'}
             </span>
           </div>
@@ -266,7 +266,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               className={`py-1.5 text-[12.5px] font-semibold rounded-lg transition-all cursor-pointer ${
                 mode === 'signin'
                   ? 'bg-white text-[#1C3EAA] shadow-xs'
-                  : 'text-[#64748B] hover:text-[#14213D]'
+                  : 'text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? 'AegisPath 登录' : 'Sign In'}
@@ -277,7 +277,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               className={`py-1.5 text-[12.5px] font-semibold rounded-lg transition-all cursor-pointer ${
                 mode === 'signup'
                   ? 'bg-white text-[#1C3EAA] shadow-xs'
-                  : 'text-[#64748B] hover:text-[#14213D]'
+                  : 'text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? '注册新学生账户' : 'Create Account'}
@@ -365,7 +365,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#14213D] text-[11px] font-semibold cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#14213D] text-[11px] font-semibold cursor-pointer"
                 >
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
@@ -394,7 +394,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             {/* Checkbox */}
             {mode === 'signin' ? (
               <div className="flex items-center justify-between pt-0.5">
-                <label className="flex items-center gap-2 cursor-pointer text-[12px] text-[#64748B]">
+                <label className="flex items-center gap-2 cursor-pointer text-[12px] text-[#334155] font-medium">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -405,7 +405,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 </label>
               </div>
             ) : (
-              <label className="flex items-start gap-2 cursor-pointer text-[11.5px] text-[#64748B] pt-0.5">
+              <label className="flex items-start gap-2 cursor-pointer text-[11.5px] text-[#334155] font-medium pt-0.5">
                 <input
                   type="checkbox"
                   required
@@ -444,7 +444,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
           {/* Quick Demo Autofill Hint */}
           <div className="mt-4 pt-3 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[11.5px]">
-            <span className="text-[#64748B]">
+            <span className="text-[#334155] font-medium">
               {locale === 'zh' ? '评审/演示快捷填入:' : 'Judge/Reviewer Autofill:'}
             </span>
             <button

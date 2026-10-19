@@ -263,7 +263,7 @@ export const PlannerScreen: React.FC<PlannerScreenProps> = ({
             <h2 className="text-[18px] font-semibold text-[#14213D] leading-none">
               Integrated Financial Metrics
             </h2>
-            <span className="text-[13px] text-[#64748B]">
+            <span className="text-[13px] text-[#334155] font-medium">
               Aligned with Monthly Schedule
             </span>
           </div>

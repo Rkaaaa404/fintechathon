@@ -135,7 +135,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                 </div>
 
                 <div className="shrink-0">
-                  <span className="inline-flex items-center text-[12px] font-semibold h-6 px-3 rounded-full bg-[#B91C1C]/25 text-[#FF8080] border border-[#B91C1C]/40 whitespace-nowrap">
+                  <span className="inline-flex items-center text-[12px] font-bold h-6 px-3 rounded-full bg-[#991B1B] text-white border border-[#DC2626] whitespace-nowrap shadow-xs">
                     {locale === 'zh'
                       ? `资金损失: $${fundsLost}`
                       : `Funds lost $${fundsLost} in this simulation`}
@@ -242,7 +242,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                         <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                           {locale === 'zh' ? '外环 · 隐私过滤' : 'Outer · Privacy Filter'}
                         </span>
-                        <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                           {locale === 'zh' ? '阻断提示词注入与脱敏学生敏感信息' : 'Blocks prompt injections & redacts sensitive student PII'}
                         </span>
                       </div>
@@ -251,7 +251,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
                         {outerActive ? (locale === 'zh' ? '有效' : 'Active') : (locale === 'zh' ? '关闭' : 'Off')}
                       </span>
-                      <span className="text-[#64748B] text-[13px]">›</span>
+                      <span className="text-[#334155] text-[13px]">›</span>
                     </div>
                   </div>
 
@@ -268,7 +268,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                         <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                           {locale === 'zh' ? '中环 · 支出规则' : 'Middle · Spending Rules'}
                         </span>
-                        <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                           {locale === 'zh' ? '强制执行每日$1,000限额并校验收款人白名单' : 'Enforces $1,000/day allowance & verifies payee whitelist'}
                         </span>
                       </div>
@@ -277,7 +277,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EEF4FF] text-[#1C3EAA] border border-[#3D6BEA]/20">
                         {middleActive ? (locale === 'zh' ? '强制' : 'Enforced') : (locale === 'zh' ? '关闭' : 'Off')}
                       </span>
-                      <span className="text-[#64748B] text-[13px]">›</span>
+                      <span className="text-[#334155] text-[13px]">›</span>
                     </div>
                   </div>
 
@@ -297,7 +297,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                         <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                           {locale === 'zh' ? '内环 · 银行限额' : 'Inner · Bank Limits'}
                         </span>
-                        <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                           {locale === 'zh' ? '银行侧独立转账限额，模型外部绝对控制' : 'Bank-side transfer limits outside agent control'}
                         </span>
                       </div>
@@ -306,7 +306,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F1F5F9] text-[#14213D] border border-[rgba(15,23,42,0.08)]">
                         {innerActive ? (locale === 'zh' ? '锁定' : 'Locked') : (locale === 'zh' ? '关闭' : 'Off')}
                       </span>
-                      <span className="text-[#64748B] text-[13px]">›</span>
+                      <span className="text-[#334155] text-[13px]">›</span>
                     </div>
                   </div>
                 </div>
@@ -329,9 +329,9 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                 <div className="h-full bg-[#1C3EAA] rounded-full transition-all duration-500" style={{ width: '20%' }} />
               </div>
 
-              <div className="flex items-center justify-between text-[12px] text-[#64748B] mt-1">
+              <div className="flex items-center justify-between text-[12px] text-[#334155] font-medium mt-1">
                 <span>{locale === 'zh' ? '剩余 $800 可用' : '$800 remaining'}</span>
-                <span className="font-medium text-[#1C3EAA]">{locale === 'zh' ? '6小时后重置' : 'Resets in 6h'}</span>
+                <span className="font-semibold text-[#1C3EAA]">{locale === 'zh' ? '6小时后重置' : 'Resets in 6h'}</span>
               </div>
             </Card>
           </div>
@@ -370,7 +370,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                         <span className="font-bold text-[13px] text-[#14213D] block truncate">
                           {locale === 'zh' ? '发票隐藏提示词攻击拦截' : 'Prompt injection blocked (invoice)'}
                         </span>
-                        <span className="text-[11.5px] text-[#64748B] block truncate">
+                        <span className="text-[11.5px] text-[#334155] font-medium block truncate">
                           1h ago · {locale === 'zh' ? '外环隐私过滤器拦截' : 'Malicious instruction detected and blocked by Outer Layer'}
                         </span>
                       </div>
@@ -393,7 +393,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                         <span className="font-bold text-[13px] text-[#14213D] block truncate">
                           {locale === 'zh' ? '拦截未授权收款人转账' : 'Unknown payee detected'}
                         </span>
-                        <span className="text-[11.5px] text-[#64748B] block truncate">
+                        <span className="text-[11.5px] text-[#334155] font-medium block truncate">
                           3h ago · {locale === 'zh' ? '目标账户不在白名单中' : 'Payee not in whitelist'}
                         </span>
                       </div>
@@ -434,7 +434,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-[12px] text-[#14213D] block leading-tight">View rules</span>
-                      <span className="text-[10px] text-[#64748B] block truncate mt-0.5">Allowance, filters</span>
+                      <span className="text-[10px] text-[#334155] font-medium block truncate mt-0.5">Allowance, filters</span>
                     </div>
                   </div>
 
@@ -447,11 +447,11 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                       <div className="w-7 h-7 rounded-lg bg-white text-[#1C3EAA] flex items-center justify-center border border-[rgba(15,23,42,0.06)] shadow-xs">
                         <PayeesBookIcon size={14} color="#1C3EAA" />
                       </div>
-                      <span className="text-[#64748B] text-[12px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[12px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                     <div>
                       <span className="font-bold text-[12px] text-[#14213D] block leading-tight">Manage payees</span>
-                      <span className="text-[10px] text-[#64748B] block truncate mt-0.5">Family, campus</span>
+                      <span className="text-[10px] text-[#334155] font-medium block truncate mt-0.5">Family, campus</span>
                     </div>
                   </div>
 
@@ -464,11 +464,11 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                       <div className="w-7 h-7 rounded-lg bg-white text-[#1C3EAA] flex items-center justify-center border border-[rgba(15,23,42,0.06)] shadow-xs">
                         📄
                       </div>
-                      <span className="text-[#64748B] text-[12px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[12px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                     <div>
                       <span className="font-bold text-[12px] text-[#14213D] block leading-tight">View logs</span>
-                      <span className="text-[10px] text-[#64748B] block truncate mt-0.5">Audit actions</span>
+                      <span className="text-[10px] text-[#334155] font-medium block truncate mt-0.5">Audit actions</span>
                     </div>
                   </div>
 

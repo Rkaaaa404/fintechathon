@@ -103,7 +103,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                 <span className="web-brand-name font-bold text-[16px] text-[#14213D] tracking-tight leading-tight">
                   AegisPath
                 </span>
-                <span className="pill-testnet text-[10px] font-bold bg-[#EEF4FF] text-[#1F3FA8] px-1.5 py-0.5 rounded-full border border-[#3D6BEA]/20">
+                <span className="pill-testnet text-[10.5px] font-bold bg-[#EEF4FF] text-[#1F3FA8] px-2 py-0.5 rounded-full border border-[#3D6BEA]/35 shadow-2xs">
                   {locale === 'zh' ? '测试网' : 'Testnet'}
                 </span>
               </div>
@@ -126,7 +126,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                 className={`web-nav-btn flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   isActive
                     ? 'active bg-[#EEF4FF] text-[#1C3EAA] shadow-xs'
-                    : 'text-[#475569] hover:text-[#1C3EAA] hover:bg-[#F4F7FE]'
+                    : 'text-[#1E293B] hover:text-[#1C3EAA] hover:bg-[#F4F7FE]'
                 }`}
                 onClick={() => onRouteChange(item.route)}
                 aria-current={isActive ? 'page' : undefined}
@@ -230,11 +230,11 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
             onClick={onLocaleToggle}
             title={locale === 'zh' ? '切换语言' : 'Toggle Language'}
           >
-            <span className={locale === 'en' ? 'text-[#1C3EAA] font-bold' : 'text-[#64748B]'}>
+            <span className={locale === 'en' ? 'text-[#1C3EAA] font-bold' : 'text-[#334155]'}>
               EN
             </span>
-            <span className="text-[#CBD5E1]">/</span>
-            <span className={locale === 'zh' ? 'text-[#1C3EAA] font-bold' : 'text-[#64748B]'}>
+            <span className="text-[#94A3B8]">/</span>
+            <span className={locale === 'zh' ? 'text-[#1C3EAA] font-bold' : 'text-[#334155]'}>
               中文
             </span>
           </button>

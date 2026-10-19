@@ -3,7 +3,7 @@ import hashlib
 import json
 import time
 import uuid
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from .config import config
 
 def canonical_json(obj: Dict[str, Any]) -> bytes:

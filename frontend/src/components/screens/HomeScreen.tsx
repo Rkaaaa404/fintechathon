@@ -101,7 +101,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 duration={0.6}
                 effect="fade"
               />
-              <span className="pill-testnet text-[11px] font-semibold bg-[#0A1440]/60 text-white px-2.5 py-0.5 rounded-full border border-white/25">
+              <span className="pill-testnet-dark pill-testnet text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/40 shadow-xs">
                 {locale === 'zh' ? '测试网' : 'Testnet'}
               </span>
             </div>
@@ -151,7 +151,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="text-white font-semibold text-[13px] tracking-wide uppercase">
                     {locale === 'zh' ? '今日可用额度' : 'Daily Allowance'}
                   </span>
-                  <span className="text-[11px] font-medium text-white/90 bg-[#0A1440]/40 px-2 py-0.5 rounded-full border border-white/20">
+                  <span className="text-[11px] font-semibold text-white bg-[#0A1440] px-2.5 py-0.5 rounded-full border border-white/30 shadow-2xs">
                     {locale === 'zh' ? '6小时后重置' : 'Resets in 6h'}
                   </span>
                 </div>
@@ -160,7 +160,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="big-allowance-amount text-white text-[36px] md:text-[40px] font-semibold tabular-nums tracking-tight">
                     ${user.dailyAllowanceRemaining}
                   </span>
-                  <span className="text-white text-[13px] font-medium opacity-90">
+                  <span className="text-white text-[13px] font-semibold">
                     {locale === 'zh' ? `总额 $${user.dailyAllowanceTotal}` : `of $${user.dailyAllowanceTotal}`}
                   </span>
                 </div>
@@ -214,7 +214,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       tap 💬
                     </span>
                   </div>
-                  <div className="text-[12px] text-[#475569] leading-relaxed">
+                  <div className="text-[12px] text-[#1E293B] leading-relaxed">
                     {locale === 'zh' ? currentThought.bodyZh : currentThought.bodyEn}
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   </CardBadge>
                 </div>
 
-                <p className="text-[12.5px] text-[#64748B] leading-relaxed max-w-sm">
+                <p className="text-[12.5px] text-[#334155] leading-relaxed max-w-sm">
                   {locale === 'zh'
                     ? '安全防护在语言模型外部独立执行，银行侧限额隔离保护资金。'
                     : 'Deterministic security rules run strictly outside the LLM. Bank-side limits protect funds.'}
@@ -343,7 +343,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                       {locale === 'zh' ? '外环 · 隐私过滤' : 'Outer · Privacy Filter'}
                     </span>
-                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                    <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                       {locale === 'zh'
                         ? '阻断提示词注入攻击，隐藏敏感身份凭据'
                         : 'Blocks prompt injections & redacts sensitive student PII'}
@@ -363,7 +363,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                       {locale === 'zh' ? '中环 · 支出规则' : 'Middle · Spending Rules'}
                     </span>
-                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                    <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                       {locale === 'zh'
                         ? '强制每日 $1,000 额度，校验收款人白名单'
                         : 'Enforces $1,000/day allowance & verifies payee whitelist'}
@@ -386,7 +386,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <span className="font-bold text-[13px] text-[#14213D] block leading-tight">
                       {locale === 'zh' ? '内环 · 银行限额' : 'Inner · Bank Limits'}
                     </span>
-                    <span className="text-[11.5px] text-[#64748B] block truncate mt-0.5">
+                    <span className="text-[11.5px] text-[#334155] font-medium block truncate mt-0.5">
                       {locale === 'zh'
                         ? '银行侧转账限额，模型外部独立锁定保护'
                         : 'Bank-side transfer limits outside agent control'}
@@ -406,7 +406,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <h2 className="font-semibold text-[18px] text-[#14213D] tracking-tight">
             {locale === 'zh' ? '服务' : 'Services'}
           </h2>
-          <span className="text-[13px] text-[#64748B]">
+          <span className="text-[13px] text-[#334155] font-medium">
             {locale === 'zh' ? '跨境金融服务与智能调度' : 'Cross-border Student Services'}
           </span>
         </div>
@@ -431,7 +431,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '转账' : 'Send'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '即时汇款' : 'Remit'}
               </span>
             </button>
@@ -450,7 +450,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '学费' : 'Tuition'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '跨境缴纳' : 'Pay'}
               </span>
             </button>
@@ -469,7 +469,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '证明' : 'Evidence'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '财力包' : 'Proof'}
               </span>
             </button>
@@ -488,7 +488,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '安全' : 'Safety'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '三环防御' : 'Kernel'}
               </span>
             </button>
@@ -507,7 +507,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '收款人' : 'Payees'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '白名单' : 'Allowed'}
               </span>
             </button>
@@ -526,7 +526,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '汇率' : 'Rates'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '中间价' : 'PBOC Mid'}
               </span>
             </button>
@@ -545,7 +545,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '规划' : 'Planner'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '现金缓冲' : 'Runway'}
               </span>
             </button>
@@ -564,7 +564,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <span className="text-[12px] md:text-[13px] font-semibold text-[#14213D] group-hover:text-[#1C3EAA] transition-colors mt-2 leading-tight">
                 {locale === 'zh' ? '智能体' : 'Ask Chop'}
               </span>
-              <span className="text-[11px] text-[#64748B] mt-0.5 leading-none">
+              <span className="text-[11px] text-[#334155] font-medium mt-0.5 leading-none">
                 {locale === 'zh' ? '助手咨询' : 'Chat'}
               </span>
             </button>
@@ -604,11 +604,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="text-[22px] md:text-[24px] font-bold tabular-nums text-[#14213D] tracking-tight">
                     ¥{tuitionDueCny.toLocaleString('en-US')}
                   </span>
-                  <span className="text-[11.5px] font-semibold text-[#64748B] uppercase tracking-wider">
+                  <span className="text-[11.5px] font-semibold text-[#334155] uppercase tracking-wider">
                     CNY
                   </span>
                 </div>
-                <p className="text-[12px] text-[#64748B] leading-normal mt-1">
+                <p className="text-[12px] text-[#334155] leading-normal mt-1">
                   {locale === 'zh'
                     ? `应缴 ¥${tuitionDueCny.toLocaleString('en-US')} · 需汇出 $${tuitionSendUsd} USD 至学校财务处`
                     : `Due ¥${tuitionDueCny.toLocaleString('en-US')} · Send $${tuitionSendUsd} USD to Campus bursar`}
@@ -622,7 +622,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 {locale === 'zh' ? '选择支付方案 (快/省/稳)' : 'Select Schedule (Fast/Cheapest)'}
               </span>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[11px] font-semibold text-[#64748B] bg-[#F1F5F9] px-2 py-0.5 rounded-full border border-[rgba(15,23,42,0.06)]">
+                <span className="text-[11px] font-semibold text-[#334155] bg-[#F1F5F9] px-2 py-0.5 rounded-full border border-[rgba(15,23,42,0.06)]">
                   Fall 2026
                 </span>
                 <span className="w-5 h-5 rounded-full bg-[#1C3EAA] text-white flex items-center justify-center text-[10px] shadow-xs">
@@ -663,11 +663,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="text-[22px] md:text-[24px] font-bold tabular-nums text-[#14213D] tracking-tight">
                     ${plannerTotalFormatted}
                   </span>
-                  <span className="text-[11.5px] font-semibold text-[#64748B] uppercase tracking-wider">
+                  <span className="text-[11.5px] font-semibold text-[#334155] uppercase tracking-wider">
                     USD
                   </span>
                 </div>
-                <p className="text-[12px] text-[#64748B] leading-normal mt-1">
+                <p className="text-[12px] text-[#334155] leading-normal mt-1">
                   {locale === 'zh'
                     ? `1月总资产 ($${janBar.reserve}k 储备缓冲) · ${plannerRunway} 充足安全线`
                     : `Jan Total Assets ($${janBar.reserve}k Reserve) · ${plannerRunway} healthy runway`}
@@ -699,7 +699,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <h3 className="font-bold text-[16px] text-[#14213D] tracking-tight">
             {locale === 'zh' ? '最近活动' : 'Recent Activity'}
           </h3>
-          <span className="text-[12.5px] text-[#475569]">
+          <span className="text-[12.5px] text-[#334155] font-medium">
             {activities.length} {locale === 'zh' ? '条记录' : 'events'}
           </span>
         </div>
@@ -729,7 +729,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       <div className="font-bold text-[13.5px] text-[#14213D] truncate">
                         {locale === 'zh' ? act.titleZh : act.titleEn}
                       </div>
-                      <div className="text-[12px] text-[#475569] mt-0.5 truncate">
+                      <div className="text-[12px] text-[#334155] mt-0.5 truncate">
                         {locale === 'zh' ? act.timestampZh : act.timestamp} · {act.receivedText || (locale === 'zh' ? '已拦截' : 'Blocked')}
                       </div>
                     </div>

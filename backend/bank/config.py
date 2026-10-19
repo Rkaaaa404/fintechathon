@@ -3,6 +3,8 @@ from pathlib import Path
 
 # Load .env if present
 env_file = Path(__file__).resolve().parents[2] / ".env"
+if not env_file.exists():
+    env_file = Path(__file__).resolve().parents[1] / ".env"
 if env_file.exists():
     try:
         with open(env_file, "r", encoding="utf-8") as f:

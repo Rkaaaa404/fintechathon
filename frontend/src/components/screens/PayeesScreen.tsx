@@ -205,7 +205,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 filter === 'all'
                   ? 'bg-[#1C3EAA] text-white shadow-xs'
-                  : 'bg-[#F1F5F9] text-[#64748B] hover:text-[#14213D]'
+                  : 'bg-[#F1F5F9] text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? '全部收款人' : 'All Payees'} ({payees.length})
@@ -215,7 +215,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 filter === 'campus'
                   ? 'bg-[#1C3EAA] text-white shadow-xs'
-                  : 'bg-[#F1F5F9] text-[#64748B] hover:text-[#14213D]'
+                  : 'bg-[#F1F5F9] text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? '高校学费' : 'Tuition & Campus'}
@@ -225,7 +225,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 filter === 'family'
                   ? 'bg-[#1C3EAA] text-white shadow-xs'
-                  : 'bg-[#F1F5F9] text-[#64748B] hover:text-[#14213D]'
+                  : 'bg-[#F1F5F9] text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? '家庭汇款' : 'Family Support'}
@@ -235,7 +235,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
               className={`px-3.5 py-1.5 rounded-full text-[12.5px] font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 filter === 'housing'
                   ? 'bg-[#1C3EAA] text-white shadow-xs'
-                  : 'bg-[#F1F5F9] text-[#64748B] hover:text-[#14213D]'
+                  : 'bg-[#F1F5F9] text-[#334155] hover:text-[#14213D]'
               }`}
             >
               {locale === 'zh' ? '学生住宿' : 'Housing'}
@@ -268,7 +268,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
                       {payee.category === 'housing' && <AegisShieldIcon size={20} color="#1C3EAA" />}
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[11px] font-bold text-[#3D6BEA] uppercase tracking-wider block">
+                      <span className="text-[11px] font-bold text-[#1F3FA8] uppercase tracking-wider block">
                         {locale === 'zh' ? payee.categoryLabelZh : payee.categoryLabelEn}
                       </span>
                       <CardTitle className="text-[14.5px] text-[#14213D] font-bold truncate block">
@@ -284,21 +284,21 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
                 </CardHeader>
 
                 <div className="my-2 p-3 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.04)] space-y-1.5 text-[12px]">
-                  <div className="flex items-center justify-between text-[#64748B]">
+                  <div className="flex items-center justify-between text-[#334155] font-medium">
                     <span>{locale === 'zh' ? '清算账户' : 'Clearing Route'}</span>
                     <span className="font-semibold text-[#14213D] truncate max-w-[160px]">
                       {locale === 'zh' ? payee.accountDescZh : payee.accountDescEn}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[#64748B]">
+                  <div className="flex items-center justify-between text-[#334155] font-medium">
                     <span>{locale === 'zh' ? '限额控制' : 'Spending Limit'}</span>
                     <span className="font-bold text-[#0E6E43] tabular-nums">
                       {locale === 'zh' ? payee.limitDescZh : payee.limitDescEn}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-[#64748B]">
+                  <div className="flex items-center justify-between text-[#334155] font-medium">
                     <span>{locale === 'zh' ? '校验凭据' : 'Verification'}</span>
-                    <span className="font-medium text-[#1C3EAA]">
+                    <span className="font-bold text-[#1C3EAA]">
                       {payee.tier}
                     </span>
                   </div>
@@ -306,7 +306,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
               </div>
 
               <CardFooter className="pt-3 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[12.5px]">
-                <span className="text-[11.5px] text-[#64748B] font-medium">
+                <span className="text-[11.5px] text-[#334155] font-semibold">
                   {payee.verifiedDate}
                 </span>
 

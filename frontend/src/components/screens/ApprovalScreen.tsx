@@ -132,7 +132,7 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
                 <div className="text-[14px] font-bold text-[#0E6E43] leading-tight">
                   {locale === 'zh' ? '付款审批已成功执行！' : 'Payment Approved & Executed!'}
                 </div>
-                <div className="text-[11px] text-[#5B6B8C] mt-0.5">
+                <div className="text-[11px] text-[#334155] font-medium mt-0.5">
                   {locale === 'zh' ? '资金已安全划转至收款人' : 'Funds safely routed to payee'}
                 </div>
               </div>
@@ -150,10 +150,10 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
 
             {/* Transfer Amount with Succeed Animation and Compact Size */}
             <div className="bg-white/80 border border-[#1E9E6A]/20 rounded-[12px] p-2.5 my-2.5 text-center">
-              <div className="text-[11px] font-semibold text-[#5B6B8C] uppercase tracking-wider mb-0.5">
+              <div className="text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-0.5">
                 {locale === 'zh' ? '汇款金额' : 'Transfer Amount'}
               </div>
-              <div className="text-[22px] font-mono font-extrabold text-[#1E9E6A] animate-succeed-pulse tracking-tight">
+              <div className="text-[22px] font-mono font-extrabold text-[#0E6E43] animate-succeed-pulse tracking-tight">
                 ${completedReceipt.amount_usd.toFixed(2)} USD
               </div>
               <div className="text-[12px] font-medium text-[#14213D] mt-0.5">
@@ -163,10 +163,10 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
 
             <div className="space-y-1.5 text-[12px] text-[#14213D] border-t border-[#1E9E6A]/20 pt-2 mb-3">
               <div className="flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{locale === 'zh' ? '银行剩余余额' : 'Remaining bank balance'}</span>
+                <span className="text-[#334155] font-medium">{locale === 'zh' ? '银行剩余余额' : 'Remaining bank balance'}</span>
                 <span className="font-bold font-mono">${completedReceipt.remaining_balance_usd.toFixed(2)} USD</span>
               </div>
-              <div className="text-[#5B6B8C] break-all font-mono pt-1 text-[11px]">{completedReceipt.intent_hash}</div>
+              <div className="text-[#334155] font-medium break-all font-mono pt-1 text-[11px]">{completedReceipt.intent_hash}</div>
               <div className="space-y-1 pt-2 text-[11.5px]">
                 <div>{locale === 'zh' ? '隐私过滤' : 'Privacy filter'}: <span className="font-semibold text-[#1E9E6A]">{completedReceipt.checks.privacy_filter}</span></div>
                 <div>{locale === 'zh' ? '支出规则' : 'Spending rules'}: <span className="font-semibold text-[#1E9E6A]">{completedReceipt.checks.spending_rules}</span></div>
@@ -180,61 +180,61 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
         ) : (
           <>
             <div className="comparison-cards-grid grid grid-cols-2 gap-2 mb-3">
-              <div className="comp-card bg-[#F4F7FE] p-2.5 rounded-[12px] border border-[#E6ECF8]">
-                <div className="comp-card-label text-[11px] font-bold text-[#5B6B8C] mb-1">{b('card_you_asked', 'card_you_asked_sub', locale)}</div>
+              <div className="comp-card bg-[#F4F7FE] p-2.5 rounded-[12px] border border-[#CBD5E1]">
+                <div className="comp-card-label text-[11px] font-bold text-[#334155] mb-1">{b('card_you_asked', 'card_you_asked_sub', locale)}</div>
                 <div className="comp-card-val text-[12px] text-[#14213D] italic break-words">&ldquo;{plan.you_asked}&rdquo;</div>
               </div>
-              <div className="comp-card bg-[#E6EEFF] p-2.5 rounded-[12px] border border-[#9DB8FF]/40">
+              <div className="comp-card bg-[#E6EEFF] p-2.5 rounded-[12px] border border-[#3D6BEA]/40">
                 <div className="comp-card-label text-[11px] font-bold text-[#1F3FA8] mb-1">{b('card_i_understood', 'card_i_understood_sub', locale)}</div>
                 <div className="comp-card-val text-[11.5px] text-[#14213D] font-medium leading-tight break-words">{plan.understood}</div>
               </div>
             </div>
             <div className="approval-amount-center text-center my-2.5">
-              <div className="approval-amount-label text-[11px] font-bold text-[#5B6B8C] uppercase tracking-wider mb-0.5">
+              <div className="approval-amount-label text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5">
                 {locale === 'zh' ? '转账金额（美元）' : 'Transfer amount (USD)'}
               </div>
               <div className="approval-big-dollars text-[24px] font-bold text-[#14213D] font-mono tracking-tight leading-tight my-1">
                 ${plan.send_amount_usd.toFixed(2)}
               </div>
-              <div className="text-[12.5px] font-semibold text-[#5B6B8C] mt-0.5">{plan.payee_name}</div>
+              <div className="text-[12.5px] font-semibold text-[#334155] mt-0.5">{plan.payee_name}</div>
             </div>
-            <div className="space-y-2 py-1 text-[13px] border-b border-[#E6ECF8] pb-3 mb-3">
+            <div className="space-y-2 py-1 text-[13px] border-b border-[#CBD5E1] pb-3 mb-3">
               {plan.receives_cny !== undefined && (
                 <div className="breakdown-row flex justify-between gap-2">
-                  <span className="text-[#5B6B8C]">{b('receives_label', 'receives_sub', locale)}</span>
+                  <span className="text-[#334155] font-medium">{b('receives_label', 'receives_sub', locale)}</span>
                   <span className="font-semibold text-[#14213D] font-mono">¥{plan.receives_cny.toLocaleString()} CNY</span>
                 </div>
               )}
               {plan.receives_idr !== undefined && (
                 <div className="breakdown-row flex justify-between gap-2">
-                  <span className="text-[#5B6B8C]">{b('receives_label', 'receives_sub', locale)}</span>
+                  <span className="text-[#334155] font-medium">{b('receives_label', 'receives_sub', locale)}</span>
                   <span className="font-semibold text-[#14213D] font-mono">Rp {plan.receives_idr.toLocaleString()} IDR</span>
                 </div>
               )}
               <div className="breakdown-row flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{b('rate_simulated', 'rate_simulated_sub', locale)}</span>
+                <span className="text-[#334155] font-medium">{b('rate_simulated', 'rate_simulated_sub', locale)}</span>
                 <span className="font-semibold text-[#14213D] font-mono">{plan.rate} {plan.rate_pair}</span>
               </div>
               <div className="breakdown-row flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{b('fee_and_buffer', 'fee_and_buffer_sub', locale)}</span>
+                <span className="text-[#334155] font-medium">{b('fee_and_buffer', 'fee_and_buffer_sub', locale)}</span>
                 <span className="font-semibold text-[#14213D] font-mono">${plan.fee_with_buffer_usd.toFixed(2)} USD</span>
               </div>
               <div className="breakdown-row flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{b('arrives_label', 'arrives_sub', locale)}</span>
-                <span className="font-semibold text-[#1E9E6A] text-right">{plan.eta}</span>
+                <span className="text-[#334155] font-medium">{b('arrives_label', 'arrives_sub', locale)}</span>
+                <span className="font-semibold text-[#0E6E43] text-right">{plan.eta}</span>
               </div>
             </div>
-            <div className="intent-lock-row bg-[#F4F7FE] p-2.5 rounded-[12px] border border-[#E6ECF8] mb-4 text-[11.5px] text-[#5B6B8C]">
+            <div className="intent-lock-row bg-[#F4F7FE] p-2.5 rounded-[12px] border border-[#CBD5E1] mb-4 text-[11.5px] text-[#334155]">
               <div>{b('locked_binding', 'locked_binding_sub', locale)}:</div>
               <div className="intent-hash-mono font-mono font-bold text-[#1F3FA8] break-all">{plan.intent_hash}</div>
               <div className="font-mono break-all mt-1">{plan.plan_id} · {plan.status}</div>
             </div>
             {error && <p role="alert" className="mb-3 p-3 rounded-[12px] bg-[#FFF4DC] text-[#B7791F] text-[12px] break-words">{error}</p>}
-            <p className="text-[11px] text-[#5B6B8C] text-center mb-3">
+            <p className="text-[11.5px] text-[#334155] font-medium text-center mb-3">
               {locale === 'zh' ? '演示审批 — 非硬件 Passkey 身份认证' : 'Demo approval — not hardware passkey authentication'}
             </p>
             <div className="flex gap-2">
-              <button className="w-1/3 py-3 rounded-[27px] font-semibold text-[13px] bg-[#F4F7FE] text-[#5B6B8C] border border-[#E6ECF8] disabled:opacity-50" onClick={() => onNavigate('/chat')} disabled={isApproving}>
+              <button className="w-1/3 py-3 rounded-[27px] font-semibold text-[13px] bg-[#F4F7FE] text-[#334155] border border-[#CBD5E1] disabled:opacity-50" onClick={() => onNavigate('/chat')} disabled={isApproving}>
                 {locale === 'zh' ? '返回聊天' : 'Back to chat'}
               </button>
               <button className="w-2/3 bg-[#3D6BEA] text-white py-3 rounded-[27px] font-bold text-[13px] shadow-sm hover:bg-[#1F3FA8] transition-all disabled:opacity-50" onClick={handleApprove} disabled={isApproving}>

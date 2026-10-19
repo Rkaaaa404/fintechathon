@@ -190,7 +190,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                 <h1 className="brand-title" style={{ fontSize: '19px', lineHeight: 1.2 }}>
                   {b('chat_header_title', 'chat_header_sub', locale)}
                 </h1>
-                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '2px' }}>
+                <div style={{ fontSize: '11.5px', color: '#E0F2FE', fontWeight: 600, marginTop: '2px' }}>
                   {b('chat_status', 'chat_status_sub', locale)}
                 </div>
               </div>
@@ -317,7 +317,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                     <div style={{ fontSize: '13.5px', lineHeight: 1.5, color: '#1E293B', fontWeight: 450 }}>
                       {locale === 'zh' ? msg.textZh : msg.textEn}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>
+                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: 500, marginTop: '6px' }}>
                       {msg.timestamp || '10:24 AM'}
                     </div>
                   </div>
@@ -697,7 +697,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         )}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 20px', fontSize: '12px', color: '#64748B' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 20px', fontSize: '12px', color: '#334155', fontWeight: 500 }}>
         <input type="checkbox" id="demoDataCheck" checked={syntheticDemo} onChange={(event) => setSyntheticDemo(event.target.checked)} disabled={isTyping} />
         <label htmlFor="demoDataCheck" style={{ cursor: 'pointer' }}>
           {locale === 'zh' ? '仅使用合成演示数据 — 请勿输入个人资料' : 'Synthetic demo data only — do not enter personal data'}
@@ -727,7 +727,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           style={{
             background: 'none',
             border: 'none',
-            color: '#64748B',
+            color: '#475569',
             cursor: 'pointer',
             padding: '4px',
             display: 'flex',
@@ -766,7 +766,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           style={{
             background: 'none',
             border: 'none',
-            color: '#64748B',
+            color: '#475569',
             cursor: 'pointer',
             padding: '6px',
             display: 'flex',

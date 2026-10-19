@@ -124,9 +124,9 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
           <div className="flex flex-col sm:flex-row items-baseline gap-2 sm:gap-4 mt-2">
             <div className="text-white text-[32px] md:text-[36px] font-bold tabular-nums tracking-tight leading-none">
               ¥{tuition.dueAmountCny.toLocaleString('en-US')}
-              <span className="text-[14px] font-semibold text-[#9DB8FF] ml-2">CNY</span>
+              <span className="text-[14px] font-bold text-[#E0F2FE] ml-2">CNY</span>
             </div>
-            <div className="text-[#DBEAFE] text-[13px]">
+            <div className="text-[#DBEAFE] text-[13px] font-medium">
               {locale === 'zh'
                 ? '学校财务处官方全额到账直连结算通道'
                 : 'Direct bursar settlement · Guaranteed zero intermediate deduction'}
@@ -151,12 +151,12 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
             <div
               onClick={() => onNavigate('/rates')}
-              className="flex items-center gap-1.5 text-[12.5px] text-[#64748B] hover:text-[#1C3EAA] transition-colors cursor-pointer group"
+              className="flex items-center gap-1.5 text-[12.5px] text-[#334155] font-medium hover:text-[#1C3EAA] transition-colors cursor-pointer group"
               title="Click to view live exchange rates"
             >
               <span>{locale === 'zh' ? '中间价基准:' : 'PBOC Mid-market:'}</span>
               <span className="font-bold text-[#14213D] group-hover:text-[#1C3EAA] tabular-nums">7.24</span>
-              <span className="w-4 h-4 rounded-full bg-[#F1F5F9] group-hover:bg-[#EEF4FF] text-[#64748B] group-hover:text-[#1C3EAA] flex items-center justify-center text-[10px]">
+              <span className="w-4 h-4 rounded-full bg-[#F1F5F9] group-hover:bg-[#EEF4FF] text-[#334155] group-hover:text-[#1C3EAA] flex items-center justify-center text-[10px]">
                 ⓘ
               </span>
             </div>
@@ -185,7 +185,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`font-bold text-[14.5px] block ${currentMode === 'fastest' ? 'text-white' : 'text-[#14213D]'}`}>
                   {locale === 'zh' ? routeOptions.fastest.labelZh : routeOptions.fastest.labelEn}
                 </span>
-                <span className={`text-[12px] block mt-0.5 ${currentMode === 'fastest' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[12px] block mt-0.5 ${currentMode === 'fastest' ? 'text-[#E0F2FE] font-medium' : 'text-[#334155] font-medium'}`}>
                   {locale === 'zh' ? routeOptions.fastest.timeZh : routeOptions.fastest.timeEn}
                 </span>
               </div>
@@ -194,7 +194,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`text-[12.5px] font-bold block ${currentMode === 'fastest' ? 'text-white' : 'text-[#14213D]'}`}>
                   {routeOptions.fastest.rate.toFixed(2)} USD/CNY
                 </span>
-                <span className={`text-[11.5px] font-medium block ${currentMode === 'fastest' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[11.5px] font-medium block ${currentMode === 'fastest' ? 'text-[#E0F2FE]' : 'text-[#334155]'}`}>
                   ${routeOptions.fastest.fee.toFixed(2)}
                 </span>
               </div>
@@ -223,7 +223,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`font-bold text-[14.5px] block ${currentMode === 'cheapest' ? 'text-white' : 'text-[#14213D]'}`}>
                   {locale === 'zh' ? routeOptions.cheapest.labelZh : routeOptions.cheapest.labelEn}
                 </span>
-                <span className={`text-[12px] block mt-0.5 ${currentMode === 'cheapest' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[12px] block mt-0.5 ${currentMode === 'cheapest' ? 'text-[#E0F2FE] font-medium' : 'text-[#334155] font-medium'}`}>
                   {locale === 'zh' ? routeOptions.cheapest.timeZh : routeOptions.cheapest.timeEn}
                 </span>
               </div>
@@ -232,7 +232,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`text-[12.5px] font-bold block ${currentMode === 'cheapest' ? 'text-white' : 'text-[#14213D]'}`}>
                   {routeOptions.cheapest.rate.toFixed(2)} USD/CNY
                 </span>
-                <span className={`text-[11.5px] font-medium block ${currentMode === 'cheapest' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[11.5px] font-medium block ${currentMode === 'cheapest' ? 'text-[#E0F2FE]' : 'text-[#334155]'}`}>
                   ${routeOptions.cheapest.fee.toFixed(2)}
                 </span>
               </div>
@@ -262,7 +262,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`font-bold text-[14.5px] block ${currentMode === 'balanced' ? 'text-white' : 'text-[#14213D]'}`}>
                   {locale === 'zh' ? routeOptions.balanced.labelZh : routeOptions.balanced.labelEn}
                 </span>
-                <span className={`text-[12px] block mt-0.5 ${currentMode === 'balanced' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[12px] block mt-0.5 ${currentMode === 'balanced' ? 'text-[#E0F2FE] font-medium' : 'text-[#334155] font-medium'}`}>
                   {locale === 'zh' ? routeOptions.balanced.timeZh : routeOptions.balanced.timeEn}
                 </span>
               </div>
@@ -271,7 +271,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
                 <span className={`text-[12.5px] font-bold block ${currentMode === 'balanced' ? 'text-white' : 'text-[#14213D]'}`}>
                   {routeOptions.balanced.rate.toFixed(2)} USD/CNY
                 </span>
-                <span className={`text-[11.5px] font-medium block ${currentMode === 'balanced' ? 'text-white/80' : 'text-[#64748B]'}`}>
+                <span className={`text-[11.5px] font-medium block ${currentMode === 'balanced' ? 'text-[#E0F2FE]' : 'text-[#334155]'}`}>
                   ${routeOptions.balanced.fee.toFixed(2)}
                 </span>
               </div>
@@ -282,7 +282,7 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
           <div className="rounded-[16px] border border-[rgba(15,23,42,0.08)] overflow-hidden mb-6 text-[13.5px]">
             {/* Row 1: University / Campus */}
             <div className="flex items-center justify-between p-3.5 bg-white border-b border-[rgba(15,23,42,0.06)]">
-              <span className="text-[#64748B] font-medium">
+              <span className="text-[#1E293B] font-semibold">
                 {locale === 'zh' ? '高校 / 财务结算方' : 'University / Campus'}
               </span>
               <div className="flex items-center gap-1.5 font-semibold text-[#14213D]">
@@ -302,22 +302,22 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
             {/* Row 2: Base amount */}
             <div className="flex items-center justify-between p-3.5 bg-white border-b border-[rgba(15,23,42,0.06)]">
-              <span className="text-[#64748B] font-medium">
+              <span className="text-[#1E293B] font-semibold">
                 {locale === 'zh' ? '应缴学费基数' : 'Base amount'}
               </span>
               <span className="font-bold tabular-nums text-[#14213D]">
-                ¥18,000 CNY <span className="text-[#64748B] font-normal">(= $2,500.00 USD)</span>
+                ¥18,000 CNY <span className="text-[#334155] font-medium">(= $2,500.00 USD)</span>
               </span>
             </div>
 
             {/* Row 3: Exchange rate (simulated) */}
             <div className="flex items-center justify-between p-3.5 bg-white border-b border-[rgba(15,23,42,0.06)]">
-              <span className="text-[#64748B] font-medium">
+              <span className="text-[#1E293B] font-semibold">
                 {locale === 'zh' ? '汇率中间价 (模拟)' : 'Exchange rate (simulated)'}
               </span>
               <div className="flex items-center gap-1.5 font-bold tabular-nums text-[#14213D]">
                 <span>{selectedData.rate.toFixed(2)} USD/CNY</span>
-                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#64748B] flex items-center justify-center text-[10px] font-normal cursor-help">
+                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#334155] flex items-center justify-center text-[10px] font-normal cursor-help">
                   ⓘ
                 </span>
               </div>
@@ -325,12 +325,12 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
             {/* Row 4: Transfer fee */}
             <div className="flex items-center justify-between p-3.5 bg-white border-b border-[rgba(15,23,42,0.06)]">
-              <span className="text-[#64748B] font-medium">
+              <span className="text-[#1E293B] font-semibold">
                 {locale === 'zh' ? '清算通道手续费' : 'Transfer fee'}
               </span>
               <div className="flex items-center gap-1.5 font-bold tabular-nums text-[#14213D]">
-                <span>${selectedData.fee.toFixed(2)} <span className="text-[#64748B] font-normal">({selectedData.timeEn})</span></span>
-                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#64748B] flex items-center justify-center text-[10px] font-normal cursor-help">
+                <span>${selectedData.fee.toFixed(2)} <span className="text-[#334155] font-medium">({selectedData.timeEn})</span></span>
+                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#334155] flex items-center justify-center text-[10px] font-normal cursor-help">
                   ⓘ
                 </span>
               </div>
@@ -338,12 +338,12 @@ export const TuitionScreen: React.FC<TuitionScreenProps> = ({
 
             {/* Row 5: Bank-charge buffer */}
             <div className="flex items-center justify-between p-3.5 bg-white">
-              <span className="text-[#64748B] font-medium">
+              <span className="text-[#1E293B] font-semibold">
                 {locale === 'zh' ? '银行扣费防缺口缓冲' : 'Bank-charge buffer'}
               </span>
               <div className="flex items-center gap-1.5 font-bold tabular-nums text-[#14213D]">
                 <span>+ $20.00</span>
-                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#64748B] flex items-center justify-center text-[10px] font-normal cursor-help" title="Guarantees full net arrival">
+                <span className="w-4 h-4 rounded-full bg-[#F1F5F9] text-[#334155] flex items-center justify-center text-[10px] font-normal cursor-help" title="Guarantees full net arrival">
                   ⓘ
                 </span>
               </div>

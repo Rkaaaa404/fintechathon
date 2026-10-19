@@ -111,7 +111,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               </svg>
             </div>
             <div>
-              <span className="text-[12.5px] text-[#64748B] font-medium block">
+              <span className="text-[12.5px] text-[#1E293B] font-semibold block">
                 {locale === 'zh' ? '月均可用资金' : 'Avg. monthly balance'}
               </span>
               <div className="text-[26px] font-bold tabular-nums text-[#14213D] tracking-tight leading-tight my-0.5">
@@ -133,7 +133,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               </svg>
             </div>
             <div>
-              <span className="text-[12.5px] text-[#64748B] font-medium block">
+              <span className="text-[12.5px] text-[#1E293B] font-semibold block">
                 {locale === 'zh' ? '稳定流水周期' : 'Income months'}
               </span>
               <div className="text-[26px] font-bold tabular-nums text-[#14213D] tracking-tight leading-tight my-0.5">
@@ -155,7 +155,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                 </svg>
               </div>
               <div>
-                <span className="text-[12.5px] text-[#64748B] font-medium block">
+                <span className="text-[12.5px] text-[#1E293B] font-semibold block">
                   {locale === 'zh' ? '已绑定证明源' : 'Connected sources'}
                 </span>
                 <div className="text-[26px] font-bold tabular-nums text-[#14213D] tracking-tight leading-tight my-0.5">
@@ -191,7 +191,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       {locale === 'zh' ? '已连接证明源' : 'Connected Sources'}
                     </CardTitle>
                   </div>
-                  <span className="text-[12.5px] text-[#64748B]">
+                  <span className="text-[12.5px] text-[#334155] font-medium">
                     3 connected sources
                   </span>
                 </CardHeader>
@@ -210,7 +210,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Bank statements (simulated)
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Tier 1 · Uploaded 12 Oct 2026 · 6 months (Apr–Sep 2026)
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
                         Connected
                       </span>
-                      <span className="text-[#64748B] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                   </div>
 
@@ -236,7 +236,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Bank API (simulated)
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Tier 2 · Auto-sync weekly · Balance & transactions
                         </span>
                       </div>
@@ -245,7 +245,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
                         Connected
                       </span>
-                      <span className="text-[#64748B] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                   </div>
 
@@ -259,7 +259,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Scholarship letter (simulated)
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Tier 3 · Signed 10 Oct 2026 · Redacted student details
                         </span>
                       </div>
@@ -268,7 +268,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
                         Connected
                       </span>
-                      <span className="text-[#64748B] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                   </div>
                 </div>
@@ -305,10 +305,10 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       <span className="font-bold text-[14px] text-[#14213D] block">
                         Expires in 14 days
                       </span>
-                      <span className="text-[12px] text-[#64748B] block mt-0.5">
+                      <span className="text-[12px] text-[#334155] font-medium block mt-0.5">
                         Verified read-only proof token.
                       </span>
-                      <span className="text-[11.5px] text-[#64748B] block mt-1 leading-relaxed">
+                      <span className="text-[11.5px] text-[#334155] font-medium block mt-1 leading-relaxed">
                         Shared fields: Balance & regular deposits (Bank account & PII strictly redacted).
                       </span>
                     </div>
@@ -376,7 +376,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Campus Housing Application
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Created 10 Oct 2026 · Expires in 14 days
                         </span>
                       </div>
@@ -385,36 +385,36 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
                         Active
                       </span>
-                      <button className="p-1 text-[#64748B] hover:text-[#1C3EAA] cursor-pointer" title="Download summary">
+                      <button className="p-1 text-[#334155] hover:text-[#1C3EAA] cursor-pointer" title="Download summary">
                         📥
                       </button>
-                      <span className="text-[#64748B] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                   </div>
 
                   {/* Pack 2 */}
                   <div className="p-3.5 rounded-[14px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.04)] flex items-center justify-between gap-3 group">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#64748B] flex items-center justify-center shrink-0 border border-[rgba(15,23,42,0.06)]">
-                        <EvidenceDocIcon size={18} color="#64748B" />
+                      <div className="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#1C3EAA] flex items-center justify-center shrink-0 border border-[rgba(15,23,42,0.06)]">
+                        <EvidenceDocIcon size={18} color="#1C3EAA" />
                       </div>
                       <div className="min-w-0">
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Bursar Verification (Fall 2026)
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Created 1 Sep 2026 · Expired 1 Oct 2026
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F1F5F9] text-[#64748B] border border-[rgba(15,23,42,0.06)]">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#F1F5F9] text-[#334155] border border-[rgba(15,23,42,0.06)]">
                         Expired
                       </span>
-                      <button className="p-1 text-[#64748B] hover:text-[#1C3EAA] cursor-pointer" title="Download summary">
+                      <button className="p-1 text-[#334155] hover:text-[#1C3EAA] cursor-pointer" title="Download summary">
                         📥
                       </button>
-                      <span className="text-[#64748B] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
+                      <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
                   </div>
 
@@ -428,7 +428,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#14213D] block leading-tight">
                           Internship Financial Proof
                         </span>
-                        <span className="text-[12px] text-[#64748B] block truncate mt-0.5">
+                        <span className="text-[12px] text-[#334155] font-medium block truncate mt-0.5">
                           Created 15 Aug 2026 · Expires in 15 days
                         </span>
                       </div>
@@ -460,7 +460,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                   <span className="font-bold text-[14px] text-[#14213D] block mb-1">
                     Evidence Notice
                   </span>
-                  <p className="text-[12.5px] text-[#64748B] leading-relaxed">
+                  <p className="text-[12.5px] text-[#334155] font-medium leading-relaxed">
                     An evidence summary, not a credit score. Acceptance by others is not guaranteed.
                   </p>
                 </div>
@@ -481,7 +481,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                   <span className="font-bold text-[14px] text-[#14213D] block mb-0.5">
                     Need help?
                   </span>
-                  <p className="text-[12px] text-[#64748B] leading-snug">
+                  <p className="text-[12px] text-[#334155] font-medium leading-snug">
                     Ask Chop to generate a customized evidence pack for your purpose.
                   </p>
                 </div>

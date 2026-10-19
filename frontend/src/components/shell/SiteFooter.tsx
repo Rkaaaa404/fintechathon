@@ -17,26 +17,26 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({ locale }) => {
               A
             </div>
             <span className="font-bold text-[14px] text-[#14213D]">AegisPath</span>
-            <span className="pill-testnet text-[10px]">Testnet 演示网</span>
+            <span className="pill-testnet text-[10.5px] font-bold">Testnet 演示网</span>
           </div>
-          <p className="text-[11.5px] text-[#5B6B8C] max-w-[340px] leading-relaxed">
+          <p className="text-[12px] text-[#334155] max-w-[340px] leading-relaxed">
             {locale === 'zh'
               ? '面向国际留学生的 AI 智能体数字钱包，在模型外层强制执行三环确定性安全与限额策略。'
               : 'Cross-border AI agent digital wallet for international students with deterministic safety enforced outside the LLM.'}
           </p>
         </div>
 
-        <div className="site-footer-links flex items-center gap-6 text-[12px] text-[#5B6B8C]">
-          <span className="flex items-center gap-1.5 text-[#1E9E6A] font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1E9E6A]"></span>
+        <div className="site-footer-links flex items-center gap-6 text-[12px] text-[#334155] font-medium">
+          <span className="flex items-center gap-1.5 text-[#065F46] font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#065F46]"></span>
             {locale === 'zh' ? '演示安全护栏' : 'Demo safeguards'}
           </span>
-          <span className="text-[#E6ECF8]">|</span>
+          <span className="text-[#94A3B8]">|</span>
           <span>{locale === 'zh' ? 'Sentinel + 有限正则隐私检测' : 'Sentinel + limited regex PII guard'}</span>
-          <span className="text-[#E6ECF8]">|</span>
+          <span className="text-[#94A3B8]">|</span>
           <span>{locale === 'zh' ? '银行沙盒接口' : 'Bank Gateway (Port 8100)'}</span>
-          <span className="text-[#E6ECF8]">|</span>
-          <span className="text-[#9DB8FF]">© 2026 AegisPath</span>
+          <span className="text-[#94A3B8]">|</span>
+          <span className="text-[#1E293B] font-semibold">© 2026 AegisPath</span>
         </div>
       </div>
     </footer>

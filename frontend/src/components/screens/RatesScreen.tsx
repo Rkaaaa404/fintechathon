@@ -335,12 +335,12 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                     })}
                   </div>
 
-                  <span className="text-[11.5px] text-[#64748B] block truncate">
+                  <span className="text-[11.5px] text-[#334155] font-medium block truncate">
                     {locale === 'zh' ? item.labelZh : item.labelEn}
                   </span>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[11px] text-[#64748B]">
+                <div className="mt-3 pt-2.5 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between text-[11px] text-[#334155] font-medium">
                   <span>{locale === 'zh' ? '清算通道' : 'Corridor'}</span>
                   <span className="font-semibold text-[#1C3EAA] truncate max-w-[120px]">
                     {locale === 'zh' ? item.etaZh : item.etaEn}
@@ -362,7 +362,7 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                 <h3 className="text-[16px] font-bold text-[#14213D] leading-tight">
                   {selectedPair.replace('_', ' / ')} {locale === 'zh' ? '实时汇率走势与动态波动' : 'Live Corridor Motion Graph'}
                 </h3>
-                <span className="text-[11.5px] text-[#64748B]">
+                <span className="text-[11.5px] text-[#334155] font-medium">
                   {isLive ? `Live Open-Source Data (Frankfurter API · Updated ${lastUpdated})` : 'Simulated Testnet Real-time Curve'}
                 </span>
               </div>
@@ -378,7 +378,7 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                   className={`px-3 py-1 text-[12px] font-bold rounded-lg transition-all cursor-pointer ${
                     activeTimeframe === tf
                       ? 'bg-white text-[#1C3EAA] shadow-xs'
-                      : 'text-[#64748B] hover:text-[#0F172A]'
+                      : 'text-[#334155] hover:text-[#0F172A]'
                   }`}
                 >
                   {tf}
@@ -504,7 +504,7 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                       textAnchor="middle"
                       fontSize="10"
                       fontWeight="600"
-                      fill="#64748B"
+                      fill="#334155"
                     >
                       {pt.time}
                     </text>
@@ -547,19 +547,19 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
           {/* Bottom Corridor Metrics Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-[rgba(15,23,42,0.06)] text-[12px]">
             <div>
-              <span className="text-[#64748B] block">24h High</span>
+              <span className="text-[#334155] font-medium block">24h High</span>
               <span className="font-bold text-[#0F172A]">{currentPairData.high}</span>
             </div>
             <div>
-              <span className="text-[#64748B] block">24h Low</span>
+              <span className="text-[#334155] font-medium block">24h Low</span>
               <span className="font-bold text-[#0F172A]">{currentPairData.low}</span>
             </div>
             <div>
-              <span className="text-[#64748B] block">Corridor Spread</span>
+              <span className="text-[#334155] font-medium block">Corridor Spread</span>
               <span className="font-bold text-[#0E6E43]">0.15% (Smart Lock)</span>
             </div>
             <div>
-              <span className="text-[#64748B] block">Bank Wire Spread</span>
+              <span className="text-[#334155] font-medium block">Bank Wire Spread</span>
               <span className="font-bold text-[#B91C1C]">2.50% - 3.80% (Hidden)</span>
             </div>
           </div>
@@ -605,14 +605,14 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
 
                   {/* Calculated Output Box */}
                   <div className="p-4 rounded-[14px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)]">
-                    <span className="text-[12px] font-medium text-[#64748B] block mb-1">
+                    <span className="text-[12px] font-semibold text-[#334155] block mb-1">
                       {locale === 'zh' ? '接收方足额到账估算' : 'Recipient Receives (Guaranteed)'}
                     </span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-[26px] font-bold tabular-nums text-[#1C3EAA] tracking-tight">
                         {currentPairData.symbol} {convertedAmount}
                       </span>
-                      <span className="text-[12px] font-bold text-[#64748B]">
+                      <span className="text-[12px] font-bold text-[#1E293B]">
                         {selectedPair.split('_')[1]}
                       </span>
                     </div>
@@ -690,14 +690,14 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                   <div className="p-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[13px] text-[#64748B]">
+                        <span className="font-bold text-[13px] text-[#1E293B]">
                           {locale === 'zh' ? '传统银行电汇 (SWIFT)' : 'Traditional Bank Wire'}
                         </span>
-                        <span className="text-[10px] font-semibold text-[#B91C1C] bg-[#FEF2F2] px-1.5 py-0.2 rounded-full">
+                        <span className="text-[10px] font-bold text-[#B91C1C] bg-[#FEF2F2] px-1.5 py-0.2 rounded-full border border-[#B91C1C]/20">
                           3-5 Days
                         </span>
                       </div>
-                      <span className="text-[11.5px] text-[#94A3B8] block mt-0.5">
+                      <span className="text-[11.5px] text-[#334155] font-medium block mt-0.5">
                         {locale === 'zh' ? '电汇费 $35 + 2.5% 点差 + 中间行 $20' : 'Wire fee $35 + 2.5% FX spread + $20 routing'}
                       </span>
                     </div>
@@ -710,18 +710,18 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                   <div className="p-3.5 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[13px] text-[#64748B]">
+                        <span className="font-bold text-[13px] text-[#1E293B]">
                           {locale === 'zh' ? '国际信用卡支付' : 'International Credit Card'}
                         </span>
-                        <span className="text-[10px] font-semibold text-[#D97706] bg-[#FFFBEB] px-1.5 py-0.2 rounded-full">
+                        <span className="text-[10px] font-bold text-[#92400E] bg-[#FEF3C7] px-1.5 py-0.2 rounded-full border border-[#D97706]/30">
                           High Fee
                         </span>
                       </div>
-                      <span className="text-[11.5px] text-[#94A3B8] block mt-0.5">
+                      <span className="text-[11.5px] text-[#334155] font-medium block mt-0.5">
                         {locale === 'zh' ? '3.0% 跨境刷卡手续费 + 1.5% 货币转换' : '3% interchange fee + 1.5% currency conversion'}
                       </span>
                     </div>
-                    <span className="text-[15px] font-bold tabular-nums text-[#D97706]">
+                    <span className="text-[15px] font-bold tabular-nums text-[#92400E]">
                       ~${creditCardFee.toFixed(2)}
                     </span>
                   </div>
@@ -733,19 +733,19 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
                         <span className="font-bold text-[13.5px] text-[#1C3EAA]">
                           {locale === 'zh' ? 'AegisPath 智能专线' : 'AegisPath Smart Agent Route'}
                         </span>
-                        <span className="text-[10px] font-semibold text-[#0E6E43] bg-[#EBF7EE] px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-[#065F46] bg-[#D1FAE5] px-2 py-0.5 rounded-full border border-[#065F46]/20">
                           ~2 Mins
                         </span>
                       </div>
-                      <span className="text-[11.5px] text-[#475569] block mt-0.5">
+                      <span className="text-[11.5px] text-[#1E293B] font-medium block mt-0.5">
                         {locale === 'zh' ? '0.15% 机构点差 + $14.30 清算费' : '0.15% spread + $14.30 direct clearing'}
                       </span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[16px] font-bold tabular-nums text-[#0E6E43] block">
+                      <span className="text-[16px] font-bold tabular-nums text-[#065F46] block">
                         ${aegisPathFee.toFixed(2)}
                       </span>
-                      <span className="text-[10px] text-[#64748B]">
+                      <span className="text-[10.5px] font-semibold text-[#334155]">
                         {locale === 'zh' ? '保障全额到账' : 'Guaranteed full'}
                       </span>
                     </div>
@@ -754,7 +754,7 @@ export const RatesScreen: React.FC<RatesScreenProps> = ({
               </div>
 
               <div className="mt-4 pt-3 border-t border-[rgba(15,23,42,0.06)] flex items-center justify-between">
-                <span className="text-[12px] text-[#64748B]">
+                <span className="text-[12px] text-[#334155] font-medium">
                   {locale === 'zh' ? '联动现金流缓冲规划' : 'Planner Runway Integration'}
                 </span>
                 <button
