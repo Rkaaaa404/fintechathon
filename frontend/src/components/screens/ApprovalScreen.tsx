@@ -117,34 +117,57 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
 
       <main className="approval-sheet-body bg-white rounded-t-[26px] -mt-4 relative z-20 p-4 shadow-[0_-8px_32px_rgba(10,20,64,0.12)] text-left min-h-[440px]">
         {completedReceipt ? (
-          <div className="payment-sent-slip border-2 border-[#1E9E6A]/30 bg-[#E3F6EE]/30 rounded-[18px] p-4 relative mb-4">
+          <div className="payment-sent-slip border-2 border-[#1E9E6A]/40 bg-gradient-to-b from-[#E3F6EE]/60 to-[#F0FBF6]/90 rounded-[20px] p-4 relative mb-4 shadow-sm animate-succeed-pop">
+            {/* Celebratory Succeed Banner */}
+            <div className="flex items-center gap-3 p-3 bg-white/90 border border-[#1E9E6A]/25 rounded-[14px] mb-3.5 shadow-xs">
+              <div className="w-10 h-10 rounded-full bg-[#1E9E6A] flex items-center justify-center text-white shrink-0 animate-succeed-glow">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <div className="text-[14px] font-bold text-[#0E6E43] leading-tight">
+                  {locale === 'zh' ? '付款审批已成功执行！' : 'Payment Approved & Executed!'}
+                </div>
+                <div className="text-[11px] text-[#5B6B8C] mt-0.5">
+                  {locale === 'zh' ? '资金已安全划转至收款人' : 'Funds safely routed to payee'}
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-between items-start mb-3 gap-2">
               <div className="min-w-0">
                 <span className="text-[11px] font-bold text-[#1E9E6A] uppercase tracking-wider block">
                   {locale === 'zh' ? '银行沙盒执行回执' : 'Bank Sandbox Execution Receipt'}
                 </span>
-                <span className="text-[13px] font-mono font-bold text-[#14213D] break-all">{completedReceipt.tx_id}</span>
+                <span className="text-[12.5px] font-mono font-bold text-[#14213D] break-all">{completedReceipt.tx_id}</span>
               </div>
               <RubberStamp type="SENT" textEn="SENT" textZh="已汇出" rotated />
             </div>
+
+            {/* Transfer Amount with Succeed Animation and Compact Size */}
+            <div className="bg-white/80 border border-[#1E9E6A]/20 rounded-[12px] p-2.5 my-2.5 text-center">
+              <div className="text-[11px] font-semibold text-[#5B6B8C] uppercase tracking-wider mb-0.5">
+                {locale === 'zh' ? '汇款金额' : 'Transfer Amount'}
+              </div>
+              <div className="text-[22px] font-mono font-extrabold text-[#1E9E6A] animate-succeed-pulse tracking-tight">
+                ${completedReceipt.amount_usd.toFixed(2)} USD
+              </div>
+              <div className="text-[12px] font-medium text-[#14213D] mt-0.5">
+                {completedReceipt.payee_name}
+              </div>
+            </div>
+
             <div className="space-y-1.5 text-[12px] text-[#14213D] border-t border-[#1E9E6A]/20 pt-2 mb-3">
-              <div className="flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{locale === 'zh' ? '转账金额' : 'Transfer amount'}</span>
-                <span className="font-bold font-mono">${completedReceipt.amount_usd.toFixed(2)} USD</span>
-              </div>
-              <div className="flex justify-between gap-2">
-                <span className="text-[#5B6B8C]">{locale === 'zh' ? '收款人' : 'Payee'}</span>
-                <span className="font-semibold">{completedReceipt.payee_name}</span>
-              </div>
               <div className="flex justify-between gap-2">
                 <span className="text-[#5B6B8C]">{locale === 'zh' ? '银行剩余余额' : 'Remaining bank balance'}</span>
                 <span className="font-bold font-mono">${completedReceipt.remaining_balance_usd.toFixed(2)} USD</span>
               </div>
-              <div className="text-[#5B6B8C] break-all font-mono pt-2">{completedReceipt.intent_hash}</div>
-              <div className="space-y-1 pt-2">
-                <div>{locale === 'zh' ? '隐私过滤' : 'Privacy filter'}: {completedReceipt.checks.privacy_filter}</div>
-                <div>{locale === 'zh' ? '支出规则' : 'Spending rules'}: {completedReceipt.checks.spending_rules}</div>
-                <div>{locale === 'zh' ? '银行令牌' : 'Bank token'}: {completedReceipt.checks.bank_token}</div>
+              <div className="text-[#5B6B8C] break-all font-mono pt-1 text-[11px]">{completedReceipt.intent_hash}</div>
+              <div className="space-y-1 pt-2 text-[11.5px]">
+                <div>{locale === 'zh' ? '隐私过滤' : 'Privacy filter'}: <span className="font-semibold text-[#1E9E6A]">{completedReceipt.checks.privacy_filter}</span></div>
+                <div>{locale === 'zh' ? '支出规则' : 'Spending rules'}: <span className="font-semibold text-[#1E9E6A]">{completedReceipt.checks.spending_rules}</span></div>
+                <div>{locale === 'zh' ? '银行令牌' : 'Bank token'}: <span className="font-semibold text-[#1E9E6A]">{completedReceipt.checks.bank_token}</span></div>
               </div>
             </div>
             <button className="w-full bg-[#1E9E6A] text-white py-2.5 rounded-[27px] font-bold text-[13px] shadow-sm hover:bg-[#168156] transition-all" onClick={() => onNavigate('/')}>
@@ -163,10 +186,14 @@ export const ApprovalScreen: React.FC<ApprovalScreenProps> = ({ locale, onNaviga
                 <div className="comp-card-val text-[11.5px] text-[#14213D] font-medium leading-tight break-words">{plan.understood}</div>
               </div>
             </div>
-            <div className="approval-amount-center text-center my-3">
-              <div className="approval-amount-label text-[12px] text-[#5B6B8C] mb-0.5">{locale === 'zh' ? '转账金额（美元）' : 'Transfer amount (USD)'}</div>
-              <div className="approval-big-dollars text-[34px] font-bold text-[#14213D] font-mono tracking-tight">${plan.send_amount_usd.toFixed(2)}</div>
-              <div className="text-[13px] font-semibold text-[#14213D]">{plan.payee_name}</div>
+            <div className="approval-amount-center text-center my-2.5">
+              <div className="approval-amount-label text-[11px] font-bold text-[#5B6B8C] uppercase tracking-wider mb-0.5">
+                {locale === 'zh' ? '转账金额（美元）' : 'Transfer amount (USD)'}
+              </div>
+              <div className="approval-big-dollars text-[24px] font-bold text-[#14213D] font-mono tracking-tight leading-tight my-1">
+                ${plan.send_amount_usd.toFixed(2)}
+              </div>
+              <div className="text-[12.5px] font-semibold text-[#5B6B8C] mt-0.5">{plan.payee_name}</div>
             </div>
             <div className="space-y-2 py-1 text-[13px] border-b border-[#E6ECF8] pb-3 mb-3">
               {plan.receives_cny !== undefined && (
