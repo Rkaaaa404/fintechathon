@@ -2,10 +2,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install dependencies inside Linux container
 COPY frontend/package*.json ./
 RUN npm install
 
-COPY frontend ./
+# Copy source files explicitly (prevents host node_modules contamination)
+COPY frontend/tsconfig.json ./
+COPY frontend/next.config.ts ./
+COPY frontend/eslint.config.mjs ./
+COPY frontend/src ./src
+COPY frontend/public ./public
+
 RUN npm run build
 
 FROM node:20-alpine AS runner
