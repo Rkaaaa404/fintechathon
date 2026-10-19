@@ -28,11 +28,21 @@ def parse_user_instruction(text: str, locale: str = "en") -> dict[str, Any]:
     clean = text.strip()
     result = dict(raw_text=clean, action="general_query", amount=None, currency=None,
                   currency_assumed=False, payee="", route_preference="balanced",
-                  assumptions=[], flagged_injection=False)
+                  assumptions=[], flagged_injection=False, locale=locale)
     flagged, threats, reason = scan_text_with_sentinel(clean)
     if flagged:
         result.update(action="attack_flagged", flagged_injection=True, threats=threats, reason=reason)
         return result
+    # 1. Check remaining limit / balance query (Tier 0 read-only)
+    if re.search(r"\b(balance|limit|allowance|cap|saldo|sisa|kuota)\b|查余额|额度|剩余", clean, re.I):
+        result["action"] = "check_balance"
+        return result
+
+    # 2. Transfer ability inquiry ("Bisa kirim uang?", "Can I still send money?", etc.)
+    if re.search(r"(bisa (?:lagi )?kirim|bisa transfer|tidak bisa (?:lagi )?kirim|still (?:send|sent)|can i (?:still )?(?:send|sent)|can i transfer|还能转账|还可以转账|pengiriman)", clean, re.I):
+        result["action"] = "transfer_ability_query"
+        return result
+
     tuition = bool(re.search(r"\b(tuition|school|bursar)\b|学费|缴费", clean, re.I))
     payment = tuition or bool(re.search(r"\b(send|transfer|pay)\b|汇款|汇|转账|给", clean, re.I))
     if not payment:

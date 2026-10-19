@@ -6,7 +6,6 @@ import { AppRoute } from '@/types';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
 import { RubberStamp } from '@/components/art/RubberStamp';
-import { ProjectGanttCard } from '@/components/art/ProjectGanttCard';
 import {
   ChatMessage,
   processUserMessage,
@@ -34,14 +33,14 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const [messages, setMessages] = useState<ChatMessage[]>([{
     id: 'greeting',
     role: 'assistant',
-    textEn: 'Send one complete instruction with amount, currency, and recipient. You can also explore project scheduling, COGS & BEP recommendations, or test policy limits.',
-    textZh: '请提供完整的金额、币种和收款人。您也可以查看项目甘特时间线、COGS与BEP测算推荐，或测试安全拦截。',
+    textEn: 'Send one complete instruction with amount, currency, and recipient. You can send remittances to family, pay university tuition, or test deterministic safety guards.',
+    textZh: '请提供完整的金额、币种和收款人。您可以向家人汇款、缴纳大学学费，或测试确定性安全防御策略。',
     timestamp: '',
     quickChips: [
-      { labelEn: '📊 Project Roadmap (Gantt)', labelZh: '📊 项目时间线 (Gantt Chart)', action: 'prompt-project-gantt' },
-      { labelEn: 'Send USD 200 to Mom', labelZh: '给妈妈汇 USD 200', action: 'prompt-send-200' },
-      { labelEn: 'Review USD 600 to Mom', labelZh: '审核给妈妈汇 USD 600', action: 'prompt-send-3000' },
-      { labelEn: 'Test injection guard', labelZh: '测试注入拦截', action: 'prompt-attack' },
+      { labelEn: '⚡ Send USD 200 to Mom', labelZh: '⚡ 给妈妈汇 USD 200', action: 'prompt-send-200' },
+      { labelEn: '🎓 Pay tuition CNY 18,000', labelZh: '🎓 支付学费 CNY 18,000', action: 'prompt-tuition-18000' },
+      { labelEn: '🛡️ Test injection attack', labelZh: '🛡️ 测试注入攻击拦截', action: 'prompt-attack' },
+      { labelEn: '💳 Check remaining limit', labelZh: '💳 查询今日剩余可用额度', action: 'prompt-check-balance' },
     ],
   }]);
   const [inputValue, setInputValue] = useState(initialDraft);
@@ -86,8 +85,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       const isNetwork = error instanceof Error && error.message.toLowerCase().includes('fetch');
       const detail = isNetwork
         ? (locale === 'zh'
-            ? '已接通本地确定性安全引擎。您可以发送转账指令、查询学费或查看项目甘特时间线。'
-            : 'Connected via local deterministic security engine. You can send transfer instructions, check tuition, or explore project roadmaps.')
+            ? '已接通本地确定性安全引擎。您可以发送转账指令、查询学费或测试安全拦截。'
+            : 'Connected via local deterministic security engine. You can send transfer instructions, check tuition, or test security guards.')
         : (error instanceof Error ? error.message : 'Request completed.');
       setMessages((prev) => [...prev, {
         id: crypto.randomUUID(), role: 'assistant', textEn: detail, textZh: detail, timestamp: timeStr,
@@ -103,28 +102,16 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       return;
     }
 
-    if (chip.action === 'prompt-project-gantt') {
-      void handleSendMessage('Rekomendasi Timeline Proyek & Gantt Chart');
-      return;
-    }
-    if (chip.action === 'filter-gantt-initiation') {
-      void handleSendMessage('Lihat tahap Inisiasi proyek');
-      return;
-    }
-    if (chip.action === 'filter-gantt-planning') {
-      void handleSendMessage('Lihat tahap Perencanaan & COGS');
-      return;
-    }
-    if (chip.action === 'filter-gantt-execution') {
-      void handleSendMessage('Lihat tahap Pelaksanaan & POS');
-      return;
-    }
-    if (chip.action === 'filter-gantt-closing') {
-      void handleSendMessage('Lihat tahap Closing & BEP');
-      return;
-    }
     if (chip.action === 'prompt-send-200') {
-      void handleSendMessage('Send USD 200 to Mom, cheapest route');
+      void handleSendMessage('Send USD 200 to Mom, fastest route');
+      return;
+    }
+    if (chip.action === 'prompt-tuition-18000') {
+      void handleSendMessage('Pay tuition CNY 18000 to Campus bursar, fastest route');
+      return;
+    }
+    if (chip.action === 'prompt-check-balance') {
+      void handleSendMessage('Check my remaining balance and daily limit');
       return;
     }
     if (chip.action === 'prompt-send-3000') {
@@ -342,13 +329,6 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                   >
                     {locale === 'zh' ? '审核此付款计划 ($600 > 限额)' : 'Review this payment plan ($600 > Cap) →'}
                   </button>
-                </div>
-              )}
-
-              {/* Project Gantt Timeline Recommendation Card */}
-              {msg.ganttRoadmap && (
-                <div style={{ marginLeft: '46px', width: 'calc(100% - 46px)' }}>
-                  <ProjectGanttCard locale={locale} />
                 </div>
               )}
 

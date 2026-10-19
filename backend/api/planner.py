@@ -3,6 +3,7 @@ import time
 import json
 import httpx
 import math
+import re
 from decimal import Decimal
 from typing import Dict, Any, List, Optional
 from .config import config
@@ -109,8 +110,113 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         }
 
     action = parsed.get("action")
-    if action == "general_query":
-        return {"type": "info_note", "message": "I can help with USD transfers and CNY tuition payments."}
+    raw_text = parsed.get("raw_text", "").strip().lower()
+
+    # ── Flow: Tier 0 Balance / Limit Inspection & Conversational Inquiries ──
+    if action in ("check_balance", "transfer_ability_query", "general_query"):
+        conn = get_connection()
+        p_row = conn.execute(
+            "SELECT single_send_cap_usd, daily_cap_usd, used_today_usd, is_paused FROM policy WHERE user_id = ?",
+            (user_id,)
+        ).fetchone()
+        single_cap = float(p_row["single_send_cap_usd"]) if p_row else 500.0
+        daily_cap = float(p_row["daily_cap_usd"]) if p_row else 1000.0
+        used_today = float(p_row["used_today_usd"]) if p_row else 0.0
+        remaining = max(0.0, daily_cap - used_today)
+        is_paused = bool(p_row["is_paused"]) if p_row else False
+
+        # Live custodial balance from bank sandbox
+        balance_usd = 12450.0
+        try:
+            from backend.bank.database import get_connection as get_bank_conn
+            with get_bank_conn() as bconn:
+                acc = bconn.execute("SELECT balance_usd FROM accounts WHERE account_id = 'acc_student_ayu'").fetchone()
+                if acc:
+                    balance_usd = float(acc["balance_usd"])
+        except Exception:
+            pass
+
+        locale = parsed.get("locale", "en")
+        is_zh = (locale == "zh") or bool(re.search(r"[\u4e00-\u9fff]", raw_text))
+
+        # 1. Balance / Allowance Query (Tier 0 read-only check)
+        if action == "check_balance" or any(k in raw_text for k in ("balance", "saldo", "limit", "allowance", "cap", "kuota", "余额", "额度")):
+            msg_en = (
+                f"💳 Account Balance: ${balance_usd:,.2f} USD\n"
+                f"📊 Daily Allowance: ${remaining:,.2f} USD remaining today (Used ${used_today:,.2f} of ${daily_cap:,.2f} daily cap)\n"
+                f"⚡ Single-Send Limit: ${single_cap:,.2f} USD (Tier 1 auto-approved)\n"
+                f"👥 Allowlisted Payees: Mom, Campus bursar, Dad\n"
+                f"🛡️ Safety Status: {'Paused (Kill-switch engaged)' if is_paused else 'Active (Resets daily at 00:00 UTC)'}"
+            )
+            msg_zh = (
+                f"💳 账户余额: ${balance_usd:,.2f} USD\n"
+                f"📊 今日可用额度: 剩余 ${remaining:,.2f} USD (已使用 ${used_today:,.2f} / ${daily_cap:,.2f} USD 上限)\n"
+                f"⚡ 单笔限额: ${single_cap:,.2f} USD (Tier 1 自动确认)\n"
+                f"👥 白名单收款人: 妈妈 (Mom), 学院财务处 (Campus bursar), 爸爸 (Dad)\n"
+                f"🛡️ 智能体状态: {'已暂停 (安全熔断已触发)' if is_paused else '正常运行 (每日 00:00 UTC 重置)'}"
+            )
+            return {
+                "type": "info_note",
+                "message": msg_zh if is_zh else msg_en,
+                "message_en": msg_en,
+                "message_zh": msg_zh,
+                "action_type": "check_balance"
+            }
+
+        # 2. Transfer Ability Inquiry ("Can I still send money?", "还能转账吗？", etc.)
+        if action == "transfer_ability_query" or any(k in raw_text for k in ("can i", "still send", "still sent", "bisa kirim", "bisa transfer", "pengiriman", "转账")):
+            if is_paused:
+                msg_en = "Transfers are currently paused because the Kill-Switch is engaged. Please resume the agent in Safety controls before sending funds."
+                msg_zh = "智能体转账功能目前已被紧急制动（Kill-Switch）暂停。请在安全中心恢复运行后再发起转账。"
+            elif remaining <= 0:
+                msg_en = f"You have reached your daily limit of ${daily_cap:,.2f} USD for today ($0.00 remaining). The allowance will reset at 00:00 UTC."
+                msg_zh = f"您今日的 ${daily_cap:,.2f} USD 转账额度已达上限（剩余 $0.00）。该额度将于每日 00:00 UTC 自动重置。"
+            else:
+                msg_en = f"Yes, you can still send money! Your daily allowance has **${remaining:,.2f} USD remaining today** (used ${used_today:,.2f} of ${daily_cap:,.2f} limit). You can send up to ${single_cap:,.2f} USD per transaction to allowlisted payees (Mom, Dad, Campus bursar)."
+                msg_zh = f"是的，您仍可进行转账汇款！您今日的可用额度仍有 **${remaining:,.2f} USD**（今日已使用 ${used_today:,.2f} / ${daily_cap:,.2f} USD 上限）。单笔向白名单收款人（妈妈 Mom、爸爸 Dad、财务处 Campus bursar）转账限额为 ${single_cap:,.2f} USD。"
+            return {
+                "type": "info_note",
+                "message": msg_zh if is_zh else msg_en,
+                "message_en": msg_en,
+                "message_zh": msg_zh,
+                "action_type": "transfer_ability_query"
+            }
+
+        # 3. Help & Greeting Inquiries
+        if any(k in raw_text for k in ("help", "halo", "hello", "hi", "hey", "apa yang bisa", "what can you do", "siapa kamu", "who are you", "你好", "帮助")):
+            msg_en = (
+                "Hello! I am Chop, your AI Digital Wallet Assistant for cross-border student finance.\n\n"
+                "Here is what I can do:\n"
+                "1. ⚡ **Instant Transfers (Tier 1):** Send USD up to $500 to allowlisted family (e.g. *'Send USD 200 to Mom'*).\n"
+                "2. 🎓 **Tuition Planning (Tier 2):** Plan CNY tuition to Campus bursar with dynamic FX buffer.\n"
+                "3. 💳 **Allowance Tracking (Tier 0):** Check remaining daily spending allowance (*'Check remaining limit'*).\n"
+                "4. 🛡️ **Autonomous Sentinel Defense:** Real-time defense against invoice tampering and prompt injection."
+            )
+            msg_zh = (
+                "你好！我是 Chop，专为留学生打造的跨境数字钱包 AI 智能体助手。\n\n"
+                "我能为您提供以下服务：\n"
+                "1. ⚡ **极速汇款 (Tier 1)：** 向白名单家庭成员发送最高 $500 USD（例：*'给妈妈汇款 $200'*）。\n"
+                "2. 🎓 **学费规划 (Tier 2)：** 向学院财务处 (Campus bursar) 预约缴纳 CNY 学费并享受动态汇率缓冲保护。\n"
+                "3. 💳 **额度查询 (Tier 0)：** 随时查看今日剩余消费与转账额度（点击 *'查询剩余额度'*）。\n"
+                "4. 🛡️ **哨兵防御 (Sentinel)：** 智能识别伪造账单、钓鱼欺诈与提示词注入攻击。"
+            )
+            return {
+                "type": "info_note",
+                "message": msg_zh if is_zh else msg_en,
+                "message_en": msg_en,
+                "message_zh": msg_zh,
+                "action_type": "general_query"
+            }
+
+        # General query default
+        msg_en = "I can help with USD transfers and CNY tuition payments. You can also check your remaining allowance by clicking '💳 Check remaining limit'."
+        msg_zh = "我可以帮您处理 USD 跨境转账和 CNY 留学生学费缴费。您也可以点击“💳 查询今日剩余可用额度”随时查看额度。"
+        return {
+            "type": "info_note",
+            "message": msg_zh if is_zh else msg_en,
+            "message_en": msg_en,
+            "message_zh": msg_zh
+        }
     amount = parsed.get("amount")
     payee_name = parsed.get("payee")
     valid_amount = (
@@ -131,6 +237,8 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         return {
             "type": "clarification",
             "message": "Specify one payment with an explicit amount, currency, and recipient.",
+            "message_en": "Specify one payment with an explicit amount, currency, and recipient.",
+            "message_zh": "请提供具体的单笔付款指令，包含明确的金额、币种和收款人。",
         }
 
     # Handle Tuition

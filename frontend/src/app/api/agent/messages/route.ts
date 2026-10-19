@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 30000);
   try {
-    const backendBase = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000';
+    const backendBase = process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000';
     const response = await fetch(`${backendBase}/v1/agent/messages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: authorization },

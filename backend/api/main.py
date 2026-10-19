@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any, List
 
 from .config import config
 from .database import get_connection, init_db, get_db
-from .auth import generate_tokens_for_user, verify_jwt
+from .auth import generate_tokens_for_user, verify_jwt, revoke_token
 from .policy import evaluate_transfer_policy, compute_intent_hash
 from .tokens import create_scoped_bank_token
 from .audit import record_audit_event, verify_audit_chain
@@ -136,6 +136,17 @@ def refresh_token(req: TokenRefreshRequest):
     new_tokens = generate_tokens_for_user(user_id=payload["sub"], username=payload.get("username", "Ayu"))
     return new_tokens
 
+@app.post("/v1/auth/logout")
+def logout(authorization: Optional[str] = Header(None), user_id: str = Depends(get_current_user)):
+    parts = authorization.split() if authorization else []
+    if len(parts) == 2:
+        revoke_token(parts[1], user_id)
+    record_audit_event("AUTH_LOGOUT", user_id, {"method": "user_logout", "timestamp": time.time()})
+    return {
+        "status": "ok",
+        "message": "Session terminated successfully. Token revoked."
+    }
+
 # ── Policy Endpoints ───────────────────────────────────────────
 @app.get("/v1/policy")
 def get_policy(user_id: str = Depends(get_current_user)):
@@ -156,6 +167,14 @@ def get_policy(user_id: str = Depends(get_current_user)):
         "rule_summary": f"The agent can send up to ${row['single_send_cap_usd']:,.0f} at a time and ${row['daily_cap_usd']:,.0f} a day, only to people on your list.",
         "simulated": True
     }
+
+@app.post("/v1/policy/reset-daily-used")
+def reset_daily_used(user_id: str = Depends(get_current_user)):
+    """Reset daily used allowance to $0.00 for clean demo presentation."""
+    conn = get_connection()
+    with conn:
+        conn.execute("UPDATE policy SET used_today_usd = 0.0 WHERE user_id = ?", (user_id,))
+    return {"status": "ok", "user_id": user_id, "used_today_usd": 0.0, "message": "Daily allowance usage reset to $0.00"}
 
 @app.put("/v1/policy")
 def propose_policy_change(req: PolicyProposalRequest, user_id: str = Depends(get_current_user)):
@@ -353,6 +372,7 @@ async def agent_message(req: AgentMessageRequest, request: Request, user_id: str
         result = await extract_intent(req.text, req.locale, synthetic_demo=req.synthetic_demo)
     except AIError as exc:
         return problem_response(exc.status, "AI Request Failed", exc.message, exc.code, request.state.request_id)
+    result.intent["locale"] = req.locale
     plan_res = await plan_and_process_intent(result.intent, user_id)
     return {
         "user_id": user_id,

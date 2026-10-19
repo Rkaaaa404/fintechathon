@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker, Session
 
 from .config import config
-from .models import BankBase, Account
+from .models import BankBase, Account, LedgerEntry, IdempotencyRecord, UsedNonce
 
 # ── SQLAlchemy 2.0 Engine & Session Configuration ─────────────────────────
 engine_args = {}

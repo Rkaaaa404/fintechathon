@@ -23,7 +23,44 @@ def sign_jwt(payload: Dict[str, Any], secret: str = config.SECRET_KEY) -> str:
     sig_b64 = base64url_encode(sig)
     return f"{header_b64}.{payload_b64}.{sig_b64}"
 
+# In-memory revocation cache for instant sub-millisecond check
+REVOKED_TOKENS_CACHE: set = set()
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode('utf-8')).hexdigest()
+
+def revoke_token(token: str, user_id: str = "usr_ayu") -> None:
+    token_h = hash_token(token)
+    REVOKED_TOKENS_CACHE.add(token_h)
+    try:
+        from .database import get_connection
+        conn = get_connection()
+        with conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO revoked_tokens (token_hash, user_id, revoked_at) VALUES (?, ?, ?)",
+                (token_h, user_id, time.time())
+            )
+    except Exception:
+        pass
+
+def is_token_revoked(token: str) -> bool:
+    token_h = hash_token(token)
+    if token_h in REVOKED_TOKENS_CACHE:
+        return True
+    try:
+        from .database import get_connection
+        conn = get_connection()
+        cur = conn.execute("SELECT 1 FROM revoked_tokens WHERE token_hash = ?", (token_h,))
+        if cur.fetchone():
+            REVOKED_TOKENS_CACHE.add(token_h)
+            return True
+    except Exception:
+        pass
+    return False
+
 def verify_jwt(token: str, secret: str = config.SECRET_KEY) -> Tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
+    if is_token_revoked(token):
+        return False, None, "Token has been revoked"
     try:
         header_b64, payload_b64, sig_b64 = token.split(".")
         signing_input = f"{header_b64}.{payload_b64}".encode("ascii")

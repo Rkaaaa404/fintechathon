@@ -32,7 +32,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('ayu.sutanto@connect.ust.hk');
-  const [password, setPassword] = useState('••••••••••••');
+  const [password, setPassword] = useState('AegisGuard2026!');
   const [fullName, setFullName] = useState('Ayu Sutanto');
   const [university, setUniversity] = useState('HKUST');
   const [showPassword, setShowPassword] = useState(false);
@@ -359,15 +359,35 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full h-9 px-3 pr-12 rounded-[10px] border border-[rgba(15,23,42,0.12)] bg-[#F8FAFC] text-[13px] text-[#14213D] focus:bg-white focus:border-[#1C3EAA] focus:outline-none transition-all font-mono"
+                  placeholder={locale === 'zh' ? '输入登录密码' : 'Enter password'}
+                  className={`w-full h-9 px-3 pr-16 rounded-[10px] border border-[rgba(15,23,42,0.12)] bg-[#F8FAFC] text-[13px] text-[#14213D] focus:bg-white focus:border-[#1C3EAA] focus:outline-none transition-all ${
+                    showPassword ? 'font-sans font-medium' : 'font-mono'
+                  }`}
                 />
                 <button
                   type="button"
+                  id="btn-toggle-password-visibility"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#14213D] text-[11px] font-semibold cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#1C3EAA] hover:text-[#153285] text-[11px] font-semibold cursor-pointer flex items-center gap-1 select-none py-1 px-1.5 rounded hover:bg-[#EEF4FF] transition-all"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                      <span>{locale === 'zh' ? '隐藏' : 'Hide'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      <span>{locale === 'zh' ? '显示' : 'Show'}</span>
+                    </>
+                  )}
                 </button>
               </div>
 

@@ -116,10 +116,36 @@ To maintain absolute transparency for competition judges and security auditors:
 ## 🚀 Quick Start Guide
 
 ### 1. Prerequisites
-- **Python 3.12+** (`py` or `python`)
-- **Node.js 20+** (`node`)
+- **Docker & Docker Compose** (Recommended for instant one-click launch), OR
+- **Python 3.12+** & **Node.js 20+** (For native host development)
 
-### 2. One-Click Launch (Recommended)
+### 2. One-Click Docker Launch (Instant, Zero Setup)
+Run all 3 services (`Next.js :3000`, `Core API :8000`, `Bank Gateway :8100`) automatically in isolated containers:
+
+**On Windows (Double-Click or CMD):**
+```bash
+docker-start.bat
+# or in PowerShell:
+.\docker-start.ps1
+```
+
+**On Linux / macOS:**
+```bash
+chmod +x docker-start.sh && ./docker-start.sh
+```
+
+**Using Standard Docker CLI:**
+```bash
+docker compose up --build -d
+```
+All services boot up with auto-seeding, database volume persistence, and automatic healthchecks.
+- Web Application: http://localhost:3000
+- Core API Swagger: http://localhost:8000/v1/docs
+- Bank Health: http://localhost:8100/v1/health
+
+---
+
+### 3. Native Host Development (Without Docker)
 On Windows:
 ```bash
 start.bat

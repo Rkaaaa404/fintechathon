@@ -95,3 +95,11 @@ class EvidenceShare(Base):
     expires_at: Mapped[float] = mapped_column(Float, nullable=False)
     is_revoked: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[float] = mapped_column(Float, nullable=False)
+
+
+class RevokedToken(Base):
+    __tablename__ = "revoked_tokens"
+
+    token_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    revoked_at: Mapped[float] = mapped_column(Float, nullable=False)

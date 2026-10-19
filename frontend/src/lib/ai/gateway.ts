@@ -56,7 +56,6 @@ export interface ChatMessage {
   quickChips?: QuickChipData[];
   approval?: ApprovalSheetResponse;
   ai?: AIExecutionInfo;
-  ganttRoadmap?: boolean;
 }
 
 export async function processUserMessage(
@@ -158,24 +157,25 @@ export async function processUserMessage(
         checks: [],
       };
       return message;
-    case 'gantt_roadmap':
-      message.textEn = response.summary || 'Here is the project execution roadmap and Gantt milestone recommendation:';
-      message.textZh = response.summary || '这是为您整理的项目执行时间线与甘特里程碑推荐规划：';
-      message.ganttRoadmap = true;
+    case 'clarification':
+      message.textEn = `${(response as any).message_en || response.message} Resend the complete payment instruction; chat history is not used.`;
+      message.textZh = `${(response as any).message_zh || (response as any).message_en || response.message} 请重新发送完整的付款指令；系统不会使用聊天历史。`;
       message.quickChips = [
-        { labelEn: 'Initiation Tasks', labelZh: '起步阶段 (Inisiasi)', action: 'filter-gantt-initiation' },
-        { labelEn: 'Planning & COGS', labelZh: '规划与HPP (COGS)', action: 'filter-gantt-planning' },
-        { labelEn: 'Execution & POS', labelZh: '执行与POS系统', action: 'filter-gantt-execution' },
-        { labelEn: 'Closing & BEP', labelZh: '收尾与BEP测算', action: 'filter-gantt-closing' },
+        { labelEn: '⚡ Send USD 200 to Mom', labelZh: '⚡ 给妈妈汇 USD 200', action: 'prompt-send-200', icon: 'send' },
+        { labelEn: '🎓 Pay tuition CNY 18,000', labelZh: '🎓 支付学费 CNY 18,000', action: 'prompt-tuition-18000', icon: 'tuition' },
+        { labelEn: '🛡️ Test injection attack', labelZh: '🛡️ 测试发票注入拦截', action: 'prompt-attack', icon: 'shield' },
+        { labelEn: '💳 Check remaining limit', labelZh: '💳 查询今日剩余可用额度', action: 'prompt-check-balance' },
       ];
       return message;
-    case 'clarification':
-      message.textEn = `${response.message} Resend the complete payment instruction; chat history is not used.`;
-      message.textZh = `${response.message} 请重新发送完整的付款指令；系统不会使用聊天历史。`;
-      return message;
     case 'info_note':
-      message.textEn = response.message;
-      message.textZh = response.message;
+      message.textEn = (response as any).message_en || response.message;
+      message.textZh = (response as any).message_zh || (response as any).message_en || response.message;
+      message.quickChips = [
+        { labelEn: '⚡ Send USD 200 to Mom', labelZh: '⚡ 给妈妈汇 USD 200', action: 'prompt-send-200', icon: 'send' },
+        { labelEn: '🎓 Pay tuition CNY 18,000', labelZh: '🎓 支付学费 CNY 18,000', action: 'prompt-tuition-18000', icon: 'tuition' },
+        { labelEn: '🛡️ Test injection attack', labelZh: '🛡️ 测试发票注入拦截', action: 'prompt-attack', icon: 'shield' },
+        { labelEn: '💳 Check remaining limit', labelZh: '💳 查询今日剩余可用额度', action: 'prompt-check-balance' },
+      ];
       return message;
     case 'execution_error':
       message.textEn = `${response.code}: ${response.message}`;

@@ -48,6 +48,22 @@ export default function HomePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const PROTECTED_ROUTES: AppRoute[] = ['/approve', '/planner', '/chat', '/safety', '/evidence', '/payees'];
+
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem('aegispath_auth_user');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && typeof parsed.isAuthenticated === 'boolean') {
+          setAuthUser(parsed);
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }, []);
+
   useEffect(() => {
     const handleUrlRoute = () => {
       if (typeof window === 'undefined') return;
@@ -56,7 +72,11 @@ export default function HomePage() {
       const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
 
       if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
-        setCurrentRoute(r as AppRoute);
+        if (PROTECTED_ROUTES.includes(r as AppRoute) && !hasEntered) {
+          setCurrentRoute('/login');
+        } else {
+          setCurrentRoute(r as AppRoute);
+        }
       } else if (!hasEntered) {
         // First visit: present the animated welcome experience with "Enter as Guest"
         setCurrentRoute('/login');
@@ -101,7 +121,48 @@ export default function HomePage() {
     }, 2800);
   };
 
+  const handleLogout = async () => {
+    try {
+      await connector.logout();
+    } catch {
+      connector.clearSession();
+    }
+    const unauthUser: AuthUserProfile = {
+      name: 'Guest',
+      email: '',
+      avatarLetter: 'G',
+      provider: 'guest',
+      isAuthenticated: false,
+    };
+    setAuthUser(unauthUser);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('aegispath_auth_user');
+      sessionStorage.removeItem('aegispath_entered');
+    }
+    setCurrentRoute('/login');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/?route=/login');
+    }
+    showToast(
+      locale === 'zh'
+        ? '已安全退出登录 · Sesi telah diakhiri'
+        : 'Signed out successfully · Session terminated'
+    );
+  };
+
   const navigateTo = (route: AppRoute) => {
+    if (PROTECTED_ROUTES.includes(route) && !authUser.isAuthenticated) {
+      setCurrentRoute('/login');
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/?route=/login');
+      }
+      showToast(
+        locale === 'zh'
+          ? '请先登录以访问此功能'
+          : 'Please sign in to access this wallet feature'
+      );
+      return;
+    }
     setCurrentRoute(route);
     if (typeof window !== 'undefined') {
       const url = route === '/' ? '/' : `/?route=${route}`;
@@ -334,14 +395,25 @@ export default function HomePage() {
             onLoginSuccess={(user) => {
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
+                sessionStorage.setItem('aegispath_auth_user', JSON.stringify(user));
               }
               setAuthUser(user);
               navigateTo('/');
             }}
             onEnterAsGuest={() => {
+              const guestUser: AuthUserProfile = {
+                name: 'Ayu',
+                email: 'ayu.sutanto@connect.ust.hk',
+                university: 'HKUST',
+                avatarLetter: 'AY',
+                provider: 'guest',
+                isAuthenticated: true,
+              };
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
+                sessionStorage.setItem('aegispath_auth_user', JSON.stringify(guestUser));
               }
+              setAuthUser(guestUser);
               navigateTo('/');
             }}
             onShowToast={showToast}
@@ -389,6 +461,7 @@ export default function HomePage() {
           onLocaleToggle={toggleLocale}
           isPaused={isPaused}
           authUser={authUser}
+          onLogout={handleLogout}
         />
 
         {/* ═══════════ APPLICATION VIEWPORT FRAME (Responsive Web / Mobile) ═══════════ */}
