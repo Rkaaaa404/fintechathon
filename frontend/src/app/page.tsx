@@ -13,6 +13,8 @@ import { EvidenceScreen } from '@/components/screens/EvidenceScreen';
 import { PlannerScreen } from '@/components/screens/PlannerScreen';
 import { ChatScreen } from '@/components/screens/ChatScreen';
 import { LoginScreen, AuthUserProfile } from '@/components/screens/LoginScreen';
+import { PayeesScreen } from '@/components/screens/PayeesScreen';
+import { RatesScreen } from '@/components/screens/RatesScreen';
 import { AppPresentationState, AppRoute, Locale } from '@/types';
 import { connector, type ApprovalSheetResponse } from '@/lib/api/connector';
 
@@ -52,7 +54,7 @@ export default function HomePage() {
       const r = params.get('route');
       const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
 
-      if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/login'].includes(r)) {
+      if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
         setCurrentRoute(r as AppRoute);
       } else if (!hasEntered) {
         // First visit: present the animated welcome experience with "Enter as Guest"
@@ -329,6 +331,22 @@ export default function HomePage() {
               }
               setCurrentRoute('/');
             }}
+            onShowToast={showToast}
+          />
+        );
+      case '/payees':
+        return (
+          <PayeesScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
+            onShowToast={showToast}
+          />
+        );
+      case '/rates':
+        return (
+          <RatesScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => setCurrentRoute(route)}
             onShowToast={showToast}
           />
         );

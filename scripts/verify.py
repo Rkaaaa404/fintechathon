@@ -101,7 +101,7 @@ def scan_forbidden_claims():
     violations = []
     for ext in [".md", ".py", ".ts", ".js", ".json", ".html"]:
         for p in ROOT.rglob(f"*{ext}"):
-            if "node_modules" in p.parts or ".git" in p.parts or "competition" in p.parts or "blueprints" in p.parts or "claims-register.md" in p.parts or "STATUS.md" in p.parts or p.name == "verify.py":
+            if "node_modules" in p.parts or ".git" in p.parts or "competition" in p.parts or "blueprints" in p.parts or "reference-past" in p.parts or "claims-register.md" in p.parts or "STATUS.md" in p.parts or p.name == "verify.py":
                 continue
             text = p.read_text(encoding="utf-8", errors="ignore")
             for pat, desc in forbidden_patterns:

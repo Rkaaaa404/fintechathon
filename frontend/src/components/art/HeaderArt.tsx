@@ -3,7 +3,7 @@
 import React from 'react';
 
 interface HeaderArtProps {
-  screenType: 'home' | 'tuition' | 'approval' | 'evidence' | 'planner' | 'safety' | 'chat';
+  screenType: 'home' | 'tuition' | 'approval' | 'evidence' | 'planner' | 'safety' | 'chat' | 'payees' | 'rates';
 }
 
 export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType = 'home' }) => {
@@ -655,6 +655,86 @@ export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType = 'home' }) => 
               <ellipse cx="0" cy="0" rx="7.5" ry="5" fill="url(#goldCoinGrad)" stroke="#B45309" strokeWidth="1.2" />
               <ellipse cx="0" cy="0" rx="5.2" ry="3.4" fill="none" stroke="#FDE047" strokeWidth="1" strokeOpacity="0.9" />
             </g>
+          </g>
+        </g>
+      )}
+
+      {/* 6. PAYEES: Whitelist Guard Nodes, Floating Verified Badges */}
+      {screenType === 'payees' && (
+        <g>
+          <circle cx="500" cy="70" r="45" fill="url(#artBlueGlow)" />
+          {/* Central Verified Shield */}
+          <g className="shield-anim" transform="translate(480, 50)">
+            <path
+              d="M 20 0 L 38 7 C 38 25, 20 38, 20 38 C 20 38, 2 25, 2 7 Z"
+              fill="#FFFFFF"
+              stroke="#0E6E43"
+              strokeWidth="2"
+            />
+            <path
+              d="M 12 18 L 17 23 L 28 12"
+              stroke="#0E6E43"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </g>
+
+          {/* Floating Whitelist Badges */}
+          <g className="coin-anim-1" transform="translate(410, 40)">
+            <rect width="64" height="22" rx="11" fill="#EBF7EE" stroke="#0E6E43" strokeWidth="1.2" />
+            <text x="32" y="14.5" fill="#0E6E43" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              Bursar ✓
+            </text>
+          </g>
+          <g className="coin-anim-2" transform="translate(525, 95)">
+            <rect width="60" height="20" rx="10" fill="#EEF4FF" stroke="#3D6BEA" strokeWidth="1.2" />
+            <text x="30" y="13.5" fill="#1C3EAA" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              Family ✓
+            </text>
+          </g>
+          <g className="coin-anim-3" transform="translate(430, 110)">
+            <rect width="62" height="20" rx="10" fill="#F8FAFC" stroke="rgba(15,23,42,0.12)" strokeWidth="1.2" />
+            <text x="31" y="13.5" fill="#14213D" fontSize="8.5" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              Landlord ✓
+            </text>
+          </g>
+          {/* Orbit connector */}
+          <circle cx="500" cy="70" r="38" stroke="#FFFFFF" strokeWidth="1.2" strokeDasharray="3 3" strokeOpacity="0.5" fill="none" />
+        </g>
+      )}
+
+      {/* 7. RATES: Exchange Trajectory, Currency Orbits, PBOC Mid Marker */}
+      {screenType === 'rates' && (
+        <g>
+          <circle cx="500" cy="70" r="48" fill="url(#artBlueGlow)" />
+          {/* Dynamic Rate Curve */}
+          <path
+            d="M 380 110 Q 430 40, 480 75 T 580 45"
+            stroke="url(#graphLineGrad)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+          {/* Orbit Currency Pills */}
+          <g className="coin-anim-1" transform="translate(425, 45)">
+            <circle cx="14" cy="14" r="14" fill="#FFFFFF" stroke="#1C3EAA" strokeWidth="1.5" />
+            <text x="14" y="18" fill="#1C3EAA" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              $
+            </text>
+          </g>
+          <g className="coin-anim-2" transform="translate(490, 85)">
+            <circle cx="14" cy="14" r="14" fill="#FFFFFF" stroke="#0E6E43" strokeWidth="1.5" />
+            <text x="14" y="18" fill="#0E6E43" fontSize="11" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              ¥
+            </text>
+          </g>
+          <g className="coin-anim-3" transform="translate(545, 35)">
+            <rect width="48" height="20" rx="10" fill="#FFFBEB" stroke="#D97706" strokeWidth="1.2" />
+            <text x="24" y="13.5" fill="#8A5200" fontSize="9" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">
+              7.24 Mid
+            </text>
           </g>
         </g>
       )}

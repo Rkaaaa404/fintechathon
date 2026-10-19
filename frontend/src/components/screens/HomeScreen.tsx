@@ -42,6 +42,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const tuition = SEED_DATA.tuition;
   const activities = emptyActivity ? [] : SEED_DATA.recentActivities;
 
+  const [mascotThoughtIdx, setMascotThoughtIdx] = React.useState(0);
+  const mascotThoughts = [
+    {
+      titleEn: "Hi Ayu!",
+      titleZh: "Ayu 你好！",
+      bodyEn: "All 3 security layers are active. Monitoring tuition buffers.",
+      bodyZh: "三环安全已就绪，正在监控学费交割缓冲。",
+    },
+    {
+      titleEn: "Corridor Alert ✨",
+      titleZh: "汇率最优提示 ✨",
+      bodyEn: "USD/CNY is currently within 0.2% of 30d optimal rate for tuition!",
+      bodyZh: "当前美元/人民币处于近30日极佳汇率区间，建议按期缴纳！",
+    },
+    {
+      titleEn: "Safety Guarantee 🛡️",
+      titleZh: "确定性防护 🛡️",
+      bodyEn: "0 prompt injection attacks can bypass bank-side limits on my watch.",
+      bodyZh: "有我在，任何针对发票的恶意提示词注入都无法越过银行侧限额！",
+    },
+    {
+      titleEn: "Family Send Ready ⚡",
+      titleZh: "生活费即时汇款 ⚡",
+      bodyEn: "Allowance to Mom is whitelisted for instant 1-click execution.",
+      bodyZh: "给妈妈的生活费已在白名单中，点击转账即可秒级执行。",
+    },
+  ];
+
+  const currentThought = mascotThoughts[mascotThoughtIdx % mascotThoughts.length];
+
   // Derive dynamic calculated numbers strictly from seed & planner models
   const tuitionDueCny = tuition.dueAmountCny; // 18,000
   const tuitionSendUsd = tuition.modes.cheapest.total.toFixed(2); // 2,534.30
@@ -169,27 +199,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             {/* Right Column: Interactive Chop Companion Stage */}
             <div className="md:col-span-5 lg:col-span-4 flex flex-col items-center md:items-end justify-center mt-2 md:mt-0">
-              <div className="companion-stage flex flex-col items-center text-center max-w-[320px] w-full">
-                {/* Speech Bubble */}
-                <div className="speech-bubble-companion bg-white text-[#14213D] text-[12px] font-semibold p-3.5 rounded-[16px] shadow-sm mb-3 border border-[#E6ECF8] w-full relative">
-                  <div className="text-[13px] font-bold text-[#1C3EAA] mb-0.5">
-                    {locale === 'zh' ? 'Ayu 你好！' : 'Hi Ayu!'}
+              <div className="companion-stage flex flex-col items-center text-center max-w-[320px] w-full relative">
+                {/* Speech Bubble (Clickable to cycle thoughts) */}
+                <div
+                  onClick={() => setMascotThoughtIdx((prev) => prev + 1)}
+                  className="speech-bubble-companion bg-white text-[#14213D] text-[12px] font-semibold p-3.5 rounded-[16px] shadow-sm mb-3 border border-[#E6ECF8] w-full relative cursor-pointer hover:border-[#3D6BEA] hover:shadow-md transition-all active:scale-98 group"
+                  title="Click to chat with Chop!"
+                >
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-[13px] font-bold text-[#1C3EAA]">
+                      {locale === 'zh' ? currentThought.titleZh : currentThought.titleEn}
+                    </span>
+                    <span className="text-[10px] text-[#94A3B8] group-hover:text-[#3D6BEA] transition-colors">
+                      tap 💬
+                    </span>
                   </div>
                   <div className="text-[12px] text-[#475569] leading-relaxed">
-                    {locale === 'zh'
-                      ? '三环安全已就绪，正在监控学费交割缓冲。'
-                      : 'All 3 security layers are active. Monitoring tuition buffers.'}
+                    {locale === 'zh' ? currentThought.bodyZh : currentThought.bodyEn}
                   </div>
                 </div>
 
-                {/* Substantial Mascot Element */}
-                <div className="mascot-mount py-1">
+                {/* Substantial Mascot Element with Sparkles & Pulse */}
+                <div
+                  onClick={() => setMascotThoughtIdx((prev) => prev + 1)}
+                  className="mascot-mount py-1 relative cursor-pointer active:scale-95 transition-transform"
+                >
+                  {/* Subtle Aura Halo */}
+                  <div className="absolute inset-0 bg-[#6FD3FF]/20 rounded-full blur-md -z-10 animate-pulse" />
                   <ChopMascot
                     bodyColor="#FFFFFF"
                     faceColor="#DCE8FD"
                     expression={isPaused ? 'paused' : 'wave'}
                     size={84}
-                    className="home-main-chop hover:scale-105 transition-transform cursor-pointer"
+                    className="home-main-chop hover:scale-110 transition-transform duration-300 drop-shadow-md"
                   />
                 </div>
 
@@ -451,15 +493,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </span>
             </button>
 
-            {/* 5. Payees (Restored!) */}
+            {/* 5. Payees */}
             <button
-              onClick={() => {
-                onShowToast?.(locale === 'zh' ? '查看收款人白名单' : 'Viewing whitelisted payees');
-                onNavigate('/safety');
-              }}
-              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+              onClick={() => onNavigate('/payees')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none active:scale-95 transition-transform"
             >
-              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs group-hover:scale-105">
                 <PayeesBookIcon size={19} color="currentColor" />
                 <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
                   3
@@ -473,15 +512,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </span>
             </button>
 
-            {/* 6. Rates (Restored!) */}
+            {/* 6. Rates */}
             <button
-              onClick={() => {
-                onShowToast?.(locale === 'zh' ? '查看实时汇率' : 'Live PBOC exchange rates');
-                onNavigate('/tuition');
-              }}
-              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none"
+              onClick={() => onNavigate('/rates')}
+              className="group flex flex-col items-center cursor-pointer w-full text-center focus:outline-none active:scale-95 transition-transform"
             >
-              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs">
+              <div className="w-12 h-12 rounded-[16px] bg-[#F4F7FE] text-[#1C3EAA] flex items-center justify-center relative group-hover:bg-[#1C3EAA] group-hover:text-white transition-all shadow-xs group-hover:scale-105">
                 <RatesExchangeIcon size={19} color="currentColor" />
                 <span className="absolute -top-1.5 -right-1 bg-[#EEF4FF] text-[#1C3EAA] text-[10px] font-bold px-1.5 py-0.2 rounded-full border border-[#3D6BEA]/20">
                   Live

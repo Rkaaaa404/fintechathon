@@ -17,6 +17,8 @@ export type AppRoute =
   | '/evidence'
   | '/safety'
   | '/planner'
+  | '/payees'
+  | '/rates'
   | '/login';
 
 export type Locale = 'en' | 'zh';
