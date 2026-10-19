@@ -44,7 +44,9 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "127.0.0.1:3000:80"
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://api:8000
     depends_on:
       api:
         condition: service_healthy
