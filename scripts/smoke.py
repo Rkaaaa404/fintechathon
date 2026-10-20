@@ -30,6 +30,7 @@ from backend.api.config import config as api_config
 
 # Set in-memory ASGI transport so API calls to Bank service route directly in-process
 api_config.BANK_TRANSPORT = httpx.ASGITransport(app=bank_app)
+api_config.LLM_PROVIDER = "none"
 
 bank_client = TestClient(bank_app)
 api_client = TestClient(api_app)

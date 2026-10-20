@@ -44,7 +44,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     ],
   }]);
   const [inputValue, setInputValue] = useState(initialDraft);
-  const [syntheticDemo, setSyntheticDemo] = useState(false);
+  const [syntheticDemo, setSyntheticDemo] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const chatStreamRef = useRef<HTMLDivElement>(null);
 
@@ -304,8 +304,23 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                     <div style={{ fontSize: '13.5px', lineHeight: 1.5, color: '#1E293B', fontWeight: 450 }}>
                       {locale === 'zh' ? msg.textZh : msg.textEn}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: 500, marginTop: '6px' }}>
-                      {msg.timestamp || '10:24 AM'}
+                    <div style={{ fontSize: '11px', color: '#475569', fontWeight: 500, marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>{msg.timestamp || '10:24 AM'}</span>
+                      {msg.ai && (
+                        <span style={{
+                          fontSize: '10.5px',
+                          color: msg.ai.source === 'cloud' ? '#1D4ED8' : '#475569',
+                          background: msg.ai.source === 'cloud' ? '#EFF6FF' : '#F1F5F9',
+                          padding: '1px 7px',
+                          borderRadius: '4px',
+                          border: `1px solid ${msg.ai.source === 'cloud' ? '#BFDBFE' : '#CBD5E1'}`,
+                          fontWeight: 600,
+                        }}>
+                          {msg.ai.source === 'cloud'
+                            ? `☁️ ${msg.ai.provider === 'gemini' ? 'Gemini' : 'Groq'} (${msg.ai.model})`
+                            : (msg.ai.source === 'blocked' ? '🛡️ Sentinel Blocked' : '⚙️ Deterministic Rules')}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -327,7 +342,13 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                     }}
                     onClick={() => onReviewPlan(msg.approval!)}
                   >
-                    {locale === 'zh' ? '审核此付款计划 ($600 > 限额)' : 'Review this payment plan ($600 > Cap) →'}
+                    {locale === 'zh'
+                      ? (msg.approval.receives_cny
+                          ? '审核学费付款计划 (需通行密钥/演示授权) →'
+                          : `审核此付款计划 ($${msg.approval.send_amount_usd.toFixed(0)} > 限额) →`)
+                      : (msg.approval.receives_cny
+                          ? 'Review tuition payment plan (Requires Passkey / Demo Consent) →'
+                          : `Review this payment plan ($${msg.approval.send_amount_usd.toFixed(0)} > Cap) →`)}
                   </button>
                 </div>
               )}

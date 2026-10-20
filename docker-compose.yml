@@ -36,7 +36,12 @@ services:
       - API_SECRET_KEY=${API_SECRET_KEY:?Set API_SECRET_KEY to a distinct random signing secret}
       - BANK_SERVICE_URL=http://bank:8100
       - BANK_SECRET_KEY=${BANK_SECRET_KEY:?Set BANK_SECRET_KEY to a random signing secret}
-      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+      - LLM_PROVIDER=${LLM_PROVIDER:-gemini}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.8-flash}
+      - GROQ=${GROQ:-}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-20b}
     volumes:
       - aegispath_api_data:/app/data
     healthcheck:
