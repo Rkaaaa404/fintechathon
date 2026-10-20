@@ -3,10 +3,14 @@
 import React from 'react';
 
 interface HeaderArtProps {
-  screenType: 'home' | 'tuition' | 'approval' | 'evidence' | 'planner' | 'safety' | 'chat' | 'payees' | 'rates';
+  screenType: 'home' | 'tuition' | 'approval' | 'evidence' | 'evidence-packs' | 'planner' | 'safety' | 'safety-rules' | 'safety-logs' | 'chat' | 'payees' | 'rates';
 }
 
-export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType = 'home' }) => {
+export const HeaderArt: React.FC<HeaderArtProps> = ({ screenType: rawScreenType = 'home' }) => {
+  const screenType =
+    rawScreenType === 'evidence-packs' ? 'evidence' :
+    (rawScreenType === 'safety-rules' || rawScreenType === 'safety-logs') ? 'safety' :
+    rawScreenType;
   return (
     <svg
       className="header-art-background pointer-events-none"
