@@ -15,6 +15,9 @@ import { ChatScreen } from '@/components/screens/ChatScreen';
 import { LoginScreen, AuthUserProfile } from '@/components/screens/LoginScreen';
 import { PayeesScreen } from '@/components/screens/PayeesScreen';
 import { RatesScreen } from '@/components/screens/RatesScreen';
+import { EvidencePacksScreen } from '@/components/screens/EvidencePacksScreen';
+import { SafetyRulesScreen } from '@/components/screens/SafetyRulesScreen';
+import { SafetyLogsScreen } from '@/components/screens/SafetyLogsScreen';
 import { AppPresentationState, AppRoute, Locale } from '@/types';
 import { connector, type ApprovalSheetResponse } from '@/lib/api/connector';
 
@@ -71,7 +74,7 @@ export default function HomePage() {
         return;
       }
       const requested = params.get('route');
-      const routes: AppRoute[] = ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'];
+      const routes: AppRoute[] = ['/', '/tuition', '/chat', '/evidence', '/evidence-packs', '/safety', '/safety-rules', '/safety-logs', '/planner', '/approve', '/payees', '/rates', '/login'];
       const route = routes.includes(requested as AppRoute) ? requested as AppRoute : '/';
       setCurrentRoute(route);
       const state = params.get('state');
@@ -321,6 +324,25 @@ export default function HomePage() {
             isAttackReplaying={isAttackReplaying}
           />
         );
+      case '/safety-rules':
+        return (
+          <SafetyRulesScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
+            onShowToast={showToast}
+            agentPaused={isPaused}
+            onTogglePause={handleTogglePause}
+          />
+        );
+      case '/safety-logs':
+        return (
+          <SafetyLogsScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
+            onShowToast={showToast}
+            onReplayAttack={handleReplayAttack}
+          />
+        );
       case '/evidence':
         return (
           <EvidenceScreen
@@ -339,6 +361,15 @@ export default function HomePage() {
             onCopyShareLink={() => {
               showToast('Proof link copied to clipboard! 证明链接已复制');
             }}
+            authUser={authUser}
+          />
+        );
+      case '/evidence-packs':
+        return (
+          <EvidencePacksScreen
+            locale={locale}
+            onNavigate={(route: AppRoute) => navigateTo(route)}
+            onShowToast={showToast}
             authUser={authUser}
           />
         );

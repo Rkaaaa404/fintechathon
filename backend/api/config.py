@@ -54,7 +54,14 @@ class ApiConfig:
     TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     BANK_TRANSPORT: object = None
-    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "none").strip()
+    USE_LLM_ADAPTER: bool = os.getenv("USE_LLM_ADAPTER", "false").strip().lower() in {"true", "1", "yes"}
+    _provider_env = os.getenv("LLM_PROVIDER", "").strip()
+    if not _provider_env or (_provider_env == "none" and USE_LLM_ADAPTER):
+        if USE_LLM_ADAPTER:
+            _provider_env = "gemini" if os.getenv("GEMINI_API_KEY", "").strip() else ("groq" if os.getenv("GROQ", "").strip() else "none")
+        else:
+            _provider_env = "none"
+    LLM_PROVIDER: str = _provider_env
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "").strip()
     GROQ: str = os.getenv("GROQ", "").strip()
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()

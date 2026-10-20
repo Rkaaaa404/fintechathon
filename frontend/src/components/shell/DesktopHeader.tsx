@@ -192,7 +192,10 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
           aria-label="Desktop Navigation"
         >
           {navItems.map((item) => {
-            const isActive = currentRoute === item.route;
+            const isActive =
+              currentRoute === item.route ||
+              (item.route === '/evidence' && currentRoute === '/evidence-packs') ||
+              (item.route === '/safety' && (currentRoute === '/safety-rules' || currentRoute === '/safety-logs'));
             const Icon = item.Icon;
             const label = locale === 'zh' ? item.labelZh : item.labelEn;
             return (

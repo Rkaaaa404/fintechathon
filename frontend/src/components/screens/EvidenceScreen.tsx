@@ -180,7 +180,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
             </div>
 
             <button
-              onClick={() => onNavigate('/chat')}
+              onClick={() => onNavigate('/evidence-packs')}
               className="px-3 py-1 rounded-[10px] bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#14213D] font-bold text-[12px] cursor-pointer transition-all active:scale-95 shrink-0"
             >
               Manage
@@ -371,7 +371,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                     </CardTitle>
                   </div>
                   <button
-                    onClick={() => onNavigate('/chat')}
+                    onClick={() => onNavigate('/evidence-packs')}
                     className="text-[12.5px] font-bold text-[#1C3EAA] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>{locale === 'zh' ? '查看全部' : 'View all'}</span>

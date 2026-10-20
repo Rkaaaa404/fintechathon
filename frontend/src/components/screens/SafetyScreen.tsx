@@ -423,7 +423,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 my-1">
                   {/* 1. View rules */}
                   <div
-                    onClick={() => onToggleLayer('rules')}
+                    onClick={() => onNavigate('/safety-rules')}
                     className="p-3 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] hover:bg-[#EEF4FF]/50 transition-all cursor-pointer flex flex-col justify-between min-h-[92px] group"
                   >
                     <div className="flex items-center justify-between">
@@ -434,7 +434,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-[12px] text-[#14213D] block leading-tight">View rules</span>
-                      <span className="text-[10px] text-[#334155] font-medium block truncate mt-0.5">Allowance, filters</span>
+                      <span className="text-[10px] text-[#334155] font-medium block truncate mt-0.5">Guidance & policy</span>
                     </div>
                   </div>
 
@@ -457,7 +457,7 @@ export const SafetyScreen: React.FC<SafetyScreenProps> = ({
 
                   {/* 3. View logs */}
                   <div
-                    onClick={() => onNavigate('/chat')}
+                    onClick={() => onNavigate('/safety-logs')}
                     className="p-3 rounded-[12px] bg-[#F8FAFC] border border-[rgba(15,23,42,0.06)] hover:bg-[#EEF4FF]/50 transition-all cursor-pointer flex flex-col justify-between min-h-[92px] group"
                   >
                     <div className="flex items-center justify-between">
