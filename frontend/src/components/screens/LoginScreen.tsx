@@ -107,12 +107,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       provider: 'guest',
       isAuthenticated: true,
     };
-    onLoginSuccess(guestUser);
     onShowToast(
       locale === 'zh'
         ? '已以访客身份进入钱包 (合成演示数据模式: Ayu · HKUST)'
         : 'Welcome! Exploring AegisPath Wallet as Guest (Synthetic Demo Mode)'
     );
+    onLoginSuccess(guestUser);
   };
 
   const handleGoogleClick = () => {
@@ -163,12 +163,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         provider: 'google',
         isAuthenticated: true,
       };
-      onLoginSuccess(user);
       onShowToast(
         locale === 'zh'
           ? `Google 演示登录成功：${selectedName}`
           : `Demo Google sign-in successful as ${selectedName}`
       );
+      onLoginSuccess(user);
     }, 450);
   };
 
@@ -187,12 +187,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         provider: 'aegispath',
         isAuthenticated: true,
       };
-      onLoginSuccess(user);
       onShowToast(
         mode === 'signup'
           ? (locale === 'zh' ? '学生账户注册成功！' : 'AegisPath Student account created!')
           : (locale === 'zh' ? `欢迎回来，${name}！` : `Welcome back, ${name}!`)
       );
+      onLoginSuccess(user);
     }, 600);
   };
 

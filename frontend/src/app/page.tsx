@@ -135,9 +135,12 @@ export default function HomePage() {
   };
 
   const navigateTo = (route: AppRoute) => {
-    const target = route !== '/login' && !sessionProfileRef.current ? '/login' : route;
+    const isAuthed = !!sessionProfileRef.current || authUser.isAuthenticated || (typeof window !== 'undefined' && sessionStorage.getItem('aegispath_entered') === 'true');
+    const target = route !== '/login' && !isAuthed ? '/login' : route;
     setCurrentRoute(target);
-    window.history.pushState({}, '', target === '/' ? '/' : `/?route=${target}`);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', target === '/' ? '/' : `/?route=${target}`);
+    }
   };
 
   const handleLoginSuccess = (user: AuthUserProfile) => {
