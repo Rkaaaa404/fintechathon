@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Locale } from '@/types';
 import { AppRoute } from '@/types';
-import { SEED_DATA, EvidencePack } from '@/lib/mockData';
+import { SEED_DATA, EvidencePack, getAppDataForUser, UserProfileContext } from '@/lib/mockData';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
 import SplitText from '@/components/SplitText';
@@ -17,17 +17,21 @@ interface EvidenceScreenProps {
   onToggleRevokeShare: () => void;
   onCopyShareLink: () => void;
   locale?: Locale;
+  authUser?: UserProfileContext;
 }
 
 export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
   onNavigate,
-  evidencePack = SEED_DATA.evidencePack,
+  evidencePack,
   landlordShareRevoked,
   onToggleRevokeShare,
   onCopyShareLink,
   locale = 'en',
+  authUser,
 }) => {
-  const ev = evidencePack;
+  const appData = getAppDataForUser(authUser);
+  const ev = evidencePack || appData.evidencePack;
+  const isGoogle = authUser?.provider === 'google' && authUser?.isAuthenticated;
   const [copiedToast, setCopiedToast] = useState(false);
 
   const handleCopy = () => {
@@ -74,7 +78,9 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               <span className="text-[12px] font-semibold bg-white/20 text-white px-3 py-1 rounded-full border border-white/25 flex items-center gap-1.5 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-[#6FD3FF] animate-pulse" />
                 <span>
-                  {locale === 'zh' ? '多源资金证明已汇总' : 'Proof Pack Ready · PII Redacted'}
+                  {isGoogle
+                    ? (locale === 'zh' ? `凭证主体: ${authUser?.name}` : `Proof Issued to: ${authUser?.name}`)
+                    : (locale === 'zh' ? '多源资金证明已汇总 (测试演示)' : 'Proof Pack Ready · PII Redacted')}
                 </span>
               </span>
               <div className="mascot-header-cluster">

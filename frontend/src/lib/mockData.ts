@@ -328,3 +328,241 @@ export const SEED_DATA = {
     }
   ] as ActivityItem[]
 };
+
+export interface PayeeItem {
+  id: string;
+  nameEn: string;
+  nameZh: string;
+  category: 'campus' | 'family' | 'housing';
+  categoryLabelEn: string;
+  categoryLabelZh: string;
+  accountDescEn: string;
+  accountDescZh: string;
+  limitDescEn: string;
+  limitDescZh: string;
+  tier: string;
+  verifiedDate: string;
+  status: 'active' | 'cooling';
+}
+
+export interface UserProfileContext {
+  name?: string;
+  email?: string;
+  university?: string;
+  avatarLetter?: string;
+  provider?: 'google' | 'aegispath' | 'guest';
+  isAuthenticated?: boolean;
+}
+
+export function getAppDataForUser(authUser?: UserProfileContext | null) {
+  const isGoogle = authUser?.provider === 'google' && authUser?.isAuthenticated;
+
+  if (isGoogle) {
+    const realName = authUser.name || 'Google User';
+    const realEmail = authUser.email || 'user@gmail.com';
+    const realUni = authUser.university || 'Verified Campus';
+
+    const user: UserSeed = {
+      name: realName,
+      greetingTime: 'morning',
+      dailyAllowanceTotal: 2500,
+      dailyAllowanceUsed: 0,
+      dailyAllowanceRemaining: 2500,
+      perSendCap: 1000,
+      totalBalance: 12500.00,
+      currency: 'USD',
+    };
+
+    const tuition: TuitionSeed = {
+      dueAmountCny: 18000,
+      payeeName: `${realUni} Student Bursar`,
+      payeeNameZh: `${realUni} 财务处`,
+      dueDate: 'Feb 15',
+      dueDateZh: '2月15日截止',
+      modes: SEED_DATA.tuition.modes,
+    };
+
+    const recentActivities: ActivityItem[] = [
+      {
+        id: 'real-act-1',
+        titleEn: 'Google Identity Security Link',
+        titleZh: 'Google 真实账号安全绑定',
+        amount: 'Verified',
+        receivedText: realEmail,
+        type: 'success',
+        icon: 'check',
+        timestamp: 'Just now',
+        timestampZh: '刚刚',
+      },
+      {
+        id: 'real-act-2',
+        titleEn: 'FIDO2 Passkey Hardware Active',
+        titleZh: '硬件通行密钥防御已激活',
+        amount: 'Active',
+        receivedText: 'Secure Enclave',
+        type: 'success',
+        icon: 'check',
+        timestamp: 'Just now',
+        timestampZh: '刚刚',
+      },
+      {
+        id: 'real-act-3',
+        titleEn: 'USD Live Vault Primary Genesis',
+        titleZh: '美元实名主账户建立',
+        amount: '+$12,500.00',
+        receivedText: 'Live Balance Active',
+        type: 'success',
+        icon: 'check',
+        timestamp: 'Today',
+        timestampZh: '今天',
+      },
+    ];
+
+    const evidencePack: EvidencePack = {
+      avgBalance: '$12,500',
+      incomeMonths: 'Verified Live',
+      sources: [
+        {
+          titleEn: `Google Certified Account (${realEmail})`,
+          titleZh: `Google 官方认证账户 (${realEmail})`,
+          provenanceEn: 'OAuth 2.0 Security Binding',
+          provenanceZh: 'Google 身份凭证直连',
+          tier: 'Tier 1',
+        },
+        {
+          titleEn: 'Direct Bank Settlement (Primary USD)',
+          titleZh: '主结算行实时资金流水',
+          provenanceEn: 'Live Bank Network API',
+          provenanceZh: '银行网络直连核验',
+          tier: 'Tier 1',
+        },
+        {
+          titleEn: `Cryptographic Passkey (${realName})`,
+          titleZh: `实名硬件通行密钥凭证 (${realName})`,
+          provenanceEn: 'Passkey Signed Attestation',
+          provenanceZh: '硬件签名防伪凭证',
+          tier: 'Tier 1',
+        },
+      ],
+    };
+
+    const payees: PayeeItem[] = [
+      {
+        id: 'payee-real-1',
+        nameEn: `${realName} (Primary Bank Wire)`,
+        nameZh: `${realName} (主银行电汇账户)`,
+        category: 'campus',
+        categoryLabelEn: 'Personal Primary',
+        categoryLabelZh: '个人主账户',
+        accountDescEn: `FedWire / ACH Direct Wire (${realEmail})`,
+        accountDescZh: `FedWire / ACH 直连账户 (${realEmail})`,
+        limitDescEn: '$2,500 / day personal limit',
+        limitDescZh: '每日限额 $2,500',
+        tier: 'Tier 1',
+        verifiedDate: 'Active Live',
+        status: 'active',
+      },
+      {
+        id: 'payee-real-2',
+        nameEn: `${realUni} Student Bursar`,
+        nameZh: `${realUni} 学生财务处`,
+        category: 'campus',
+        categoryLabelEn: 'Higher Education',
+        categoryLabelZh: '高等教育',
+        accountDescEn: 'Cross-Border Tuition Clearing Wire',
+        accountDescZh: '跨境学费清算账户',
+        limitDescEn: '$10,000 tuition cap with passkey',
+        limitDescZh: '凭通行密钥限额 $10,000',
+        tier: 'Tier 1',
+        verifiedDate: 'Active Live',
+        status: 'active',
+      },
+      {
+        id: 'payee-real-3',
+        nameEn: 'Authorized Family Beneficiary',
+        nameZh: '授权家庭成员收款人',
+        category: 'family',
+        categoryLabelEn: 'Family Allowance',
+        categoryLabelZh: '家庭生活费',
+        accountDescEn: 'Global Remittance Network Wire',
+        accountDescZh: '全球汇款网络直连',
+        limitDescEn: '$500 / day autonomous transfer',
+        limitDescZh: '自主汇款上限 $500/日',
+        tier: 'Tier 1',
+        verifiedDate: 'Active Live',
+        status: 'active',
+      },
+    ];
+
+    return {
+      user,
+      tuition,
+      recentActivities,
+      evidencePack,
+      payees,
+      isRealAccount: true,
+      accountBadgeEn: 'Google Verified · Live Real Account',
+      accountBadgeZh: 'Google 实名认证 · 真实账户',
+    };
+  }
+
+  // Guest / Demo Synthetic Mode (Default)
+  const defaultPayees: PayeeItem[] = [
+    {
+      id: 'payee-1',
+      nameEn: 'Campus Bursar (HKUST Tuition & Fees)',
+      nameZh: '学校财务处 (香港科技大学学费及杂费)',
+      category: 'campus',
+      categoryLabelEn: 'Higher Education',
+      categoryLabelZh: '高等教育',
+      accountDescEn: 'BOC (Hong Kong) •••• 8820',
+      accountDescZh: '中银香港 •••• 8820',
+      limitDescEn: 'Up to $10,000/term with Passkey',
+      limitDescZh: '学期上限 $10,000 (需通行密钥)',
+      tier: 'Tier 1',
+      verifiedDate: 'Sep 2026',
+      status: 'active',
+    },
+    {
+      id: 'payee-2',
+      nameEn: 'Rina Sutanto (Mom - Family Allowance)',
+      nameZh: 'Rina Sutanto (妈妈 - 生活费汇款)',
+      category: 'family',
+      categoryLabelEn: 'Family Allowance',
+      categoryLabelZh: '家庭生活费',
+      accountDescEn: 'Bank Central Asia (BCA) •••• 4192',
+      accountDescZh: 'BCA 银行 •••• 4192',
+      limitDescEn: '$500/day autonomous transfer',
+      limitDescZh: '每日 $500 自主即时汇款',
+      tier: 'Tier 1',
+      verifiedDate: 'Aug 2026',
+      status: 'active',
+    },
+    {
+      id: 'payee-3',
+      nameEn: 'Mr. Chan (Kowloon Landlord - Rent)',
+      nameZh: '陈先生 (九龙房东 - 房租)',
+      category: 'housing',
+      categoryLabelEn: 'Housing & Rent',
+      categoryLabelZh: '租房与租金',
+      accountDescEn: 'Hang Seng Bank •••• 1039',
+      accountDescZh: '恒生银行 •••• 1039',
+      limitDescEn: '$1,200/month recurring allowance',
+      limitDescZh: '每月 $1,200 周期房租限额',
+      tier: 'Tier 2',
+      verifiedDate: 'Pending co-sign',
+      status: 'cooling',
+    },
+  ];
+
+  return {
+    user: SEED_DATA.user,
+    tuition: SEED_DATA.tuition,
+    recentActivities: SEED_DATA.recentActivities,
+    evidencePack: SEED_DATA.evidencePack,
+    payees: defaultPayees,
+    isRealAccount: false,
+    accountBadgeEn: 'Guest Demo Mode · Synthetic Testnet Data',
+    accountBadgeZh: '访客演示模式 · 合成测试数据',
+  };
+}

@@ -4,7 +4,7 @@ import React from 'react';
 import { ChopMascot } from '@/components/art/ChopMascot';
 import { HeaderArt } from '@/components/art/HeaderArt';
 import { FiveSegmentBar } from '@/components/art/FiveSegmentBar';
-import { SEED_DATA } from '@/lib/mockData';
+import { SEED_DATA, getAppDataForUser, UserProfileContext } from '@/lib/mockData';
 import { t, b } from '@/lib/i18n';
 import { AppRoute, Locale } from '@/types';
 import SplitText from '@/components/SplitText';
@@ -28,6 +28,7 @@ interface HomeScreenProps {
   onNavigate: (route: AppRoute) => void;
   onShowToast?: (message: string) => void;
   emptyActivity?: boolean;
+  authUser?: UserProfileContext;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -37,10 +38,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigate,
   onShowToast,
   emptyActivity = false,
+  authUser,
 }) => {
-  const user = SEED_DATA.user;
-  const tuition = SEED_DATA.tuition;
-  const activities = emptyActivity ? [] : SEED_DATA.recentActivities;
+  const appData = getAppDataForUser(authUser);
+  const user = appData.user;
+  const tuition = appData.tuition;
+  const activities = emptyActivity ? [] : appData.recentActivities;
 
   const [mascotThoughtIdx, setMascotThoughtIdx] = React.useState(0);
   const mascotThoughts = [
@@ -75,13 +78,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   // Derive dynamic calculated numbers strictly from seed & planner models
   const tuitionDueCny = tuition.dueAmountCny; // 18,000
   const tuitionSendUsd = tuition.modes.cheapest.total.toFixed(2); // 2,534.30
+  const isGoogle = authUser?.provider === 'google' && authUser?.isAuthenticated;
   const onTimePlan = SEED_DATA.plannerSchedule.scenarios.on_time;
   const janBar = onTimePlan.bars?.[3] || { total: 4.3, reserve: 1.1, runwayDays: '95d' };
-  const plannerTotalFormatted = (janBar.total * 1000).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }); // 4,300.00
-  const plannerRunway = janBar.runwayDays || '95d';
+  const plannerTotalFormatted = isGoogle
+    ? '12,500.00'
+    : (janBar.total * 1000).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }); // 4,300.00
+  const plannerRunway = isGoogle ? '180d' : (janBar.runwayDays || '95d');
 
   return (
     <div className="home-screen pb-10 w-full">
@@ -102,7 +108,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 effect="fade"
               />
               <span className="pill-testnet-dark pill-testnet text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/40 shadow-xs">
-                {locale === 'zh' ? '测试网' : 'Testnet'}
+                {isGoogle ? 'Live Verified' : (locale === 'zh' ? '测试网' : 'Testnet')}
               </span>
             </div>
 
@@ -128,15 +134,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             {/* Left Column: Greeting, Allowance, Quick Jump */}
             <div className="md:col-span-7 lg:col-span-8 pr-0 md:pr-4">
               <div className="hidden md:flex items-center gap-2 mb-2">
-                <span className="text-[12px] font-semibold tracking-wide text-white bg-white/20 px-3 py-1 rounded-full border border-white/25">
-                  {locale === 'zh' ? '确定性 AI 智能钱包 · 测试网' : 'Deterministic AI Agent Wallet · Testnet'}
-                </span>
+                {isGoogle ? (
+                  <span className="text-[12px] font-semibold tracking-wide text-white bg-[#0E6E43]/90 px-3 py-1 rounded-full border border-white/30 flex items-center gap-1.5 shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+                    <span>{locale === 'zh' ? 'Google 实名认证 · 真实账户' : 'Google Verified · Live Real Account'}</span>
+                  </span>
+                ) : (
+                  <span className="text-[12px] font-semibold tracking-wide text-white bg-[#D97706]/90 px-3 py-1 rounded-full border border-white/30 flex items-center gap-1.5 shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-[#FDE047] animate-pulse" />
+                    <span>{locale === 'zh' ? '访客演示模式 · 合成测试数据' : 'Guest Demo Mode · Synthetic Testnet Data'}</span>
+                  </span>
+                )}
+                {authUser?.email && (
+                  <span className="text-[11.5px] text-white/85 font-medium">
+                    {authUser.email}
+                  </span>
+                )}
               </div>
 
-              {/* Personal Greeting to Ayu (Optional single line sub) */}
+              {/* Personal Greeting to User */}
               <div className="home-hero-greeting text-white font-medium text-[16px] md:text-[18px] mb-3 flex items-baseline gap-2">
                 <SplitText
-                  text={locale === 'zh' ? '欢迎回来，Ayu' : 'Welcome back, Ayu'}
+                  key={user.name}
+                  text={locale === 'zh' ? `欢迎回来，${user.name}` : `Welcome back, ${user.name}`}
                   tag="span"
                   className="text-white font-bold"
                   delay={20}
@@ -158,15 +178,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                 <div className="flex items-baseline gap-2 mb-2">
                   <span className="big-allowance-amount text-white text-[36px] md:text-[40px] font-semibold tabular-nums tracking-tight">
-                    ${user.dailyAllowanceRemaining}
+                    ${user.dailyAllowanceRemaining.toLocaleString('en-US')}
                   </span>
                   <span className="text-white text-[13px] font-semibold">
-                    {locale === 'zh' ? `总额 $${user.dailyAllowanceTotal}` : `of $${user.dailyAllowanceTotal}`}
+                    {locale === 'zh' ? `总额 $${user.dailyAllowanceTotal.toLocaleString('en-US')}` : `of $${user.dailyAllowanceTotal.toLocaleString('en-US')}`}
                   </span>
                 </div>
 
                 {/* 5-Segment Allowance Indicator Bar */}
-                <FiveSegmentBar filledCount={4} total={5} />
+                <FiveSegmentBar filledCount={isGoogle ? 5 : 4} total={5} />
               </div>
 
               {/* Quick Jump Action Pills */}
@@ -669,8 +689,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </div>
                 <p className="text-[12px] text-[#334155] leading-normal mt-1">
                   {locale === 'zh'
-                    ? `1月总资产 ($${janBar.reserve}k 储备缓冲) · ${plannerRunway} 充足安全线`
-                    : `Jan Total Assets ($${janBar.reserve}k Reserve) · ${plannerRunway} healthy runway`}
+                    ? (isGoogle
+                        ? `实名钱包总资产 · 充足储备与 ${plannerRunway} 安全线`
+                        : `1月总资产 ($${janBar.reserve}k 储备缓冲) · ${plannerRunway} 充足安全线`)
+                    : (isGoogle
+                        ? `Primary Live Assets ($12.5k Reserve) · ${plannerRunway} healthy runway`
+                        : `Jan Total Assets ($${janBar.reserve}k Reserve) · ${plannerRunway} healthy runway`)}
                 </p>
               </div>
             </div>

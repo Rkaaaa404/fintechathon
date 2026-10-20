@@ -20,7 +20,7 @@ import { connector, type ApprovalSheetResponse } from '@/lib/api/connector';
 
 export default function HomePage() {
   const [currentState, setCurrentState] = useState<AppPresentationState>('default');
-  const [currentRoute, setCurrentRoute] = useState<AppRoute>('/');
+  const [currentRoute, setCurrentRoute] = useState<AppRoute>('/login');
   const [locale, setLocale] = useState<Locale>('en');
   const [isPaused, setIsPaused] = useState(false);
   const [emptyActivity, setEmptyActivity] = useState(false);
@@ -28,12 +28,11 @@ export default function HomePage() {
   const [chatDraft, setChatDraft] = useState('');
   const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
   const [authUser, setAuthUser] = useState<AuthUserProfile>({
-    name: 'Ayu',
-    email: 'ayu.sutanto@connect.ust.hk',
-    university: 'HKUST',
-    avatarLetter: 'AY',
-    provider: 'aegispath',
-    isAuthenticated: true,
+    name: 'Guest',
+    email: '',
+    avatarLetter: 'G',
+    provider: 'guest',
+    isAuthenticated: false,
   });
 
   // Safety, Evidence, Planner Interactive States
@@ -48,20 +47,31 @@ export default function HomePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const PROTECTED_ROUTES: AppRoute[] = ['/approve', '/planner', '/chat', '/safety', '/evidence', '/payees'];
+  const PROTECTED_ROUTES: AppRoute[] = ['/', '/approve', '/planner', '/chat', '/safety', '/evidence', '/payees', '/rates', '/tuition'];
 
   useEffect(() => {
     try {
       const cached = sessionStorage.getItem('aegispath_auth_user');
-      if (cached) {
+      const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
+      if (cached && hasEntered) {
         const parsed = JSON.parse(cached);
-        if (parsed && typeof parsed.isAuthenticated === 'boolean') {
+        if (parsed && parsed.isAuthenticated) {
           setAuthUser(parsed);
+          const params = new URLSearchParams(window.location.search);
+          const r = params.get('route');
+          if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
+            setCurrentRoute(r as AppRoute);
+          } else {
+            setCurrentRoute('/');
+          }
+          return;
         }
       }
     } catch {
       // fallback
     }
+    // Always start at /login when opening the web application without an active session
+    setCurrentRoute('/login');
   }, []);
 
   useEffect(() => {
@@ -70,16 +80,24 @@ export default function HomePage() {
       const params = new URLSearchParams(window.location.search);
       const r = params.get('route');
       const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
+      const cached = sessionStorage.getItem('aegispath_auth_user');
+      let isAuthed = false;
+      try {
+        isAuthed = hasEntered && cached ? Boolean(JSON.parse(cached)?.isAuthenticated) : false;
+      } catch {
+        isAuthed = false;
+      }
+
+      if (!isAuthed) {
+        // Must show login screen on initial open / when not authenticated
+        setCurrentRoute('/login');
+        return;
+      }
 
       if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
-        if (PROTECTED_ROUTES.includes(r as AppRoute) && !hasEntered) {
-          setCurrentRoute('/login');
-        } else {
-          setCurrentRoute(r as AppRoute);
-        }
-      } else if (!hasEntered) {
-        // First visit: present the animated welcome experience with "Enter as Guest"
-        setCurrentRoute('/login');
+        setCurrentRoute(r as AppRoute);
+      } else {
+        setCurrentRoute('/');
       }
 
       const s = params.get('state');
@@ -291,6 +309,7 @@ export default function HomePage() {
             onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
             emptyActivity={emptyActivity}
+            authUser={authUser}
           />
         );
       case '/tuition':
@@ -349,6 +368,7 @@ export default function HomePage() {
             onCopyShareLink={() => {
               showToast('Proof link copied to clipboard! 证明链接已复制');
             }}
+            authUser={authUser}
           />
         );
       case '/planner':
@@ -402,10 +422,10 @@ export default function HomePage() {
             }}
             onEnterAsGuest={() => {
               const guestUser: AuthUserProfile = {
-                name: 'Ayu',
-                email: 'ayu.sutanto@connect.ust.hk',
-                university: 'HKUST',
-                avatarLetter: 'AY',
+                name: 'Ayu (Demo)',
+                email: 'guest.demo@connect.ust.hk',
+                university: 'HKUST (Synthetic Demo)',
+                avatarLetter: 'GU',
                 provider: 'guest',
                 isAuthenticated: true,
               };
@@ -425,6 +445,7 @@ export default function HomePage() {
             locale={locale}
             onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
+            authUser={authUser}
           />
         );
       case '/rates':
@@ -444,6 +465,7 @@ export default function HomePage() {
             onNavigate={(route: AppRoute) => navigateTo(route)}
             onShowToast={showToast}
             emptyActivity={emptyActivity}
+            authUser={authUser}
           />
         );
     }

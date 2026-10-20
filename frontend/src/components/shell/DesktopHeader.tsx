@@ -415,14 +415,20 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-bold text-[#14213D] truncate">
-                        {authUser?.name || 'Ayu Sutanto'}
+                        {authUser?.name || (authUser?.provider === 'google' ? 'Google User' : 'Ayu Sutanto')}
                       </div>
                       <div className="text-[11px] text-[#475569] truncate">
-                        {authUser?.email || 'ayu.sutanto@connect.ust.hk'}
+                        {authUser?.email || (authUser?.provider === 'google' ? 'user@gmail.com' : 'ayu.sutanto@connect.ust.hk')}
                       </div>
-                      <div className="text-[10px] font-semibold text-[#0E6E43] bg-[#EBF7EE] inline-block px-1.5 py-0.2 rounded mt-0.5">
-                        {authUser?.university || 'HKUST'} · Verified Student
-                      </div>
+                      {authUser?.provider === 'google' ? (
+                        <div className="text-[10px] font-semibold text-[#1A73E8] bg-[#EEF4FF] inline-block px-1.5 py-0.2 rounded mt-0.5">
+                          ● Google Verified · Real Account
+                        </div>
+                      ) : (
+                        <div className="text-[10px] font-semibold text-[#D97706] bg-[#FFFBEB] inline-block px-1.5 py-0.2 rounded mt-0.5">
+                          ● Guest Mode · Synthetic Demo Data
+                        </div>
+                      )}
                     </div>
                   </div>
 

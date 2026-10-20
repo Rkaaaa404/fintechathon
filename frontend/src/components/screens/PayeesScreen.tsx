@@ -16,33 +16,22 @@ import {
   SafetyRingsIcon,
 } from '@/components/icons/AegisIcons';
 
+import { getAppDataForUser, UserProfileContext, PayeeItem } from '@/lib/mockData';
+
 interface PayeesScreenProps {
   onNavigate: (route: AppRoute) => void;
   locale?: Locale;
   onShowToast?: (message: string) => void;
-}
-
-interface PayeeItem {
-  id: string;
-  nameEn: string;
-  nameZh: string;
-  category: 'campus' | 'family' | 'housing';
-  categoryLabelEn: string;
-  categoryLabelZh: string;
-  accountDescEn: string;
-  accountDescZh: string;
-  limitDescEn: string;
-  limitDescZh: string;
-  tier: string;
-  verifiedDate: string;
-  status: 'active' | 'cooling';
+  authUser?: UserProfileContext;
 }
 
 export const PayeesScreen: React.FC<PayeesScreenProps> = ({
   onNavigate,
   locale = 'en',
   onShowToast,
+  authUser,
 }) => {
+  const appData = getAppDataForUser(authUser);
   const [filter, setFilter] = useState<'all' | 'campus' | 'family' | 'housing'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPayeeName, setNewPayeeName] = useState('');
@@ -50,53 +39,7 @@ export const PayeesScreen: React.FC<PayeesScreenProps> = ({
   const [newPayeeCategory, setNewPayeeCategory] = useState<'campus' | 'family' | 'housing'>('campus');
   const [newPayeeLimit, setNewPayeeLimit] = useState('500');
 
-  const [payees, setPayees] = useState<PayeeItem[]>([
-    {
-      id: 'payee-1',
-      nameEn: 'Campus Bursar (HKUST Tuition & Fees)',
-      nameZh: '学校财务处 (香港科技大学学费及杂费)',
-      category: 'campus',
-      categoryLabelEn: 'Higher Education',
-      categoryLabelZh: '高等教育',
-      accountDescEn: 'Direct Campus Bursar Clearing · SWIFT / Local HKD',
-      accountDescZh: '学校财务结算通道 · 直连清算',
-      limitDescEn: '$2,500.00 / transaction (Tuition Cap)',
-      limitDescZh: '$2,500.00 / 笔 (学费独立额度)',
-      tier: 'Tier 1 Official Registry',
-      verifiedDate: 'Verified 12 Sep 2026',
-      status: 'active',
-    },
-    {
-      id: 'payee-2',
-      nameEn: 'Mom (Ibu Ayu · Family Support)',
-      nameZh: '妈妈 (家庭生活备用金)',
-      category: 'family',
-      categoryLabelEn: 'Family Allowance',
-      categoryLabelZh: '家庭汇款',
-      accountDescEn: 'Bank Mandiri / BCA · IDR Immediate Settlement',
-      accountDescZh: '印尼银行合规汇款账户 · 即时到账',
-      limitDescEn: '$500.00 / day (Personal Send Cap)',
-      limitDescZh: '$500.00 / 日 (个人自主限额)',
-      tier: 'Tier 1 Passkey Bound',
-      verifiedDate: 'Verified 01 Oct 2026',
-      status: 'active',
-    },
-    {
-      id: 'payee-3',
-      nameEn: 'High Street Student Apartments',
-      nameZh: '大学路学生公寓 (月度租金)',
-      category: 'housing',
-      categoryLabelEn: 'Campus Housing',
-      categoryLabelZh: '校外住宿',
-      accountDescEn: 'Verified Property Management Trust · HKD',
-      accountDescZh: '合规物业管理资金信托 · 港币自动入账',
-      limitDescEn: '$1,200.00 / month (Rental Schedule)',
-      limitDescZh: '$1,200.00 / 月 (固定租金批次)',
-      tier: 'Tier 2 Lease Verified',
-      verifiedDate: 'Verified 28 Sep 2026',
-      status: 'active',
-    },
-  ]);
+  const [payees, setPayees] = useState<PayeeItem[]>(() => appData.payees);
 
   const filteredPayees = filter === 'all' ? payees : payees.filter((p) => p.category === filter);
 
