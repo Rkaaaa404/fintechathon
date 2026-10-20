@@ -263,7 +263,7 @@ export const SafetyLogsScreen: React.FC<SafetyLogsScreenProps> = ({
               {locale === 'zh' ? '资金损耗风险' : 'Funds Lost'}
             </span>
             <div className="text-[20px] font-bold text-[#0E6E43] leading-tight mt-0.5">
-              $0.00 (100% Protected)
+              $0.00 (Zero Drainage)
             </div>
           </div>
         </Card>
