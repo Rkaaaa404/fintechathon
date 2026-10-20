@@ -47,7 +47,17 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 ========================================================================================
 
 --> Running WSTG-APIT-01: Testing GraphQL (4.12.1) & REST API Contract Validation (test_wstg_apit_01_graphql_rest_contract.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryM\test_wstg_apit_01_graphql_rest_contract.py", line 100, in <module>
+    success = test_wstg_apit_01_graphql_rest_contract()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryM\test_wstg_apit_01_graphql_rest_contract.py", line 66, in test_wstg_apit_01_graphql_rest_contract
+    assert resp_empty.status_code == 422
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running MVP-SCOPE-01: Secondary Navigation Screens (Payees, Rates, More) & Optional On-Chain Anchor (test_mvp_scope_01_deferred_ui_scope.py)...
     [OK] Execution finished successfully.
 
@@ -59,7 +69,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-APIT-01   | Testing GraphQL (4.12.1) & REST API Contract Validation | N/A (GraphQL) / PASS (REST) |
 | MVP-SCOPE-01   | Secondary Navigation Screens (Payees, Rates, More) & Optional On-Chain Anchor | DEFERRED (Out of MVP)      |
 ----------------------------------------------------------------------------------------
- OVERALL RESULT: ALL 2 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ========================================================================================
 ```
 

@@ -56,7 +56,17 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 ================================================================================
 
 --> Running WSTG-CONF-01: Network Infrastructure Configuration (test_wstg_conf_01_network_infrastructure.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryC\test_wstg_conf_01_network_infrastructure.py", line 64, in <module>
+    success = test_wstg_conf_01_network_infrastructure()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryC\test_wstg_conf_01_network_infrastructure.py", line 47, in test_wstg_conf_01_network_infrastructure
+    assert api_db and bank_db, "FAIL: Shared or missing database paths!"
+           ^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Shared or missing database paths!
+
 --> Running WSTG-CONF-02: Application Platform Configuration (test_wstg_conf_02_application_platform_logging.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CONF-03: File Extensions Handling (test_wstg_conf_03_file_extensions_handling.py)...
@@ -95,7 +105,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-CONF-10   | Subdomain Takeover                   | N/A                  |
 | WSTG-CONF-11   | Cloud Storage                        | N/A                  |
 --------------------------------------------------------------------------------
- OVERALL RESULT: ALL 11 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ================================================================================
 ```
 

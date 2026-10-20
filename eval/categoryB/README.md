@@ -61,7 +61,17 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-INFO-03: Review Webserver Metafiles (test_wstg_info_03_webserver_metafiles.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INFO-04: Enumerate Applications (test_wstg_info_04_enumerate_applications.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryB\test_wstg_info_04_enumerate_applications.py", line 63, in <module>
+    success = test_wstg_info_04_enumerate_applications()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryB\test_wstg_info_04_enumerate_applications.py", line 46, in test_wstg_info_04_enumerate_applications
+    assert len(unauthorized) == 0, f"FAIL: Rogue services detected in docker-compose: {unauthorized}"
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Rogue services detected in docker-compose: {'aegispath_api_data', 'aegispath_bank_data'}
+
 --> Running WSTG-INFO-05: Review Webpage Content (test_wstg_info_05_review_webpage_content.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INFO-06: Identify Application Entry Points (test_wstg_info_06_entry_points.py)...
@@ -91,7 +101,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-INFO-09   | Fingerprint Web Application        | N/A                  |
 | WSTG-INFO-10   | Map Application Architecture       | PASS (Verified)      |
 --------------------------------------------------------------------------------
- OVERALL RESULT: ALL 10 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ================================================================================
 ```
 

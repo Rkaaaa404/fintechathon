@@ -49,13 +49,53 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 ====================================================================================
 
 --> Running WSTG-ATHZ-01: Testing Directory Traversal File Include (4.5.1) (test_wstg_athz_01_directory_traversal.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_01_directory_traversal.py", line 79, in <module>
+    success = test_wstg_athz_01_directory_traversal()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_01_directory_traversal.py", line 52, in test_wstg_athz_01_directory_traversal
+    assert resp_plan.status_code in [400, 404, 422], f"FAIL: Traversal payload succeeded on /v1/plans: {resp_plan.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Traversal payload succeeded on /v1/plans: {"detail":"Bearer access token required"}
+
 --> Running WSTG-ATHZ-02: Testing for Bypassing Authorization Schema (4.5.2) (test_wstg_athz_02_bypassing_authz_schema.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_02_bypassing_authz_schema.py", line 125, in <module>
+    success = test_wstg_athz_02_bypassing_authz_schema()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_02_bypassing_authz_schema.py", line 76, in test_wstg_athz_02_bypassing_authz_schema
+    assert resp_forged.status_code == 401, f"FAIL: Forged signature was not rejected with 401: {resp_forged.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Forged signature was not rejected with 401: {"detail":[{"type":"missing","loc":["body","token","intent_hash"],"msg":"Field required","input":{"token_id":"tok_forged_2c0092","account_id":"acc_student_ayu","payee_id":"acc_attacker","payee_name":"Attacker Corp","amount":2500.0,"fee_usd":0.0,"expires_at":1792500653.5584667,"nonce":"nonce_forged_8ccb882c"}},{"type":"missing","loc":["body","token","idempotency_key"],"msg":"Field required","input":{"token_id":"tok_forged_2c0092","account_id":"acc_student_ayu","payee_id":"acc_attacker","payee_name":"Attacker Corp","amount":2500.0,"fee_usd":0.0,"expires_at":1792500653.5584667,"nonce":"nonce_forged_8ccb882c"}},{"type":"missing","loc":["body","token","currency"],"msg":"Field required","input":{"token_id":"tok_forged_2c0092","account_id":"acc_student_ayu","payee_id":"acc_attacker","payee_name":"Attacker Corp","amount":2500.0,"fee_usd":0.0,"expires_at":1792500653.5584667,"nonce":"nonce_forged_8ccb882c"}},{"type":"missing","loc":["body","token","rate"],"msg":"Field required","input":{"token_id":"tok_forged_2c0092","account_id":"acc_student_ayu","payee_id":"acc_attacker","payee_name":"Attacker Corp","amount":2500.0,"fee_usd":0.0,"expires_at":1792500653.5584667,"nonce":"nonce_forged_8ccb882c"}},{"type":"missing","loc":["body","token","route_id"],"msg":"Field required","input":{"token_id":"tok_forged_2c0092","account_id":"acc_student_ayu","payee_id":"acc_attacker","payee_name":"Attacker Corp","amount":2500.0,"fee_usd":0.0,"expires_at":1792500653.5584667,"nonce":"nonce_forged_8ccb882c"}},{"type":"extra_forbidden","loc":["body","token","token_id"],"msg":"Extra inputs are not permitted","input":"tok_forged_2c0092"}]}
+
 --> Running WSTG-ATHZ-03: Testing for Privilege Escalation (4.5.3) (test_wstg_athz_03_privilege_escalation.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_03_privilege_escalation.py", line 137, in <module>
+    success = test_wstg_athz_03_privilege_escalation()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_03_privilege_escalation.py", line 99, in test_wstg_athz_03_privilege_escalation
+    assert resp_tamper.status_code == 400, f"FAIL: Tampered intent hash was not refused: {resp_tamper.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Tampered intent hash was not refused: {"detail":"Bearer access token required"}
+
 --> Running WSTG-ATHZ-04: Testing for Insecure Direct Object References (IDOR) (4.5.4) (test_wstg_athz_04_idor.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_04_idor.py", line 157, in <module>
+    success = test_wstg_athz_04_idor()
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryF\test_wstg_athz_04_idor.py", line 87, in test_wstg_athz_04_idor
+    assert resp_cross_tenant.status_code == 404, f"FAIL: Cross-tenant approval was not blocked: {resp_cross_tenant.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Cross-tenant approval was not blocked: {"detail":"Invalid access token"}
+
 
 ====================================================================================
  CATEGORY F VERIFICATION MATRIX TABLE
@@ -67,7 +107,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-ATHZ-03   | Testing for Privilege Escalation (4.5.3) | PASS (Verified)      |
 | WSTG-ATHZ-04   | Testing for Insecure Direct Object References (IDOR) (4.5.4) | PASS (Verified)      |
 ------------------------------------------------------------------------------------
- OVERALL RESULT: ALL 4 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ====================================================================================
 ```
 

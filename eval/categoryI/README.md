@@ -47,9 +47,29 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 ====================================================================================
 
 --> Running WSTG-ERRH-01: Testing for Improper Error Handling (4.8.1) (test_wstg_errh_01_improper_error_handling.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryI\test_wstg_errh_01_improper_error_handling.py", line 111, in <module>
+    success = test_wstg_errh_01_improper_error_handling()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryI\test_wstg_errh_01_improper_error_handling.py", line 90, in test_wstg_errh_01_improper_error_handling
+    assert resp_transfer.status_code == 401
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-ERRH-02: Testing for Stack Traces (4.8.2) (test_wstg_errh_02_stack_traces.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryI\test_wstg_errh_02_stack_traces.py", line 115, in <module>
+    success = test_wstg_errh_02_stack_traces()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryI\test_wstg_errh_02_stack_traces.py", line 79, in test_wstg_errh_02_stack_traces
+    assert resp.status_code in expected_statuses, f"FAIL: Unexpected status {resp.status_code} on {url}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Unexpected status 401 on /v1/plans/non-existent-plan-id
+
 
 ====================================================================================
  CATEGORY I VERIFICATION MATRIX TABLE
@@ -59,7 +79,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-ERRH-01   | Testing for Improper Error Handling (4.8.1) | PASS (Verified)      |
 | WSTG-ERRH-02   | Testing for Stack Traces (4.8.2)         | PASS (Verified)      |
 ------------------------------------------------------------------------------------
- OVERALL RESULT: ALL 2 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ====================================================================================
 ```
 

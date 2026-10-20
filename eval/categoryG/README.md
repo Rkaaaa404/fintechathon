@@ -58,19 +58,79 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-SESS-02: Testing for Cookies Attributes (4.6.2) (test_wstg_sess_02_cookies_attributes.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-SESS-03: Testing for Session Fixation (4.6.3) (test_wstg_sess_03_session_fixation.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_03_session_fixation.py", line 83, in <module>
+    success = test_wstg_sess_03_session_fixation()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_03_session_fixation.py", line 70, in test_wstg_sess_03_session_fixation
+    assert valid_2 is False, "FAIL: Bank accepted replayed/fixed nonce"
+           ^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Bank accepted replayed/fixed nonce
+
 --> Running WSTG-SESS-04: Testing for Exposed Session Variables (4.6.4) (test_wstg_sess_04_exposed_session_variables.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_04_exposed_session_variables.py", line 87, in <module>
+    success = test_wstg_sess_04_exposed_session_variables()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_04_exposed_session_variables.py", line 75, in test_wstg_sess_04_exposed_session_variables
+    assert has_signature_truncation, "FAIL: Bank does not truncate token signature in ledger records"
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Bank does not truncate token signature in ledger records
+
 --> Running WSTG-SESS-05: Testing for Cross Site Request Forgery (CSRF) (4.6.5) (test_wstg_sess_05_csrf.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_05_csrf.py", line 95, in <module>
+    success = test_wstg_sess_05_csrf()
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_05_csrf.py", line 54, in test_wstg_sess_05_csrf
+    assert resp_form_api.status_code == 422, f"FAIL: API accepted form-encoded CSRF data: {resp_form_api.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: API accepted form-encoded CSRF data: {"detail":"Bearer access token required"}
+
 --> Running WSTG-SESS-06: Testing for Logout Functionality (4.6.6) (test_wstg_sess_06_logout_functionality.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-SESS-07: Testing Session Timeout (4.6.7) (test_wstg_sess_07_session_timeout.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_07_session_timeout.py", line 130, in <module>
+    success = test_wstg_sess_07_session_timeout()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_07_session_timeout.py", line 66, in test_wstg_sess_07_session_timeout
+    assert "expired" in (err_msg or "").lower()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-SESS-08: Testing for Session Puzzling (4.6.8) (test_wstg_sess_08_session_puzzling.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_08_session_puzzling.py", line 97, in <module>
+    success = test_wstg_sess_08_session_puzzling()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_08_session_puzzling.py", line 72, in test_wstg_sess_08_session_puzzling
+    assert resp_puzzle.status_code == 404, f"FAIL: System allowed simulation ID to be processed as plan: {resp_puzzle.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: System allowed simulation ID to be processed as plan: {"detail":"Bearer access token required"}
+
 --> Running WSTG-SESS-09: Testing for Session Hijacking (4.6.9) (test_wstg_sess_09_session_hijacking.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_09_session_hijacking.py", line 120, in <module>
+    success = test_wstg_sess_09_session_hijacking()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_09_session_hijacking.py", line 84, in test_wstg_sess_09_session_hijacking
+    assert resp_exec_1.status_code == 200, f"FAIL: Initial execution failed: {resp_exec_1.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Initial execution failed: {"type":"https://aegispath.dev/errors/IDEMPOTENCY_KEY_MISMATCH","title":"Idempotency Key Mismatch","status":400,"detail":"The header must match the signed idempotency key.","code":"IDEMPOTENCY_KEY_MISMATCH","request_id":"4313bde7-abba-4748-ae6e-e70ccd4c9cf6","timestamp":1792500062.956167}
+
 
 ====================================================================================
  CATEGORY G VERIFICATION MATRIX TABLE
@@ -87,7 +147,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-SESS-08   | Testing for Session Puzzling (4.6.8)     | PASS (Verified)      |
 | WSTG-SESS-09   | Testing for Session Hijacking (4.6.9)    | PASS (Verified)      |
 ------------------------------------------------------------------------------------
- OVERALL RESULT: ALL 9 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ====================================================================================
 ```
 
