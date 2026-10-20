@@ -304,10 +304,17 @@ async def approve_plan(plan_id: str, req: ApprovePlanRequest, request: Request, 
         )
         if claimed.rowcount != 1:
             return problem_response(409, "Plan Not Pending", "Plan changed or is already executing.", "PLAN_NOT_PENDING", req_id)
-        reserved = conn.execute(
-            "UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ? AND is_paused = 0 AND used_today_usd + ? <= daily_cap_usd",
-            (amount_usd, user_id, amount_usd),
-        )
+        is_tuition_plan = plan_data.get("type") == "tuition" or payee_id == "p2"
+        if is_tuition_plan:
+            reserved = conn.execute(
+                "UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ? AND is_paused = 0",
+                (amount_usd, user_id),
+            )
+        else:
+            reserved = conn.execute(
+                "UPDATE policy SET used_today_usd = used_today_usd + ? WHERE user_id = ? AND is_paused = 0 AND used_today_usd + ? <= daily_cap_usd",
+                (amount_usd, user_id, amount_usd),
+            )
         if reserved.rowcount != 1:
             conn.rollback()
             return problem_response(409, "Policy Refused", "Agent paused or allowance unavailable.", "POLICY_REFUSED", req_id)

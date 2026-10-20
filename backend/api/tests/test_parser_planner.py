@@ -160,13 +160,27 @@ def test_incomplete_or_unsupported_requests_do_not_execute(client, text):
     assert state_snapshot() == before
 
 
-def test_tuition_over_daily_cap_is_refused_without_plan(client):
+def test_tuition_over_daily_cap_escalates_to_tier2_approval(client):
     before = state_snapshot()
     response = client.post("/v1/agent/messages", json={"text": "Pay tuition CNY 18000 to Campus bursar"})
     assert response.status_code == 200
+    resp = response.json()["response"]
+    assert resp["type"] == "approval_sheet"
+    assert resp["plan_id"].startswith("plan-tuition-")
+    assert resp["intent_hash"]
+    assert resp["send_amount_usd"] > 2000
+    after = state_snapshot()
+    assert after[0] == before[0]
+    assert after[1] == before[1] + 1
+    assert after[2:] == before[2:]
+
+
+def test_non_bursar_over_daily_cap_is_refused_without_plan(client):
+    before = state_snapshot()
+    response = client.post("/v1/agent/messages", json={"text": "Send USD 1200 to Mom"})
+    assert response.status_code == 200
     assert response.json()["response"]["type"] == "refused_note"
     assert state_snapshot() == before
-
 
 @pytest.mark.parametrize("amount", [0, -1, float("nan"), float("inf"), 1.001, True, None])
 def test_invalid_amount_never_reaches_policy_or_bank(client, amount, monkeypatch):

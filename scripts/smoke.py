@@ -137,9 +137,22 @@ def run_smoke_tests():
     replay = api_client.post(f"/v1/plans/{plan_id}/approve", json={
         "intent_hash": locked_intent_hash, "passkey_signature": "DEMO_CONSENT"})
     assert replay.status_code == 409
-    refused = api_client.post("/v1/agent/messages", json={"text": "Pay tuition CNY 18000 to Campus bursar"})
-    assert refused.json()["response"]["type"] == "refused_note"
+    # Tier 2 Tuition Escalation: Allowlisted tuition exceeding daily cap escalates to approval sheet
+    tuition_high = api_client.post("/v1/agent/messages", json={"text": "Pay tuition CNY 18000 to Campus bursar"})
+    assert tuition_high.status_code == 200
+    resp_tuition_high = tuition_high.json()["response"]
+    assert resp_tuition_high["type"] == "approval_sheet"
+    assert resp_tuition_high["status"] == "WAITING_APPROVAL"
+    assert resp_tuition_high["intent_hash"]
+    assert "tuition payment" in resp_tuition_high["why_approval_needed"]
+    print("  [OK] Tuition CNY 18000 escalates to Tier 2 approval sheet requiring passkey.")
 
+    # Non-bursar transfer exceeding daily cap remains strictly refused
+    refused = api_client.post("/v1/agent/messages", json={"text": "Send USD 1200 to Mom"})
+    assert refused.status_code == 200
+    assert refused.json()["response"]["type"] == "refused_note"
+    assert "Exceeds daily allowance limit" in refused.json()["response"]["reason"]
+    print("  [OK] Non-bursar transfer exceeding daily allowance strictly refused.")
     # ──────────────────────────────────────────────────────────
     # 3. Golden Flow C: Prompt Injection Attack Blocked
     # ──────────────────────────────────────────────────────────

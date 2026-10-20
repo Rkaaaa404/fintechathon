@@ -53,21 +53,28 @@ def evaluate_transfer_policy(
     exceeds_single_cap = amount_usd > single_cap
     exceeds_daily_cap = (used_today + amount_usd) > daily_cap
 
-    if exceeds_daily_cap:
+    is_bursar = matched_payee is not None and (
+        matched_payee.get("id") == "p2"
+        or matched_payee.get("relation") == "Tuition"
+        or matched_payee.get("name", "").lower() == "campus bursar"
+    )
+
+    if exceeds_daily_cap and not is_bursar:
         return {
             "tier": "REFUSED",
             "allowed": False,
             "reason": f"Exceeds daily allowance limit of ${daily_cap:,.2f}. (${used_today:,.2f} already used today)."
         }
 
-    # Tier 2 triggers: new payee or amount > $500
-    if is_new_payee or exceeds_single_cap:
+    # Tier 2 triggers: new payee, amount > $500, or tuition exceeding daily allowance cap
+    if is_new_payee or exceeds_single_cap or (is_bursar and exceeds_daily_cap):
         reasons = []
+        if is_bursar and exceeds_daily_cap:
+            reasons.append(f"tuition payment of ${amount_usd:,.2f} exceeds daily allowance limit of ${daily_cap:,.2f} (${used_today:,.2f} already used today)")
+        elif exceeds_single_cap:
+            reasons.append(f"amount ${amount_usd:,.2f} exceeds auto-send limit of ${single_cap:,.2f}")
         if is_new_payee:
             reasons.append(f"recipient '{payee_name}' is not on your allowed list")
-        if exceeds_single_cap:
-            reasons.append(f"amount ${amount_usd:,.2f} exceeds auto-send limit of ${single_cap:,.2f}")
-
         intent_hash = compute_intent_hash(
             payee_id=matched_payee["id"] if matched_payee else "new_payee",
             payee_name=payee_name,

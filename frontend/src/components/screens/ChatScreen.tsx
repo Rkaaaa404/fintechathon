@@ -563,9 +563,13 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '18px' }}>🛡️</span>
+                      <span style={{ fontSize: '18px' }}>
+                        {msg.receiptSlip.blockType === 'policy' ? '🛑' : '🛡️'}
+                      </span>
                       <span style={{ fontSize: '14.5px', fontWeight: 700, color: '#9F1239' }}>
-                        Attack Simulation Blocked (Outer Privacy Filter)
+                        {msg.receiptSlip.blockType === 'policy'
+                          ? 'Policy Refusal (Middle Ring Spending Rules)'
+                          : 'Attack Simulation Blocked (Outer Privacy Filter)'}
                       </span>
                     </div>
                     <span style={{ background: '#F43F5E', color: '#FFFFFF', fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '999px' }}>

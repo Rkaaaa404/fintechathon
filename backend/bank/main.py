@@ -157,7 +157,11 @@ def execute_transfer(
             return problem_response(403, "Payee Not Allowed",
                                     "The bank has not authorized this account and recipient.",
                                     "PAYEE_NOT_ALLOWED", req_id)
-        if token.amount > config.SINGLE_SEND_CAP_USD or token.fee_usd > config.MAX_FEE_USD:
+        is_tuition = token.payee_id == "p2"
+        single_cap = config.TUITION_SEND_CAP_USD if is_tuition else config.SINGLE_SEND_CAP_USD
+        daily_cap = config.TUITION_DAILY_CAP_USD if is_tuition else config.DAILY_CAP_USD
+
+        if token.amount > single_cap or token.fee_usd > config.MAX_FEE_USD:
             return problem_response(422, "Bank Limit Exceeded",
                                     "Principal or fee exceeds the bank's independent limit.",
                                     "BANK_LIMIT_EXCEEDED", req_id)
@@ -171,7 +175,7 @@ def execute_transfer(
         ).fetchone()[0]
         amount_cents = int(Decimal(str(token.amount)) * 100)
         fee_cents = int(Decimal(str(token.fee_usd)) * 100)
-        if spent_cents + amount_cents > int(Decimal(str(config.DAILY_CAP_USD)) * 100):
+        if spent_cents + amount_cents > int(Decimal(str(daily_cap)) * 100):
             return problem_response(422, "Daily Bank Limit Exceeded",
                                     "The bank's UTC-day principal limit would be exceeded.",
                                     "BANK_DAILY_LIMIT_EXCEEDED", req_id)

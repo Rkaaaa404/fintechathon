@@ -40,6 +40,8 @@ class BankConfig:
 
     SINGLE_SEND_CAP_USD: float = 1000.0
     DAILY_CAP_USD: float = 1000.0
+    TUITION_SEND_CAP_USD: float = 10000.0
+    TUITION_DAILY_CAP_USD: float = 10000.0
     # Largest fee among the sandbox's cheapest, balanced, and fastest routes.
     MAX_FEE_USD: float = 18.0
     MAX_TOKEN_TTL_SECONDS: int = 300

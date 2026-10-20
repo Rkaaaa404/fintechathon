@@ -24,6 +24,7 @@ export interface PlanCardData {
 
 export interface ReceiptSlipData {
   status: 'SENT' | 'BLOCKED';
+  blockType?: 'attack' | 'policy';
   amountText: string;
   rawAmountUsd?: number;
   recipientText: string;
@@ -134,6 +135,7 @@ export async function processUserMessage(
       message.textZh = response.conclusion;
       message.receiptSlip = {
         status: response.stamp,
+        blockType: 'attack',
         amountText: `USD ${response.amount_lost_usd.toFixed(2)} lost / 损失`,
         recipientText: response.quoted_instruction,
         detailsEn: response.verdicts.map((verdict) => verdict.text).join(' · '),
@@ -148,12 +150,13 @@ export async function processUserMessage(
       message.textZh = response.reason;
       message.receiptSlip = {
         status: response.stamp,
+        blockType: 'policy',
         amountText: locale === 'zh' ? '未发送' : 'Not sent',
         recipientText: '',
         detailsEn: response.reason,
         detailsZh: response.reason,
-        noticeEn: 'The backend policy refused this request.',
-        noticeZh: '后端策略拒绝了此请求。',
+        noticeEn: response.reason || 'The backend policy refused this request.',
+        noticeZh: response.reason || '后端策略拒绝了此请求。',
         checks: [],
       };
       return message;
