@@ -5,6 +5,10 @@
 
 Security revalidation: [plan, reproduced findings, patches and verification](docs/security-revalidation.md). The original self-assessment is historical, not a current PASS attestation. Local demo sessions and approval consent are synthetic; do not expose this sandbox as a production banking service.
 
+The bilingual login at `/?route=/login` is a standalone, responsive sign-in/create-account panel based on `sign in.jpeg` and `create.jpeg`. Its decorative robot crops live in `frontend/public/auth/`; the forms remain accessible HTML. Below 700px the panel uses one column with natural scrolling. Guest entry, reviewer autofill, Google account selection, password reset, and delayed form submission remain **simulated demo authentication**, not OAuth or production identity services. The “Kernel Guard Active” badge is reference artwork copy, not a live health indicator. Only successful demo entry sets `sessionStorage.aegispath_entered` and returns to the normal wallet shell.
+
+For container startup, run `docker compose up --build` after backend source changes: Compose builds the API into its image rather than bind-mounting the source. The scoped-token module imports `typing.Optional` explicitly so its optional intent/idempotency annotations load on the Python 3.11 container runtime.
+
 ---
 
 ## 🏛️ Executive Summary

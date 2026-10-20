@@ -406,6 +406,7 @@ export default function HomePage() {
         return (
           <LoginScreen
             locale={locale}
+            onLocaleToggle={toggleLocale}
             onNavigate={(route: AppRoute) => {
               if (typeof window !== 'undefined') {
                 sessionStorage.setItem('aegispath_entered', 'true');
@@ -474,8 +475,9 @@ export default function HomePage() {
   return (
     <>
       {/* ═══════════ MAIN WEB APPLICATION VIEWPORT ═══════════ */}
-      <main className="webapp-container mode-web" id="main-container">
-        {/* Desktop Web Application Header (sticky, 6 items, zero overflow) */}
+      <main className={currentRoute === '/login' ? 'auth-page' : 'webapp-container mode-web'} id="main-container">
+        {currentRoute === '/login' ? renderActiveScreen() : (
+          <>
         <DesktopHeader
           currentRoute={currentRoute}
           onRouteChange={setCurrentRoute}
@@ -497,6 +499,8 @@ export default function HomePage() {
 
         {/* ═══════════ PROFESSIONAL SITE FOOTER (Desktop only) ═══════════ */}
         <SiteFooter locale={locale} />
+          </>
+        )}
 
         {/* Toast Feedback Popup */}
         <div className={`toast-popup ${toastMessage ? 'show' : ''}`} id="app-toast">
