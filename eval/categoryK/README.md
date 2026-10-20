@@ -56,21 +56,101 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-BUSL-01: Test Business Logic Data Validation (4.10.1) (test_wstg_busl_01_business_data_validation.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-BUSL-02: Test Ability to Forge Requests (4.10.2) (test_wstg_busl_02_ability_to_forge_requests.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_02_ability_to_forge_requests.py", line 132, in <module>
+    success = test_wstg_busl_02_ability_to_forge_requests()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_02_ability_to_forge_requests.py", line 75, in test_wstg_busl_02_ability_to_forge_requests
+    assert resp2.status_code == 401, f"Expected 401, got {resp2.status_code}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected 401, got 422
+
 --> Running WSTG-BUSL-03: Test Integrity Checks (4.10.3) (test_wstg_busl_03_integrity_checks.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_03_integrity_checks.py", line 165, in <module>
+    success = test_wstg_busl_03_integrity_checks()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_03_integrity_checks.py", line 120, in test_wstg_busl_03_integrity_checks
+    assert resp_tampered.status_code == 400
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-BUSL-04: Test for Process Timing (4.10.4) (test_wstg_busl_04_process_timing.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_04_process_timing.py", line 122, in <module>
+    success = test_wstg_busl_04_process_timing()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_04_process_timing.py", line 71, in test_wstg_busl_04_process_timing
+    assert resp1.status_code == 200, f"Expected 200, got {resp1.status_code}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected 200, got 422
+
 --> Running WSTG-BUSL-05: Test Number of Times a Function Can Be Used Limits (4.10.5) (test_wstg_busl_05_function_limits.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_05_function_limits.py", line 141, in <module>
+    success = test_wstg_busl_05_function_limits()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_05_function_limits.py", line 63, in test_wstg_busl_05_function_limits
+    assert r1.status_code == 200
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-BUSL-06: Testing for the Circumvention of Work Flows (4.10.6) (test_wstg_busl_06_circumvention_workflows.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_06_circumvention_workflows.py", line 143, in <module>
+    success = test_wstg_busl_06_circumvention_workflows()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_06_circumvention_workflows.py", line 64, in test_wstg_busl_06_circumvention_workflows
+    assert resp_nonexistent.status_code == 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-BUSL-07: Test Defenses Against Application Misuse (4.10.7) (test_wstg_busl_07_defenses_against_misuse.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_07_defenses_against_misuse.py", line 114, in <module>
+    success = test_wstg_busl_07_defenses_against_misuse()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_07_defenses_against_misuse.py", line 82, in test_wstg_busl_07_defenses_against_misuse
+    assert resp_pause.status_code == 200
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-BUSL-08: Test Upload of Unexpected File Types (4.10.8) (test_wstg_busl_08_upload_unexpected_file_types.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_08_upload_unexpected_file_types.py", line 101, in <module>
+    success = test_wstg_busl_08_upload_unexpected_file_types()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_08_upload_unexpected_file_types.py", line 57, in test_wstg_busl_08_upload_unexpected_file_types
+    assert resp_file.status_code in [400, 415, 422, 500], f"Expected rejection, got {resp_file.status_code}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Expected rejection, got 401
+
 --> Running WSTG-BUSL-09: Test Upload of Malicious Files (4.10.9) (test_wstg_busl_09_upload_malicious_files.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_09_upload_malicious_files.py", line 100, in <module>
+    success = test_wstg_busl_09_upload_malicious_files()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryK\test_wstg_busl_09_upload_malicious_files.py", line 52, in test_wstg_busl_09_upload_malicious_files
+    assert resp.status_code == 200, f"Replay failed with status {resp.status_code}"
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Replay failed with status 401
+
 
 ========================================================================================
  CATEGORY K VERIFICATION MATRIX TABLE
@@ -87,7 +167,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-BUSL-08   | Test Upload of Unexpected File Types (4.10.8) | PASS (Verified)    |
 | WSTG-BUSL-09   | Test Upload of Malicious Files (4.10.9)      | PASS (Verified)    |
 ----------------------------------------------------------------------------------------
- OVERALL RESULT: ALL 9 TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ========================================================================================
 ```
 

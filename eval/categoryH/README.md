@@ -76,13 +76,33 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-INPV-01   : Testing for Reflected Cross Site Scripting (4.7.1) (test_wstg_inpv_01_reflected_xss.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-02   : Testing for Stored Cross Site Scripting (4.7.2) (test_wstg_inpv_02_stored_xss.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_02_stored_xss.py", line 92, in <module>
+    success = test_wstg_inpv_02_stored_xss()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_02_stored_xss.py", line 61, in test_wstg_inpv_02_stored_xss
+    assert resp.status_code == 200
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
 --> Running WSTG-INPV-03   : Testing for HTTP Verb Tampering (4.7.3)        (test_wstg_inpv_03_http_verb_tampering.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-04   : Testing for HTTP Parameter Pollution (4.7.4)   (test_wstg_inpv_04_http_parameter_pollution.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-05   : Testing for SQL Injection (4.7.5)              (test_wstg_inpv_05_sql_injection.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_05_sql_injection.py", line 96, in <module>
+    success = test_wstg_inpv_05_sql_injection()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_05_sql_injection.py", line 55, in test_wstg_inpv_05_sql_injection
+    assert resp_plan.status_code in [400, 404, 422], f"FAIL: Potential SQL injection on /v1/plans: {resp_plan.text}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Potential SQL injection on /v1/plans: {"detail":"Bearer access token required"}
+
 --> Running WSTG-INPV-05.1 : Testing for Oracle (4.7.5.1)                   (test_wstg_inpv_05_1_oracle.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-05.2 : Testing for MySQL (4.7.5.2)                    (test_wstg_inpv_05_2_mysql.py)...
@@ -110,7 +130,17 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-INPV-10   : Testing for IMAP SMTP Injection (4.7.10)       (test_wstg_inpv_10_imap_smtp_injection.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-11   : Testing for Code Injection (4.7.11)            (test_wstg_inpv_11_code_injection.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_11_code_injection.py", line 70, in <module>
+    success = test_wstg_inpv_11_code_injection()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_11_code_injection.py", line 50, in test_wstg_inpv_11_code_injection
+    assert len(dangerous_code_evals) == 0, f"FAIL: Found dynamic code execution: {dangerous_code_evals}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Found dynamic code execution: [('attacks.py', ['eval('])]
+
 --> Running WSTG-INPV-11.1 : Testing for Local File Inclusion (4.7.11.1)    (test_wstg_inpv_11_1_lfi.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-11.2 : Testing for Remote File Inclusion (4.7.11.2)   (test_wstg_inpv_11_2_rfi.py)...
@@ -124,7 +154,17 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-INPV-15   : Testing for HTTP Splitting Smuggling (4.7.15)  (test_wstg_inpv_15_http_splitting.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-16   : Testing for HTTP Incoming Requests (4.7.16)    (test_wstg_inpv_16_incoming_requests.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_16_incoming_requests.py", line 88, in <module>
+    success = test_wstg_inpv_16_incoming_requests()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryH\test_wstg_inpv_16_incoming_requests.py", line 76, in test_wstg_inpv_16_incoming_requests
+    assert resp_bad_ct.status_code == 422, "FAIL: Accepted non-JSON content-type"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: FAIL: Accepted non-JSON content-type
+
 --> Running WSTG-INPV-17   : Testing for Host Header Injection (4.7.17)     (test_wstg_inpv_17_host_header_injection.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-INPV-18   : Testing for Server-side Template Injection (4.7.18) (test_wstg_inpv_18_ssti.py)...
@@ -167,7 +207,7 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 | WSTG-INPV-18    | Testing for Server-side Template Injection (4.7.18) | PASS (Verified)  |
 | WSTG-INPV-19    | Testing for Server-Side Request Forgery (SSRF) (4.7.19) | PASS (Verified)  |
 ----------------------------------------------------------------------------------------
- OVERALL RESULT: ALL TESTS VERIFIED (PASS)
+ OVERALL RESULT: SOME TESTS FAILED
 ========================================================================================
 ```
 

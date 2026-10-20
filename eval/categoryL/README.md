@@ -66,53 +66,43 @@ Berikut adalah rekaman log eksekusi terminal nyata saat seluruh pengujian dalam 
 --> Running WSTG-CLNT-04: Testing for Client-side URL Redirect (4.11.4) (test_wstg_clnt_04_client_url_redirect.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CLNT-05: Testing for CSS Injection (4.11.5) (test_wstg_clnt_05_css_injection.py)...
-    [OK] Execution finished successfully.
+    [FAIL] Script exited with code 1
+    Error output:
+Traceback (most recent call last):
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_05_css_injection.py", line 95, in <module>
+    success = test_wstg_clnt_05_css_injection()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_05_css_injection.py", line 70, in test_wstg_clnt_05_css_injection
+    assert len(dynamic_css_injection) == 0, f"Dangerous dynamic <style> injection found: {dynamic_css_injection}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Dangerous dynamic <style> injection found: ['RatesScreen.tsx']
+
 --> Running WSTG-CLNT-06: Testing for Client-side Resource Manipulation (4.11.6) (test_wstg_clnt_06_client_resource_manipulation.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CLNT-07: Testing Cross Origin Resource Sharing (CORS) (4.11.7) (test_wstg_clnt_07_cors.py)...
-    [FAIL] Script exited with code 1
-    Error output:
-Traceback (most recent call last):
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_07_cors.py", line 99, in <module>
-    success = test_wstg_clnt_07_cors()
-              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_07_cors.py", line 61, in test_wstg_clnt_07_cors
-    assert allow_origin is None or allow_origin != unauth, f"Unauthorized origin reflected: {unauth}"
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: Unauthorized origin reflected: http://attacker.com
-
+    [OK] Execution finished successfully.
 --> Running WSTG-CLNT-08: Testing for Cross Site Flashing (4.11.8) (test_wstg_clnt_08_cross_site_flashing.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CLNT-09: Testing for Clickjacking (4.11.9) (test_wstg_clnt_09_clickjacking.py)...
-    [FAIL] Script exited with code 1
-    Error output:
-Traceback (most recent call last):
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_09_clickjacking.py", line 85, in <module>
-    success = test_wstg_clnt_09_clickjacking()
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_09_clickjacking.py", line 47, in test_wstg_clnt_09_clickjacking
-    assert has_x_frame, "Missing X-Frame-Options: DENY in next.config.ts"
-           ^^^^^^^^^^^
-AssertionError: Missing X-Frame-Options: DENY in next.config.ts
-
+    [OK] Execution finished successfully.
 --> Running WSTG-CLNT-10: Testing WebSockets (4.11.10) (test_wstg_clnt_10_websockets.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CLNT-11: Testing Web Messaging (4.11.11) (test_wstg_clnt_11_web_messaging.py)...
     [OK] Execution finished successfully.
 --> Running WSTG-CLNT-12: Testing Browser Storage (4.11.12) (test_wstg_clnt_12_browser_storage.py)...
-    [OK] Execution finished successfully.
---> Running WSTG-CLNT-13: Testing for Cross Site Script Inclusion (XSSI) (4.11.13) (test_wstg_clnt_13_xssi.py)...
     [FAIL] Script exited with code 1
     Error output:
 Traceback (most recent call last):
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_13_xssi.py", line 94, in <module>
-    success = test_wstg_clnt_13_xssi()
-              ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_13_xssi.py", line 56, in test_wstg_clnt_13_xssi
-    assert nosniff == "nosniff", f"Missing nosniff header on {path}"
-           ^^^^^^^^^^^^^^^^^^^^
-AssertionError: Missing nosniff header on /v1/health
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_12_browser_storage.py", line 96, in <module>
+    success = test_wstg_clnt_12_browser_storage()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\pentest_aegispath\fintechathon\eval\categoryL\test_wstg_clnt_12_browser_storage.py", line 63, in test_wstg_clnt_12_browser_storage
+    assert k in ["aegis_demo_panel", "aegispath_entered"], f"Unexpected sensitive key in sessionStorage: {k}"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Unexpected sensitive key in sessionStorage: aegispath_auth_user
 
+--> Running WSTG-CLNT-13: Testing for Cross Site Script Inclusion (XSSI) (4.11.13) (test_wstg_clnt_13_xssi.py)...
+    [OK] Execution finished successfully.
 
 ========================================================================================
  CATEGORY L VERIFICATION MATRIX TABLE
