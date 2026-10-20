@@ -21,6 +21,63 @@ interface ChatScreenProps {
   onReviewPlan: (plan: ApprovalSheetResponse) => void;
   initialDraft?: string;
 }
+function renderFormattedMessage(text: string): React.ReactNode {
+  if (!text) return null;
+  const regex = /(\*{4}[^\n]+?\*{4}|\*{3}[^\n]+?\*{3}|\*{2}[^\n]+?\*{2}|__[^_\n]+?__|\*[^\s*](?:[^\n*]*?[^\s*])?\*|_[^\s_](?:[^\n_]*?[^\s_])?_|`[^`\n]+`)/g;
+  const elements: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      elements.push(<span key={key++}>{text.substring(lastIndex, match.index)}</span>);
+    }
+    const token = match[0];
+    if (token.startsWith('****') && token.endsWith('****') && token.length >= 8) {
+      elements.push(
+        <strong key={key++} style={{ fontWeight: 700, fontStyle: 'italic', color: '#0F172A' }}>
+          {token.slice(4, -4)}
+        </strong>
+      );
+    } else if (token.startsWith('***') && token.endsWith('***') && token.length >= 6) {
+      elements.push(
+        <strong key={key++} style={{ fontWeight: 700, fontStyle: 'italic', color: '#0F172A' }}>
+          {token.slice(3, -3)}
+        </strong>
+      );
+    } else if ((token.startsWith('**') && token.endsWith('**') && token.length >= 4) ||
+               (token.startsWith('__') && token.endsWith('__') && token.length >= 4)) {
+      elements.push(
+        <strong key={key++} style={{ fontWeight: 700, color: '#0F172A' }}>
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if ((token.startsWith('*') && token.endsWith('*') && token.length >= 2) ||
+               (token.startsWith('_') && token.endsWith('_') && token.length >= 2)) {
+      elements.push(
+        <em key={key++} style={{ fontStyle: 'italic' }}>
+          {token.slice(1, -1)}
+        </em>
+      );
+    } else if (token.startsWith('`') && token.endsWith('`') && token.length >= 2) {
+      elements.push(
+        <code key={key++} style={{ background: '#F1F5F9', border: '1px solid #E2E8F0', padding: '1px 5px', borderRadius: '4px', fontSize: '12px', fontFamily: 'monospace' }}>
+          {token.slice(1, -1)}
+        </code>
+      );
+    } else {
+      elements.push(<span key={key++}>{token}</span>);
+    }
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    elements.push(<span key={key++}>{text.substring(lastIndex)}</span>);
+  }
+
+  return elements;
+}
 
 export const ChatScreen: React.FC<ChatScreenProps> = ({
   onNavigate,
@@ -301,8 +358,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                       maxWidth: '85%',
                     }}
                   >
-                    <div style={{ fontSize: '13.5px', lineHeight: 1.5, color: '#1E293B', fontWeight: 450 }}>
-                      {locale === 'zh' ? msg.textZh : msg.textEn}
+                    <div style={{ fontSize: '13.5px', lineHeight: 1.55, color: '#1E293B', fontWeight: 450, whiteSpace: 'pre-wrap' }}>
+                      {renderFormattedMessage(locale === 'zh' ? msg.textZh : msg.textEn)}
                     </div>
                     <div style={{ fontSize: '11px', color: '#475569', fontWeight: 500, marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>{msg.timestamp || '10:24 AM'}</span>
@@ -597,8 +654,8 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
                       BLOCKED
                     </span>
                   </div>
-                  <p style={{ fontSize: '13px', color: '#881337', marginBottom: '12px', lineHeight: 1.45 }}>
-                    {msg.receiptSlip.noticeEn}
+                  <p style={{ fontSize: '13px', color: '#881337', marginBottom: '12px', lineHeight: 1.45, whiteSpace: 'pre-wrap' }}>
+                    {renderFormattedMessage(msg.receiptSlip.noticeEn)}
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {msg.receiptSlip.checks.map((c, i) => (

@@ -70,7 +70,7 @@ Traceback (most recent call last):
   File "D:\project\pentest_aegispath\fintechathon\eval\categoryB\test_wstg_info_04_enumerate_applications.py", line 46, in test_wstg_info_04_enumerate_applications
     assert len(unauthorized) == 0, f"FAIL: Rogue services detected in docker-compose: {unauthorized}"
            ^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: FAIL: Rogue services detected in docker-compose: {'aegispath_bank_data', 'aegispath_api_data'}
+AssertionError: FAIL: Rogue services detected in docker-compose: {'aegispath_api_data', 'aegispath_bank_data'}
 
 --> Running WSTG-INFO-05: Review Webpage Content (test_wstg_info_05_review_webpage_content.py)...
     [OK] Execution finished successfully.

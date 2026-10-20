@@ -129,7 +129,7 @@ Traceback (most recent call last):
   File "D:\project\pentest_aegispath\fintechathon\eval\categoryG\test_wstg_sess_09_session_hijacking.py", line 84, in test_wstg_sess_09_session_hijacking
     assert resp_exec_1.status_code == 200, f"FAIL: Initial execution failed: {resp_exec_1.text}"
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: FAIL: Initial execution failed: {"type":"https://aegispath.dev/errors/IDEMPOTENCY_KEY_MISMATCH","title":"Idempotency Key Mismatch","status":400,"detail":"The header must match the signed idempotency key.","code":"IDEMPOTENCY_KEY_MISMATCH","request_id":"851cd1c2-15ad-4fa3-9e95-d8110f00ed64","timestamp":1792486815.742103}
+AssertionError: FAIL: Initial execution failed: {"type":"https://aegispath.dev/errors/IDEMPOTENCY_KEY_MISMATCH","title":"Idempotency Key Mismatch","status":400,"detail":"The header must match the signed idempotency key.","code":"IDEMPOTENCY_KEY_MISMATCH","request_id":"4313bde7-abba-4748-ae6e-e70ccd4c9cf6","timestamp":1792500062.956167}
 
 
 ====================================================================================
