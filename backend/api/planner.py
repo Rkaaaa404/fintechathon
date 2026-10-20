@@ -142,18 +142,18 @@ async def plan_and_process_intent(parsed: Dict[str, Any], user_id: str = "usr_ay
         # 1. Balance / Allowance Query (Tier 0 read-only check)
         if action == "check_balance" or any(k in raw_text for k in ("balance", "saldo", "limit", "allowance", "cap", "kuota", "余额", "额度")):
             msg_en = (
-                f"💳 Account Balance: ${balance_usd:,.2f} USD\n"
-                f"📊 Daily Allowance: ${remaining:,.2f} USD remaining today (Used ${used_today:,.2f} of ${daily_cap:,.2f} daily cap)\n"
-                f"⚡ Single-Send Limit: ${single_cap:,.2f} USD (Tier 1 auto-approved)\n"
-                f"👥 Allowlisted Payees: Mom, Campus bursar, Dad\n"
-                f"🛡️ Safety Status: {'Paused (Kill-switch engaged)' if is_paused else 'Active (Resets daily at 00:00 UTC)'}"
+                f"💳 **Account Balance:** ${balance_usd:,.2f} USD\n"
+                f"📊 **Daily Allowance:** ${remaining:,.2f} USD remaining today (Used ${used_today:,.2f} of ${daily_cap:,.2f} daily cap)\n"
+                f"⚡ **Single-Send Limit:** ${single_cap:,.2f} USD (Tier 1 auto-approved)\n"
+                f"👥 **Allowlisted Payees:** Mom, Campus bursar, Dad\n"
+                f"🛡️ **Safety Status:** {'Paused (Kill-switch engaged)' if is_paused else 'Active (Resets daily at 00:00 UTC)'}"
             )
             msg_zh = (
-                f"💳 账户余额: ${balance_usd:,.2f} USD\n"
-                f"📊 今日可用额度: 剩余 ${remaining:,.2f} USD (已使用 ${used_today:,.2f} / ${daily_cap:,.2f} USD 上限)\n"
-                f"⚡ 单笔限额: ${single_cap:,.2f} USD (Tier 1 自动确认)\n"
-                f"👥 白名单收款人: 妈妈 (Mom), 学院财务处 (Campus bursar), 爸爸 (Dad)\n"
-                f"🛡️ 智能体状态: {'已暂停 (安全熔断已触发)' if is_paused else '正常运行 (每日 00:00 UTC 重置)'}"
+                f"💳 **账户余额:** ${balance_usd:,.2f} USD\n"
+                f"📊 **今日可用额度:** 剩余 ${remaining:,.2f} USD (已使用 ${used_today:,.2f} / ${daily_cap:,.2f} USD 上限)\n"
+                f"⚡ **单笔限额:** ${single_cap:,.2f} USD (Tier 1 自动确认)\n"
+                f"👥 **白名单收款人:** 妈妈 (Mom), 学院财务处 (Campus bursar), 爸爸 (Dad)\n"
+                f"🛡️ **智能体状态:** {'已暂停 (安全熔断已触发)' if is_paused else '正常运行 (每日 00:00 UTC 重置)'}"
             )
             return {
                 "type": "info_note",
