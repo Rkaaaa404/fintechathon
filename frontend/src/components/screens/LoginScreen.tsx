@@ -40,13 +40,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   // Interaction loading states
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const googleModalRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!showGoogleModal) return;
-    const previousFocus = document.activeElement;
-    const modal = googleModalRef.current;
+   const [showGoogleModal, setShowGoogleModal] = useState(false);
+   const googleModalRef = useRef<HTMLElement>(null);
+  const googleTriggerRef = useRef<HTMLButtonElement>(null);
+ 
+   useEffect(() => {
+     if (!showGoogleModal) return;
+     const previousFocus = document.activeElement;
+     const modal = googleModalRef.current;
     if (!modal) return;
     const focusableSelector = 'button:not(:disabled), input:not(:disabled)';
     modal.querySelector<HTMLElement>(focusableSelector)?.focus();
@@ -68,10 +69,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       }
     };
     modal.addEventListener('keydown', handleKeyDown);
-    return () => {
-      modal.removeEventListener('keydown', handleKeyDown);
-      if (previousFocus instanceof HTMLElement) previousFocus.focus();
-    };
+     return () => {
+       modal.removeEventListener('keydown', handleKeyDown);
+      if (googleTriggerRef.current) {
+        googleTriggerRef.current.focus();
+      } else if (previousFocus instanceof HTMLElement) {
+        previousFocus.focus();
+      }
+     };
   }, [showGoogleModal]);
 
   // Password strength calculation for sign up
@@ -217,7 +222,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               <li><span className={styles.featureIcon} aria-hidden="true"><GraduationCap size={28} /></span><div><strong>{zh ? '为学生而生' : 'Built for Students'}</strong><p>{signup ? (zh ? '深受全球社区信赖。' : 'Trusted by a global community.') : (zh ? '简单、安全、值得信赖。' : 'Simple, secure, and trusted.')}</p></div></li>
             </ul>
           </div>
-          <img className={styles.art} src={`/auth/${mode}-art.png`} alt="" width={signup ? 284 : 308} height={signup ? 312 : 299} />
+          <div key={mode} className={styles.artFrame} aria-hidden="true">
+            <img className={styles.art} src={`/auth/${mode}-art.png`} alt="" width={signup ? 284 : 308} height={signup ? 312 : 299} />
+          </div>
         </aside>
         <section className={styles.formPanel} aria-labelledby="auth-heading">
           <div className={styles.status}><span />{zh ? '内核守卫已启用' : 'Kernel Guard Active'}</div>
@@ -227,7 +234,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             <button type="button" aria-pressed={!signup} onClick={() => setMode('signin')}>{zh ? '登录' : 'Sign In'}</button>
             <button type="button" aria-pressed={signup} onClick={() => setMode('signup')}>{zh ? '创建账户' : 'Create Account'}</button>
           </div>
-          <button type="button" className={styles.google} onClick={handleGoogleClick} disabled={isGoogleLoading}>
+          <button ref={googleTriggerRef} type="button" className={styles.google} onClick={handleGoogleClick} disabled={isGoogleLoading}>
             <svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none">
               <path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" fill="#4285F4"/>
               <path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.24v3.15C3.26 21.36 7.33 24 12 24z" fill="#34A853"/>
