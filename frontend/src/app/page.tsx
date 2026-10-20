@@ -34,6 +34,8 @@ export default function HomePage() {
     provider: 'guest',
     isAuthenticated: false,
   });
+  const [sessionReady, setSessionReady] = useState(false);
+  const sessionProfileRef = useRef<AuthUserProfile | null>(null);
 
   // Safety, Evidence, Planner Interactive States
   const [layersState, setLayersState] = useState<LayersState>({
@@ -47,66 +49,38 @@ export default function HomePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const toastTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const PROTECTED_ROUTES: AppRoute[] = ['/', '/approve', '/planner', '/chat', '/safety', '/evidence', '/payees', '/rates', '/tuition'];
-
   useEffect(() => {
     try {
       const cached = sessionStorage.getItem('aegispath_auth_user');
-      const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
-      if (cached && hasEntered) {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.isAuthenticated) {
-          setAuthUser(parsed);
-          const params = new URLSearchParams(window.location.search);
-          const r = params.get('route');
-          if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
-            setCurrentRoute(r as AppRoute);
-          } else {
-            setCurrentRoute('/');
-          }
-          return;
-        }
+      const parsed = cached ? JSON.parse(cached) : null;
+      if (sessionStorage.getItem('aegispath_entered') === 'true'
+        && parsed && typeof parsed === 'object' && parsed.isAuthenticated === true) {
+        sessionProfileRef.current = parsed as AuthUserProfile;
+        setAuthUser(parsed);
       }
     } catch {
-      // fallback
+      // Storage denial or malformed data must not open the wallet.
+      sessionProfileRef.current = null;
     }
-    // Always start at /login when opening the web application without an active session
-    setCurrentRoute('/login');
-  }, []);
 
-  useEffect(() => {
     const handleUrlRoute = () => {
-      if (typeof window === 'undefined') return;
       const params = new URLSearchParams(window.location.search);
-      const r = params.get('route');
-      const hasEntered = sessionStorage.getItem('aegispath_entered') === 'true';
-      const cached = sessionStorage.getItem('aegispath_auth_user');
-      let isAuthed = false;
-      try {
-        isAuthed = hasEntered && cached ? Boolean(JSON.parse(cached)?.isAuthenticated) : false;
-      } catch {
-        isAuthed = false;
-      }
-
-      if (!isAuthed) {
-        // Must show login screen on initial open / when not authenticated
+      if (!sessionProfileRef.current) {
         setCurrentRoute('/login');
+        window.history.replaceState({}, '', '/?route=/login');
         return;
       }
-
-      if (r && ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'].includes(r)) {
-        setCurrentRoute(r as AppRoute);
-      } else {
-        setCurrentRoute('/');
-      }
-
-      const s = params.get('state');
-      if (s && ['default', 'agent-paused', 'waiting-approval', 'payment-sent', 'attack-blocked', 'model-offline', 'empty-activity'].includes(s)) {
-        handleStateChange(s as AppPresentationState);
+      const requested = params.get('route');
+      const routes: AppRoute[] = ['/', '/tuition', '/chat', '/evidence', '/safety', '/planner', '/approve', '/payees', '/rates', '/login'];
+      const route = routes.includes(requested as AppRoute) ? requested as AppRoute : '/';
+      setCurrentRoute(route);
+      const state = params.get('state');
+      if (route !== '/login' && state && ['default', 'agent-paused', 'waiting-approval', 'payment-sent', 'attack-blocked', 'model-offline', 'empty-activity'].includes(state)) {
+        handleStateChange(state as AppPresentationState);
       }
     };
-
     handleUrlRoute();
+    setSessionReady(true);
     window.addEventListener('popstate', handleUrlRoute);
     return () => window.removeEventListener('popstate', handleUrlRoute);
   }, []);
@@ -140,52 +114,42 @@ export default function HomePage() {
   };
 
   const handleLogout = async () => {
+    sessionProfileRef.current = null;
+    setAuthUser({ name: 'Guest', email: '', avatarLetter: 'G', provider: 'guest', isAuthenticated: false });
+    try {
+      sessionStorage.removeItem('aegispath_auth_user');
+      sessionStorage.removeItem('aegispath_entered');
+    } catch {
+      // The in-memory gate still closes if browser storage is unavailable.
+    }
+    setPendingApproval(null);
+    setChatDraft('');
+    setCurrentRoute('/login');
+    window.history.pushState({}, '', '/?route=/login');
+    showToast(locale === 'zh' ? '已安全退出登录' : 'Signed out successfully');
     try {
       await connector.logout();
     } catch {
       connector.clearSession();
     }
-    const unauthUser: AuthUserProfile = {
-      name: 'Guest',
-      email: '',
-      avatarLetter: 'G',
-      provider: 'guest',
-      isAuthenticated: false,
-    };
-    setAuthUser(unauthUser);
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('aegispath_auth_user');
-      sessionStorage.removeItem('aegispath_entered');
-    }
-    setCurrentRoute('/login');
-    if (typeof window !== 'undefined') {
-      window.history.pushState({}, '', '/?route=/login');
-    }
-    showToast(
-      locale === 'zh'
-        ? '已安全退出登录 · Sesi telah diakhiri'
-        : 'Signed out successfully · Session terminated'
-    );
   };
 
   const navigateTo = (route: AppRoute) => {
-    if (PROTECTED_ROUTES.includes(route) && !authUser.isAuthenticated) {
-      setCurrentRoute('/login');
-      if (typeof window !== 'undefined') {
-        window.history.pushState({}, '', '/?route=/login');
-      }
-      showToast(
-        locale === 'zh'
-          ? '请先登录以访问此功能'
-          : 'Please sign in to access this wallet feature'
-      );
-      return;
+    const target = route !== '/login' && !sessionProfileRef.current ? '/login' : route;
+    setCurrentRoute(target);
+    window.history.pushState({}, '', target === '/' ? '/' : `/?route=${target}`);
+  };
+
+  const handleLoginSuccess = (user: AuthUserProfile) => {
+    sessionProfileRef.current = user;
+    setAuthUser(user);
+    try {
+      sessionStorage.setItem('aegispath_auth_user', JSON.stringify(user));
+      sessionStorage.setItem('aegispath_entered', 'true');
+    } catch {
+      // This entry remains usable in memory; reload requires sign-in again.
     }
-    setCurrentRoute(route);
-    if (typeof window !== 'undefined') {
-      const url = route === '/' ? '/' : `/?route=${route}`;
-      window.history.pushState({}, '', url);
-    }
+    navigateTo('/');
   };
 
   const toggleLocale = () => {
@@ -195,6 +159,10 @@ export default function HomePage() {
   };
 
   const handleStateChange = (state: AppPresentationState) => {
+    if (!sessionProfileRef.current) {
+      navigateTo('/login');
+      return;
+    }
     setCurrentState(state);
     if (state === 'agent-paused') {
       setIsPaused(true);
@@ -407,36 +375,7 @@ export default function HomePage() {
           <LoginScreen
             locale={locale}
             onLocaleToggle={toggleLocale}
-            onNavigate={(route: AppRoute) => {
-              if (typeof window !== 'undefined') {
-                sessionStorage.setItem('aegispath_entered', 'true');
-              }
-              navigateTo(route);
-            }}
-            onLoginSuccess={(user) => {
-              if (typeof window !== 'undefined') {
-                sessionStorage.setItem('aegispath_entered', 'true');
-                sessionStorage.setItem('aegispath_auth_user', JSON.stringify(user));
-              }
-              setAuthUser(user);
-              navigateTo('/');
-            }}
-            onEnterAsGuest={() => {
-              const guestUser: AuthUserProfile = {
-                name: 'Ayu (Demo)',
-                email: 'guest.demo@connect.ust.hk',
-                university: 'HKUST (Synthetic Demo)',
-                avatarLetter: 'GU',
-                provider: 'guest',
-                isAuthenticated: true,
-              };
-              if (typeof window !== 'undefined') {
-                sessionStorage.setItem('aegispath_entered', 'true');
-                sessionStorage.setItem('aegispath_auth_user', JSON.stringify(guestUser));
-              }
-              setAuthUser(guestUser);
-              navigateTo('/');
-            }}
+            onLoginSuccess={handleLoginSuccess}
             onShowToast={showToast}
           />
         );
@@ -472,6 +411,10 @@ export default function HomePage() {
     }
   };
 
+  if (!sessionReady) {
+    return <main className="auth-page" id="main-container"><p role="status">{locale === 'zh' ? '正在加载会话…' : 'Loading session…'}</p></main>;
+  }
+
   return (
     <>
       {/* ═══════════ MAIN WEB APPLICATION VIEWPORT ═══════════ */}
@@ -480,7 +423,7 @@ export default function HomePage() {
           <>
         <DesktopHeader
           currentRoute={currentRoute}
-          onRouteChange={setCurrentRoute}
+          onRouteChange={navigateTo}
           locale={locale}
           onLocaleToggle={toggleLocale}
           isPaused={isPaused}
@@ -491,7 +434,7 @@ export default function HomePage() {
         {/* ═══════════ APPLICATION VIEWPORT FRAME (Responsive Web / Mobile) ═══════════ */}
         <AppFrame
           currentRoute={currentRoute}
-          onRouteChange={setCurrentRoute}
+          onRouteChange={navigateTo}
           locale={locale}
         >
           {renderActiveScreen()}
@@ -509,11 +452,11 @@ export default function HomePage() {
       </main>
 
       {/* ═══════════ JUDGE DEMO PANEL (Hidden in normal view; Ctrl+Shift+D or ?demo=1) ═══════════ */}
-      <DemoPanel
+      {currentRoute !== '/login' && <DemoPanel
         currentState={currentState}
         onStateChange={handleStateChange}
         backendOnline={backendOnline}
-      />
+      />}
     </>
   );
 }

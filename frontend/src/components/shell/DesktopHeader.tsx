@@ -422,7 +422,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
                       </div>
                       {authUser?.provider === 'google' ? (
                         <div className="text-[10px] font-semibold text-[#1A73E8] bg-[#EEF4FF] inline-block px-1.5 py-0.2 rounded mt-0.5">
-                          ● Google Verified · Real Account
+                          {locale === 'zh' ? '● Google 演示资料 · 合成数据' : '● Google Demo Profile · Synthetic Data'}
                         </div>
                       ) : (
                         <div className="text-[10px] font-semibold text-[#D97706] bg-[#FFFBEB] inline-block px-1.5 py-0.2 rounded mt-0.5">

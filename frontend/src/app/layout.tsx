@@ -3,7 +3,7 @@ import './globals.css';
 import { PWARegister } from '@/components/shell/PWARegister';
 
 export const metadata: Metadata = {
-  title: 'AegisPath — AI Agent Digital Wallet',
+  title: 'AegisPath',
   description:
     'AegisPath is an AI agent that sends money and pays tuition across borders for international students with safety enforced outside the language model.',
   manifest: '/manifest.json',
@@ -21,8 +21,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1.0,
-  maximumScale: 1.0,
-  userScalable: false,
   themeColor: '#3D6BEA',
 };
 

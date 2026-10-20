@@ -26,11 +26,14 @@ if not exist ".env" (
         copy .env.example .env >nul
         echo  [OK] Created .env file.
     ) else (
-        echo  [!] .env not found, using built-in safe testnet fallbacks.
+        echo  [!] .env not found; provide API_SECRET_KEY and BANK_SECRET_KEY in the environment.
     )
 ) else (
     echo  [OK] Existing .env configuration detected.
 )
+echo  - Set API_SECRET_KEY and BANK_SECRET_KEY in .env or your environment.
+echo  - Use distinct random signing secrets, each at least 32 characters; no built-in keys are used.
+echo  - Compose will fail if either secret is missing.
 
 REM 3. Build and launch containers
 echo [3/4] Building and starting containers (Bank, API, Web)...

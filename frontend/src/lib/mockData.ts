@@ -360,7 +360,7 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
   if (isGoogle) {
     const realName = authUser.name || 'Google User';
     const realEmail = authUser.email || 'user@gmail.com';
-    const realUni = authUser.university || 'Verified Campus';
+    const realUni = authUser.university || 'Demo Campus';
 
     const user: UserSeed = {
       name: realName,
@@ -385,9 +385,9 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
     const recentActivities: ActivityItem[] = [
       {
         id: 'real-act-1',
-        titleEn: 'Google Identity Security Link',
-        titleZh: 'Google 真实账号安全绑定',
-        amount: 'Verified',
+        titleEn: 'Demo Google Profile Selected',
+        titleZh: '已选择 Google 演示资料',
+        amount: 'Demo / 演示',
         receivedText: realEmail,
         type: 'success',
         icon: 'check',
@@ -396,10 +396,10 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
       },
       {
         id: 'real-act-2',
-        titleEn: 'FIDO2 Passkey Hardware Active',
-        titleZh: '硬件通行密钥防御已激活',
-        amount: 'Active',
-        receivedText: 'Secure Enclave',
+        titleEn: 'Demo Security Event',
+        titleZh: '演示安全事件',
+        amount: 'Demo / 演示',
+        receivedText: 'Synthetic event / 演示事件',
         type: 'success',
         icon: 'check',
         timestamp: 'Just now',
@@ -407,10 +407,10 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
       },
       {
         id: 'real-act-3',
-        titleEn: 'USD Live Vault Primary Genesis',
-        titleZh: '美元实名主账户建立',
+        titleEn: 'Demo USD Wallet Balance',
+        titleZh: '演示美元钱包余额',
         amount: '+$12,500.00',
-        receivedText: 'Live Balance Active',
+        receivedText: 'Demo balance / 演示余额',
         type: 'success',
         icon: 'check',
         timestamp: 'Today',
@@ -420,27 +420,27 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
 
     const evidencePack: EvidencePack = {
       avgBalance: '$12,500',
-      incomeMonths: 'Verified Live',
+      incomeMonths: 'Demo / 演示',
       sources: [
         {
-          titleEn: `Google Certified Account (${realEmail})`,
-          titleZh: `Google 官方认证账户 (${realEmail})`,
-          provenanceEn: 'OAuth 2.0 Security Binding',
-          provenanceZh: 'Google 身份凭证直连',
+          titleEn: `Demo Google Profile (${realEmail})`,
+          titleZh: `Google 演示资料 (${realEmail})`,
+          provenanceEn: 'Local demo input — no OAuth verification',
+          provenanceZh: '本地演示输入，不验证 OAuth',
           tier: 'Tier 1',
         },
         {
-          titleEn: 'Direct Bank Settlement (Primary USD)',
-          titleZh: '主结算行实时资金流水',
-          provenanceEn: 'Live Bank Network API',
-          provenanceZh: '银行网络直连核验',
+          titleEn: 'Demo Bank Settlement (Primary USD)',
+          titleZh: '演示美元主账户结算',
+          provenanceEn: 'Simulated bank fixture',
+          provenanceZh: '模拟银行数据',
           tier: 'Tier 1',
         },
         {
-          titleEn: `Cryptographic Passkey (${realName})`,
-          titleZh: `实名硬件通行密钥凭证 (${realName})`,
-          provenanceEn: 'Passkey Signed Attestation',
-          provenanceZh: '硬件签名防伪凭证',
+          titleEn: `Demo Security Record (${realName})`,
+          titleZh: `演示安全记录 (${realName})`,
+          provenanceEn: 'Synthetic record — no hardware attestation',
+          provenanceZh: '模拟记录，不提供硬件认证',
           tier: 'Tier 1',
         },
       ],
@@ -454,12 +454,12 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
         category: 'campus',
         categoryLabelEn: 'Personal Primary',
         categoryLabelZh: '个人主账户',
-        accountDescEn: `FedWire / ACH Direct Wire (${realEmail})`,
-        accountDescZh: `FedWire / ACH 直连账户 (${realEmail})`,
+        accountDescEn: `Simulated FedWire / ACH route (${realEmail})`,
+        accountDescZh: `模拟 FedWire / ACH 路由 (${realEmail})`,
         limitDescEn: '$2,500 / day personal limit',
         limitDescZh: '每日限额 $2,500',
         tier: 'Tier 1',
-        verifiedDate: 'Active Live',
+        verifiedDate: 'Demo / 演示',
         status: 'active',
       },
       {
@@ -469,12 +469,12 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
         category: 'campus',
         categoryLabelEn: 'Higher Education',
         categoryLabelZh: '高等教育',
-        accountDescEn: 'Cross-Border Tuition Clearing Wire',
-        accountDescZh: '跨境学费清算账户',
-        limitDescEn: '$10,000 tuition cap with passkey',
-        limitDescZh: '凭通行密钥限额 $10,000',
+        accountDescEn: 'Simulated cross-border tuition route',
+        accountDescZh: '模拟跨境学费路由',
+        limitDescEn: '$10,000 demo tuition cap',
+        limitDescZh: '演示学费上限 $10,000',
         tier: 'Tier 1',
-        verifiedDate: 'Active Live',
+        verifiedDate: 'Demo / 演示',
         status: 'active',
       },
       {
@@ -484,12 +484,12 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
         category: 'family',
         categoryLabelEn: 'Family Allowance',
         categoryLabelZh: '家庭生活费',
-        accountDescEn: 'Global Remittance Network Wire',
-        accountDescZh: '全球汇款网络直连',
+        accountDescEn: 'Simulated global remittance route',
+        accountDescZh: '模拟全球汇款路由',
         limitDescEn: '$500 / day autonomous transfer',
         limitDescZh: '自主汇款上限 $500/日',
         tier: 'Tier 1',
-        verifiedDate: 'Active Live',
+        verifiedDate: 'Demo / 演示',
         status: 'active',
       },
     ];
@@ -501,8 +501,8 @@ export function getAppDataForUser(authUser?: UserProfileContext | null) {
       evidencePack,
       payees,
       isRealAccount: true,
-      accountBadgeEn: 'Google Verified · Live Real Account',
-      accountBadgeZh: 'Google 实名认证 · 真实账户',
+      accountBadgeEn: 'Google Demo Profile · Synthetic Testnet Data',
+      accountBadgeZh: 'Google 演示资料 · 模拟测试网数据',
     };
   }
 

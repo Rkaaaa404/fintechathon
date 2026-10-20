@@ -24,10 +24,7 @@ if env_file.exists():
 class ApiConfig:
     PORT: int = int(os.getenv("API_PORT", "8000"))
     HOST: str = os.getenv("API_HOST", "127.0.0.1")
-    DEMO_AUTH_ENABLED: bool = os.getenv(
-        "API_DEMO_AUTH_ENABLED",
-        "true" if os.getenv("TESTNET", "true").lower() == "true" else "false"
-    ).lower() == "true"
+    DEMO_AUTH_ENABLED: bool = os.getenv("API_DEMO_AUTH_ENABLED", "false").lower() == "true"
     SECRET_KEY: str = os.getenv("API_SECRET_KEY", "")
     BANK_SECRET_KEY: str = os.getenv("BANK_SECRET_KEY", "")
     for _name, _secret in (("API_SECRET_KEY", SECRET_KEY), ("BANK_SECRET_KEY", BANK_SECRET_KEY)):

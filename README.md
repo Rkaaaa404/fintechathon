@@ -5,7 +5,9 @@
 
 Security revalidation: [plan, reproduced findings, patches and verification](docs/security-revalidation.md). The original self-assessment is historical, not a current PASS attestation. Local demo sessions and approval consent are synthetic; do not expose this sandbox as a production banking service.
 
-The bilingual login at `/?route=/login` is a standalone, responsive sign-in/create-account panel based on `sign in.jpeg` and `create.jpeg`. Its decorative robot crops live in `frontend/public/auth/`; the forms remain accessible HTML. Below 700px the panel uses one column with natural scrolling. Guest entry, reviewer autofill, Google account selection, password reset, and delayed form submission remain **simulated demo authentication**, not OAuth or production identity services. The “Kernel Guard Active” badge is reference artwork copy, not a live health indicator. Only successful demo entry sets `sessionStorage.aegispath_entered` and returns to the normal wallet shell.
+The bilingual login at `/?route=/login` is a standalone, responsive sign-in/create-account panel based on `sign in.jpeg` and `create.jpeg`. Its decorative robot crops live in `frontend/public/auth/`; the forms remain accessible HTML. Below 43.75em the panel uses one column with natural document scrolling; zoom remains enabled. Account fields start empty with localized example placeholders, and reviewer autofill is an explicit action. Subtle, bounded login motion respects reduced-motion preferences. Guest entry, reviewer autofill, Google account selection/manual details, password reset, and delayed form submission remain **simulated demo authentication**, not OAuth or production identity services. Google profiles use fixture balances, not live wallets. The “Kernel Guard Active” badge is reference artwork copy, not a live health indicator.
+
+Before a valid demo session is restored, the header, navigation, footer, and demo controls are not mounted. Entry stores the selected profile in `sessionStorage.aegispath_auth_user` with `aegispath_entered=true`; both are required to restore the UI session. Google/form entry preserves its selected profile rather than replacing it with the guest identity. Logout immediately removes the local session and closes protected UI routes, then attempts server-token revocation. This is a demo UI gate, not backend authorization; if browser storage is unavailable, entry works only until reload.
 
 For container startup, run `docker compose up --build` after backend source changes: Compose builds the API into its image rather than bind-mounting the source. The scoped-token module imports `typing.Optional` explicitly so its optional intent/idempotency annotations load on the Python 3.11 container runtime.
 
@@ -92,7 +94,9 @@ fintechathon/
 
 ## 🔌 Universal WebApp Connector (`connector.js`)
 
-The active Next.js client uses `frontend/src/lib/api/connector.ts`. Chat sends `POST /v1/agent/messages`; pending plans use `POST /v1/plans/{plan_id}/approve`. These two operations **never fall back to fabricated transactions**. Provider/network/bank failures remain errors. Some unrelated demonstration screens retain illustrative fixtures/fallbacks.
+The active Next.js client uses `frontend/src/lib/api/connector.ts`. Chat sends `POST /v1/agent/messages`; pending plans use `POST /v1/plans/{plan_id}/approve`. These two operations **never fall back to fabricated transactions**. Provider/network/bank failures remain errors. Demo-login failures also propagate explicitly: the connector never substitutes a fabricated access token. Some unrelated demonstration screens retain illustrative fixtures/fallbacks.
+
+When demo login is offline or returns an error, chat displays a failure and does not submit the agent request with a fabricated token. A network failure is not presented as a successful local-engine connection or a confirmed transaction; check the ledger before sending again.
 
 The root `connector.js` and `frontend_legacy/` are legacy demo utilities, not the active AI integration. SSE provides heartbeat events, not model reasoning streams.
 - **CLI Self-Test Suite**: Run `node connector.js` from terminal to verify all 3 defense rings in seconds.
@@ -123,7 +127,9 @@ To maintain absolute transparency for competition judges and security auditors:
 - **Docker & Docker Compose** (Recommended for instant one-click launch), OR
 - **Python 3.12+** & **Node.js 20+** (For native host development)
 
-### 2. One-Click Docker Launch (Instant, Zero Setup)
+### 2. One-Click Docker Launch (Explicit Secrets Required)
+Before running a launcher or Compose, set `API_SECRET_KEY` and `BANK_SECRET_KEY` in the repository-root `.env` or process environment. Generate two **distinct random secrets**, each at least 32 characters (for example, run `python -c "import secrets; print(secrets.token_urlsafe(48))"` separately for each key). Do not reuse public/example signing keys. Launchers preserve an existing `.env`; Compose fails clearly if either required secret is missing. No built-in signing-key fallback is used.
+
 Run all 3 services (`Next.js :3000`, `Core API :8000`, `Bank Gateway :8100`) automatically in isolated containers:
 
 **On Windows (Double-Click or CMD):**
@@ -142,7 +148,7 @@ chmod +x docker-start.sh && ./docker-start.sh
 ```bash
 docker compose up --build -d
 ```
-All services boot up with auto-seeding, database volume persistence, and automatic healthchecks.
+All services use auto-seeding, persistent named database volumes, and automatic healthchecks. Published ports bind only to `127.0.0.1`; API and bank databases live in their separate `/app/data` volumes. Compose explicitly enables synthetic demo login; native API startup defaults to `API_DEMO_AUTH_ENABLED=false` unless you opt in. The browser uses `http://localhost:8000`, while Next server proxy requests use `API_INTERNAL_URL=http://api:8000`.
 - Web Application: http://localhost:3000
 - Core API Swagger: http://localhost:8000/v1/docs
 - Bank Health: http://localhost:8100/v1/health
@@ -159,7 +165,7 @@ On Linux / macOS:
 chmod +x start.sh && ./start.sh
 ```
 
-### 3. Manual Launch via NPM
+### 4. Manual Launch via NPM
 ```bash
 # Start Frontend WebApp (http://127.0.0.1:3000)
 npm ci --prefix frontend
@@ -177,7 +183,7 @@ npm run verify
 
 ### Server-side AI configuration
 
-API and bank load the repository-root `.env`; process environment takes precedence. `backend/.env` is no longer read. Keep secrets out of `NEXT_PUBLIC_*` and browser code.
+API and bank load the repository-root `.env`, falling back to `backend/.env` only when the root file is absent; process environment takes precedence. Compose reads the root `.env` or process environment for its required signing secrets. Keep secrets out of `NEXT_PUBLIC_*` and browser code.
 
 ```dotenv
 LLM_PROVIDER=none

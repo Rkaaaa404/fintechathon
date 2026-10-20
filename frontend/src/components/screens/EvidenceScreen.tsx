@@ -79,7 +79,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                 <span className="w-2 h-2 rounded-full bg-[#6FD3FF] animate-pulse" />
                 <span>
                   {isGoogle
-                    ? (locale === 'zh' ? `凭证主体: ${authUser?.name}` : `Proof Issued to: ${authUser?.name}`)
+                    ? (locale === 'zh' ? `演示凭证主体: ${authUser?.name}` : `Demo Proof for: ${authUser?.name}`)
                     : (locale === 'zh' ? '多源资金证明已汇总 (测试演示)' : 'Proof Pack Ready · PII Redacted')}
                 </span>
               </span>
@@ -146,7 +146,9 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                 {ev.incomeMonths}
               </div>
               <span className="text-[11.5px] text-[#1C3EAA] font-semibold flex items-center gap-1">
-                ✓ {locale === 'zh' ? '连续稳健入账' : 'Verified steady deposits'}
+                ✓ {isGoogle
+                  ? (locale === 'zh' ? '演示稳定入账' : 'Demo steady deposits')
+                  : (locale === 'zh' ? '连续稳健入账' : 'Verified steady deposits')}
               </span>
             </div>
           </Card>
@@ -162,7 +164,9 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
               </div>
               <div>
                 <span className="text-[12.5px] text-[#1E293B] font-semibold block">
-                  {locale === 'zh' ? '已绑定证明源' : 'Connected sources'}
+                  {isGoogle
+                    ? (locale === 'zh' ? '演示证明源' : 'Demo sources')
+                    : (locale === 'zh' ? '已绑定证明源' : 'Connected sources')}
                 </span>
                 <div className="text-[26px] font-bold tabular-nums text-[#14213D] tracking-tight leading-tight my-0.5">
                   3 sources
@@ -194,11 +198,13 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="w-1.5 h-4 bg-[#1C3EAA] rounded-full" />
                     <CardTitle className="text-[16px] text-[#14213D] font-bold">
-                      {locale === 'zh' ? '已连接证明源' : 'Connected Sources'}
+                      {isGoogle
+                        ? (locale === 'zh' ? '演示证明源' : 'Demo Sources')
+                        : (locale === 'zh' ? '已连接证明源' : 'Connected Sources')}
                     </CardTitle>
                   </div>
                   <span className="text-[12.5px] text-[#334155] font-medium">
-                    3 connected sources
+                    {isGoogle ? (locale === 'zh' ? '3 个演示证明源' : '3 demo sources') : '3 connected sources'}
                   </span>
                 </CardHeader>
 
@@ -223,7 +229,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
-                        Connected
+                        {isGoogle ? (locale === 'zh' ? '演示' : 'Demo') : 'Connected'}
                       </span>
                       <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
@@ -249,7 +255,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
-                        Connected
+                        {isGoogle ? (locale === 'zh' ? '演示' : 'Demo') : 'Connected'}
                       </span>
                       <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
@@ -272,7 +278,7 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#EBF7EE] text-[#0E6E43] border border-[#0E6E43]/20">
-                        Connected
+                        {isGoogle ? (locale === 'zh' ? '演示' : 'Demo') : 'Connected'}
                       </span>
                       <span className="text-[#334155] text-[13px] group-hover:translate-x-0.5 transition-transform">›</span>
                     </div>
@@ -312,7 +318,9 @@ export const EvidenceScreen: React.FC<EvidenceScreenProps> = ({
                         Expires in 14 days
                       </span>
                       <span className="text-[12px] text-[#334155] font-medium block mt-0.5">
-                        Verified read-only proof token.
+                        {isGoogle
+                          ? (locale === 'zh' ? '演示只读凭证令牌。' : 'Demo read-only proof token.')
+                          : 'Verified read-only proof token.'}
                       </span>
                       <span className="text-[11.5px] text-[#334155] font-medium block mt-1 leading-relaxed">
                         Shared fields: Balance & regular deposits (Bank account & PII strictly redacted).

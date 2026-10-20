@@ -23,11 +23,14 @@ if [ ! -f ".env" ]; then
         cp .env.example .env
         echo " [OK] Created .env from .env.example."
     else
-        echo " [!] .env not found, using built-in safe testnet fallbacks."
+        echo " [!] .env not found; provide API_SECRET_KEY and BANK_SECRET_KEY in the environment."
     fi
 else
     echo " [OK] Existing .env configuration detected."
 fi
+echo " - Set API_SECRET_KEY and BANK_SECRET_KEY in .env or your environment."
+echo " - Use distinct random signing secrets, each at least 32 characters; no built-in keys are used."
+echo " - Compose will fail if either secret is missing."
 
 # 3. Build & start
 echo "[3/4] Building and launching containers..."

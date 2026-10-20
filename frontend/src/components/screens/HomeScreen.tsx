@@ -48,8 +48,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   const [mascotThoughtIdx, setMascotThoughtIdx] = React.useState(0);
   const mascotThoughts = [
     {
-      titleEn: "Hi Ayu!",
-      titleZh: "Ayu 你好！",
+      titleEn: `Hi ${user.name}!`,
+      titleZh: `${user.name} 你好！`,
       bodyEn: "All 3 security layers are active. Monitoring tuition buffers.",
       bodyZh: "三环安全已就绪，正在监控学费交割缓冲。",
     },
@@ -108,7 +108,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 effect="fade"
               />
               <span className="pill-testnet-dark pill-testnet text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-white/40 shadow-xs">
-                {isGoogle ? 'Live Verified' : (locale === 'zh' ? '测试网' : 'Testnet')}
+                {isGoogle ? (locale === 'zh' ? '演示资料' : 'Demo Profile') : (locale === 'zh' ? '测试网' : 'Testnet')}
               </span>
             </div>
 
@@ -137,7 +137,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 {isGoogle ? (
                   <span className="text-[12px] font-semibold tracking-wide text-white bg-[#0E6E43]/90 px-3 py-1 rounded-full border border-white/30 flex items-center gap-1.5 shadow-xs">
                     <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                    <span>{locale === 'zh' ? 'Google 实名认证 · 真实账户' : 'Google Verified · Live Real Account'}</span>
+                    <span>{locale === 'zh' ? 'Google 演示资料 · 合成测试数据' : 'Google Demo Profile · Synthetic Testnet Data'}</span>
                   </span>
                 ) : (
                   <span className="text-[12px] font-semibold tracking-wide text-white bg-[#D97706]/90 px-3 py-1 rounded-full border border-white/30 flex items-center gap-1.5 shadow-xs">
@@ -690,10 +690,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <p className="text-[12px] text-[#334155] leading-normal mt-1">
                   {locale === 'zh'
                     ? (isGoogle
-                        ? `实名钱包总资产 · 充足储备与 ${plannerRunway} 安全线`
+                        ? `演示钱包总资产 · 充足储备与 ${plannerRunway} 安全线`
                         : `1月总资产 ($${janBar.reserve}k 储备缓冲) · ${plannerRunway} 充足安全线`)
                     : (isGoogle
-                        ? `Primary Live Assets ($12.5k Reserve) · ${plannerRunway} healthy runway`
+                        ? `Demo Assets ($12.5k Reserve) · ${plannerRunway} healthy runway`
                         : `Jan Total Assets ($${janBar.reserve}k Reserve) · ${plannerRunway} healthy runway`)}
                 </p>
               </div>
@@ -772,7 +772,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       >
                         {act.type === 'blocked'
                           ? locale === 'zh' ? '已拦截' : 'Blocked'
-                          : locale === 'zh' ? '已验证' : 'Verified'}
+                          : isGoogle ? (locale === 'zh' ? '演示' : 'Demo') : (locale === 'zh' ? '已验证' : 'Verified')}
                       </span>
                     </div>
                   </div>

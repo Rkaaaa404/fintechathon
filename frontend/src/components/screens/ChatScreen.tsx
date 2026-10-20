@@ -85,9 +85,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       const isNetwork = error instanceof Error && error.message.toLowerCase().includes('fetch');
       const detail = isNetwork
         ? (locale === 'zh'
-            ? '已接通本地确定性安全引擎。您可以发送转账指令、查询学费或测试安全拦截。'
-            : 'Connected via local deterministic security engine. You can send transfer instructions, check tuition, or test security guards.')
-        : (error instanceof Error ? error.message : 'Request completed.');
+            ? '无法连接后端。请求失败，未确认任何交易。请检查连接；再次发送前请先核对账本。'
+            : 'Could not connect to the backend. The request failed; no transaction was confirmed. Check your connection and review the ledger before sending again.')
+        : (error instanceof Error ? error.message : (locale === 'zh' ? '请求失败，未确认任何交易。' : 'Request failed; no transaction was confirmed.'));
       setMessages((prev) => [...prev, {
         id: crypto.randomUUID(), role: 'assistant', textEn: detail, textZh: detail, timestamp: timeStr,
       }]);

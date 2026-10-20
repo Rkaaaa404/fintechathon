@@ -4,13 +4,13 @@ services:
       context: .
       dockerfile: backend/bank/Dockerfile
     ports:
-      - "8100:8100"
+      - "127.0.0.1:8100:8100"
     environment:
       - BANK_PORT=8100
       - BANK_HOST=0.0.0.0
       - BANK_DATA_DIR=/app/data
       - BANK_DATABASE_URL=sqlite:////app/data/bank.db
-      - BANK_SECRET_KEY=${BANK_SECRET_KEY:-aegispath_bank_secret_key_2026_super_secure_isolated_token_v1}
+      - BANK_SECRET_KEY=${BANK_SECRET_KEY:?Set BANK_SECRET_KEY to a random signing secret}
     volumes:
       - aegispath_bank_data:/app/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
       context: .
       dockerfile: backend/api/Dockerfile
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       bank:
         condition: service_healthy
@@ -33,10 +33,9 @@ services:
       - API_HOST=0.0.0.0
       - API_DEMO_AUTH_ENABLED=true
       - API_DATA_DIR=/app/data
-      - API_DATABASE_URL=sqlite:////app/data/api.db
-      - API_SECRET_KEY=${API_SECRET_KEY:-aegispath_api_secret_key_2026_super_secure_production_token_v1}
+      - API_SECRET_KEY=${API_SECRET_KEY:?Set API_SECRET_KEY to a distinct random signing secret}
       - BANK_SERVICE_URL=http://bank:8100
-      - BANK_SECRET_KEY=${BANK_SECRET_KEY:-aegispath_bank_secret_key_2026_super_secure_isolated_token_v1}
+      - BANK_SECRET_KEY=${BANK_SECRET_KEY:?Set BANK_SECRET_KEY to a random signing secret}
       - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
     volumes:
       - aegispath_api_data:/app/data
@@ -51,7 +50,7 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - NEXT_PUBLIC_API_BASE=http://localhost:8000
       - API_INTERNAL_URL=http://api:8000

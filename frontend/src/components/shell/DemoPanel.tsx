@@ -21,16 +21,24 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
 
     // Check URL param ?demo=1 or stored session preference
     const params = new URLSearchParams(window.location.search);
-    if (params.get('demo') === '1' || sessionStorage.getItem('aegis_demo_panel') === '1') {
-      setIsOpen(true);
+    let storedOpen = false;
+    try {
+      storedOpen = sessionStorage.getItem('aegis_demo_panel') === '1';
+    } catch {
+      // Demo controls still work in memory when browser storage is denied.
     }
+    if (params.get('demo') === '1' || storedOpen) setIsOpen(true);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         setIsOpen((prev) => {
           const next = !prev;
-          sessionStorage.setItem('aegis_demo_panel', next ? '1' : '0');
+          try {
+            sessionStorage.setItem('aegis_demo_panel', next ? '1' : '0');
+          } catch {
+            // Persistence is optional for this presentation control.
+          }
           return next;
         });
       }
@@ -59,7 +67,11 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
         <button
           onClick={() => {
             setIsOpen(false);
-            sessionStorage.setItem('aegis_demo_panel', '0');
+            try {
+              sessionStorage.setItem('aegis_demo_panel', '0');
+            } catch {
+              // Closing the panel does not require storage.
+            }
           }}
           className="demo-close-btn"
           aria-label="Close demo panel"

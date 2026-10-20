@@ -33,11 +33,14 @@ if (-not (Test-Path ".env")) {
         Copy-Item ".env.example" ".env"
         Write-Host " [OK] Created .env configuration from .env.example." -ForegroundColor Green
     } else {
-        Write-Host " [!] .env not found, using built-in safe testnet fallbacks." -ForegroundColor Yellow
+        Write-Host " [!] .env not found; provide API_SECRET_KEY and BANK_SECRET_KEY in the environment." -ForegroundColor Yellow
     }
 } else {
     Write-Host " [OK] Existing .env configuration detected." -ForegroundColor Green
 }
+Write-Host " - Set API_SECRET_KEY and BANK_SECRET_KEY in .env or your environment." -ForegroundColor Yellow
+Write-Host " - Use distinct random signing secrets, each at least 32 characters; no built-in keys are used." -ForegroundColor Yellow
+Write-Host " - Compose will fail if either secret is missing." -ForegroundColor Yellow
 
 # 3. Build and launch services
 Write-Host "[3/4] Building and launching containers in detached mode..." -ForegroundColor White

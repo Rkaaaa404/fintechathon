@@ -179,27 +179,16 @@ export class AegisPathConnector {
     if (this.demoToken && Date.now() < this.demoTokenExpires) return this.demoToken;
     if (!this.demoLogin) {
       this.demoLogin = (async () => {
-        try {
-          const response = await fetch(`${this.apiBase}/v1/auth/demo-login`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: 'Ayu' }), signal: AbortSignal.timeout(this.timeoutMs),
-          });
-          if (response.ok) {
-            const session = await response.json();
-            if (typeof session.access_token === 'string' && session.simulated === true) {
-              this.demoToken = session.access_token;
-              this.demoTokenExpires = Date.now() + Math.max(0, session.expires_in - 30) * 1000;
-              return session.access_token as string;
-            }
-          }
-        } catch {
-          // offline or demo login call timed out
-        }
-        // Fallback testnet demo token to prevent chat breakage
-        const fallback = 'simulated_testnet_demo_token_ayu';
-        this.demoToken = fallback;
-        this.demoTokenExpires = Date.now() + 3600 * 1000;
-        return fallback;
+        const response = await fetch(`${this.apiBase}/v1/auth/demo-login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: 'Ayu' }), signal: AbortSignal.timeout(this.timeoutMs),
+        });
+        if (!response.ok) throw new Error('Synthetic demo login is unavailable or disabled');
+        const session = await response.json();
+        if (typeof session.access_token !== 'string' || session.simulated !== true) throw new Error('Invalid synthetic demo session');
+        this.demoToken = session.access_token;
+        this.demoTokenExpires = Date.now() + Math.max(0, session.expires_in - 30) * 1000;
+        return session.access_token as string;
       })().finally(() => { this.demoLogin = undefined; });
     }
     return this.demoLogin;
