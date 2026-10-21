@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "main": "connector.js",
   "scripts": {
+    "build": "npm run build --prefix frontend",
     "start": "node frontend/server.js",
     "dev:frontend": "node frontend/server.js",
     "dev:backend": "py backend/server.py",

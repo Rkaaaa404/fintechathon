@@ -232,10 +232,14 @@ export class AegisPathConnector {
     this.apiBase =
       config.apiBase ||
       (typeof window !== 'undefined' && (window as any).AEGIS_API_URL) ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE ||
       DEFAULT_API_BASE;
     this.bankBase =
       config.bankBase ||
       (typeof window !== 'undefined' && (window as any).AEGIS_BANK_URL) ||
+      process.env.NEXT_PUBLIC_BANK_URL ||
+      process.env.NEXT_PUBLIC_BANK_BASE ||
       DEFAULT_BANK_BASE;
     this.timeoutMs = config.timeoutMs || 2500;
     this.enableFallback = config.enableFallback !== undefined ? config.enableFallback : true;
